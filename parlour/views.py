@@ -394,44 +394,265 @@ def user_login(request):
     return render(request, 'parlour/login.html', {'form': form})
 
 
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.conf import settings
+from django.core.mail import send_mail
+from django.core.mail import EmailMessage
+from django.contrib.auth.models import User
+from django.db import IntegrityError
+import logging
+import random
+import string
+from .models import EmailOTP
+from django import forms 
+
+logger = logging.getLogger(__name__)
+
 def generate_otp():
-    return str(random.randint(100000, 999999))
+    """Generate a 6-digit OTP"""
+    return ''.join(random.choices(string.digits, k=6))
 
+from django.core.mail import EmailMessage  # Keep this import
 
+def send_otp_email(user, otp):
+    """Send OTP email with error handling and logging"""
+    try:
+        subject = 'Your OTP Verification Code - Hoka\'s Parlour'
+        
+        # HTML email template
+        html_message = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: 'Inter', Arial, sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    margin: 0;
+                    padding: 20px;
+                }}
+                .container {{
+                    max-width: 600px;
+                    margin: 0 auto;
+                    background: white;
+                    border-radius: 20px;
+                    padding: 40px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                }}
+                .header {{
+                    text-align: center;
+                    margin-bottom: 30px;
+                }}
+                .logo {{
+                    font-size: 32px;
+                    font-weight: 800;
+                    color: #333;
+                    font-family: 'Playfair Display', serif;
+                }}
+                .logo span {{
+                    color: #7b2eda;
+                }}
+                .otp-code {{
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    font-size: 48px;
+                    font-weight: bold;
+                    padding: 20px;
+                    text-align: center;
+                    border-radius: 16px;
+                    letter-spacing: 10px;
+                    margin: 30px 0;
+                    font-family: monospace;
+                }}
+                .footer {{
+                    text-align: center;
+                    margin-top: 30px;
+                    color: #666;
+                    font-size: 14px;
+                    border-top: 1px solid #eee;
+                    padding-top: 20px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <div class="logo">HOKA'S<span>PARLOUR</span></div>
+                    <p style="color: #666; margin-top: 10px;">Welcome to Hoka's Parlour!</p>
+                </div>
+                
+                <h2 style="text-align: center; color: #333;">Email Verification</h2>
+                
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    Hello <strong>{user.username}</strong>,<br><br>
+                    Thank you for signing up! Please use the OTP code below to verify your email address:
+                </p>
+                
+                <div class="otp-code">
+                    {otp}
+                </div>
+                
+                <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                    This code will expire in 10 minutes.<br>
+                    If you didn't request this, please ignore this email.
+                </p>
+                
+                <div class="footer">
+                    <p>© 2026 Hoka's Parlour. All rights reserved.</p>
+                    <p style="color: #999; font-size: 12px;">Rongai, Kajiado County, Kenya</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Create email with HTML content
+        email = EmailMessage(
+            subject=subject,
+            body=html_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.content_subtype = "html"  # This makes it an HTML email
+        
+        # Send email
+        sent_count = email.send(fail_silently=False)
+        
+        logger.info(f"Email sent successfully to {user.email}. Result: {sent_count}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to send email to {user.email}: {str(e)}")
+        
+        # Print to console for development
+        print(f"\n{'='*50}")
+        print(f"🔐 OTP for {user.email}: {otp}")
+        print(f"{'='*50}\n")
+        
+        # Re-raise to be caught in the view
+        raise e
+    
+    
 def user_signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
+        
+        # Add email field to form
+        form.fields['email'] = forms.EmailField(required=True)
+        
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_active = False
-            user.save()
-
-            otp = generate_otp()
-
-            EmailOTP.objects.update_or_create(
-                user=user,
-                defaults={'otp': otp}
-            )
-
-            send_mail(
-                subject='Your OTP Code - Hoka\'s Parlour',
-                message=f'Your OTP code is: {otp}',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-
-            request.session['otp_user_id'] = user.id
-
-            messages.success(request, 'An OTP has been sent to your email.')
-            return redirect('verify_otp')
+            try:
+                # Check if email already exists
+                email = form.cleaned_data['email']
+                if User.objects.filter(email=email).exists():
+                    messages.error(request, 'This email is already registered.')
+                    return render(request, 'parlour/signup.html', {'form': form})
+                
+                # Create user
+                user = form.save(commit=False)
+                user.email = email
+                user.is_active = False  # Deactivate until OTP verification
+                user.save()
+                
+                # Generate OTP
+                otp = generate_otp()
+                
+                # Save OTP to database
+                EmailOTP.objects.update_or_create(
+                    user=user,
+                    defaults={'otp': otp}
+                )
+                
+                # Try to send email
+                try:
+                    send_otp_email(user, otp)
+                    messages.success(request, f'✅ An OTP has been sent to {email}. Please check your inbox (and spam folder).')
+                except Exception as e:
+                    # If email fails, still show OTP for development
+                    messages.warning(request, f'⚠️ Email sending failed. For development, your OTP is: {otp}')
+                    logger.error(f"Email sending failed: {e}")
+                
+                # Store user ID in session
+                request.session['otp_user_id'] = user.id
+                request.session['otp_email'] = email
+                
+                return redirect('verify_otp')
+                
+            except IntegrityError as e:
+                messages.error(request, 'An error occurred. Please try again.')
+                logger.error(f"Signup error: {e}")
+            except Exception as e:
+                messages.error(request, 'An unexpected error occurred.')
+                logger.error(f"Unexpected signup error: {e}")
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = UserCreationForm()
-
+        form.fields['email'] = forms.EmailField(required=True)
+    
     return render(request, 'parlour/signup.html', {'form': form})
 
+def verify_otp(request):
+    user_id = request.session.get('otp_user_id')
+    email = request.session.get('otp_email')
+
+    if not user_id:
+        messages.error(request, 'Session expired. Please sign up again.')
+        return redirect('signup')
+
+    if request.method == 'POST':
+        otp_input = request.POST.get('otp')
+        action = request.POST.get('action')
+
+        # Resend OTP
+        if action == 'resend':
+            try:
+                user = User.objects.get(id=user_id)
+                otp = generate_otp()
+                
+                EmailOTP.objects.update_or_create(
+                    user=user,
+                    defaults={'otp': otp}
+                )
+                
+                try:
+                    send_otp_email(user, otp)
+                    messages.success(request, f'✅ A new OTP has been sent to {email}')
+                except Exception as e:
+                    messages.warning(request, f'⚠️ New OTP: {otp}')
+                
+                return redirect('verify_otp')
+                
+            except User.DoesNotExist:
+                messages.error(request, 'User not found.')
+                return redirect('signup')
+
+        # Verify OTP
+        try:
+            otp_obj = EmailOTP.objects.get(user_id=user_id)
+            
+            if otp_obj.otp == otp_input:
+                user = otp_obj.user
+                user.is_active = True
+                user.save()
+                
+                otp_obj.delete()
+                del request.session['otp_user_id']
+                del request.session['otp_email']
+                
+                # Log the user in
+                login(request, user)
+                messages.success(request, '🎉 Account verified successfully! Welcome to Hoka\'s Parlour!')
+                return redirect('home')
+            else:
+                messages.error(request, '❌ Invalid OTP. Please try again.')
+        except EmailOTP.DoesNotExist:
+            messages.error(request, 'OTP expired. Please request a new one.')
+
+    return render(request, 'parlour/verify_otp.html')
 
 def verify_otp(request):
     user_id = request.session.get('otp_user_id')
@@ -751,85 +972,79 @@ def load_saved_items(request):
     return redirect('cart')
 
 
-from django.core.mail import send_mail
-from django.conf import settings
-from django.contrib import messages
-
 def contact(request):
     """Contact Us page with form handling"""
     if request.method == 'POST':
-        # Get form data
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
         phone = request.POST.get('phone', '')
         subject = request.POST.get('subject')
         order_number = request.POST.get('order_number', '')
         message = request.POST.get('message')
-        
-        # Prepare email content
+
         email_subject = f"Contact Form: {subject} - {full_name}"
-        
+
         email_message = f"""
-        New contact form submission from Hoka's Parlour website:
-        
-        Name: {full_name}
-        Email: {email}
-        Phone: {phone}
-        Subject: {subject}
-        Order Number: {order_number}
-        
-        Message:
-        {message}
-        
-        ---
-        This message was sent from the Hoka's Parlour contact form.
+New contact form submission from Hoka's Parlour website:
+
+Name:         {full_name}
+Email:        {email}
+Phone:        {phone}
+Subject:      {subject}
+Order Number: {order_number if order_number else 'N/A'}
+
+Message:
+{message}
+
+---
+This message was sent from the Hoka's Parlour contact form.
         """
-        
+
+        auto_reply_message = f"""
+Dear {full_name},
+
+Thank you for reaching out to Hoka's Parlour!
+We have received your message and will respond within 24 hours.
+
+Your Enquiry Details:
+Subject:      {subject}
+Reference:    {order_number if order_number else 'General Inquiry'}
+
+For urgent matters, please reach us directly at:
+Email: hokasparlour@gmail.com
+
+Best regards,
+The Hoka's Parlour Team
+        """
+
         try:
-            # Send email to store
+            # Send email notification to store owner
             send_mail(
                 subject=email_subject,
                 message=email_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=['info@hokasparlour.co.ke', 'hokasparlour@gmail.com'],
+                recipient_list=['hokasparlour@gmail.com'],
                 fail_silently=False,
             )
-            
+
             # Send auto-reply to customer
-            auto_reply_subject = "Thank you for contacting Hoka's Parlour"
-            auto_reply_message = f"""
-            Dear {full_name},
-            
-            Thank you for reaching out to Hoka's Parlour. We have received your message and will respond within 24 hours.
-            
-            Your reference: {subject} - {order_number if order_number else 'General Inquiry'}
-            
-            For urgent matters, please call us at +254 700 000 000.
-            
-            Best regards,
-            The Hoka's Parlour Team
-            🎓 Serving MMU Students Since 2024
-            """
-            
             send_mail(
-                subject=auto_reply_subject,
+                subject="Thank you for contacting Hoka's Parlour",
                 message=auto_reply_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[email],
                 fail_silently=False,
             )
-            
-            messages.success(request, 'Thank you for contacting us! We will respond within 24 hours.')
-            
+
+            messages.success(request, 'Thank you! Your message has been sent. We will respond within 24 hours.')
+
         except Exception as e:
-            messages.error(request, 'Sorry, there was an error sending your message. Please try again or call us directly.')
+            messages.error(request, 'Sorry, there was an error sending your message. Please try again.')
             print(f"Contact form error: {e}")
-        
+
         return redirect('contact')
-    
+
     return render(request, 'details/contact.html')
-
-
 
 def about(request):
     """About Us page"""

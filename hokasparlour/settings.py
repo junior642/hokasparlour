@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+# Load .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,13 +27,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xmy^1l3wa0%qau65p_r^$1h4q#+b4bqjuw4x4uq5h#g!zwf%r+'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Application definition
 
@@ -129,9 +132,36 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'hokasparlour@gmail.com'
-EMAIL_HOST_PASSWORD = 'wakf sobr ycxn aewg'
-DEFAULT_FROM_EMAIL = 'Hoka\'s Parlour <noreply@hokasparlour.com>'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+
+# Logging for email debugging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'debug.log',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django.core.mail': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
 
 # Add at the end
 LOGIN_URL = '/accounts/login/'
@@ -143,19 +173,13 @@ LOGOUT_REDIRECT_URL = '/'
 # Add at the bottom of settings.py
 
 # M-Pesa Daraja API Settings
-MPESA_ENVIRONMENT = 'sandbox'
-MPESA_CONSUMER_KEY = 'r82lDbcGeRlYD8FYSsn7ssU4lyrWUOwZk47OY5PC4m2rvzEn'
-MPESA_CONSUMER_SECRET = 'AENY4xwRAnQkGDonZJ4FjKjAdAqNJsasBcIUuGQcf58k0xvhdvpzvmk0B7kIA43h'
-MPESA_SHORTCODE = '174379'
-
-# This is the standard Safaricom SANDBOX passkey - works for all sandbox apps
-MPESA_PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-
-# Your ngrok URL
-MPESA_CALLBACK_URL = 'https://envyingly-deskbound-lisabeth.ngrok-free.dev/mpesa-callback/'
-
-# Simulation OFF - use real STK Push
-MPESA_SIMULATE = False
+MPESA_ENVIRONMENT = os.getenv('MPESA_ENVIRONMENT', 'sandbox')
+MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY')
+MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET')
+MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE')
+MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
+MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
+MPESA_SIMULATE = os.getenv('MPESA_SIMULATE', 'True') == 'True'
 
 ALLOWED_HOSTS = [
     '127.0.0.1',

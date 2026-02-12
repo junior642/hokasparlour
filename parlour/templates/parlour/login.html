@@ -1,530 +1,900 @@
-{% extends 'parlour/base.html' %}
-{% load static %}
-
-{% block title %}Login - Hoka's Parlour | MMU Fashion{% endblock %}
-
-{% block extra_style %}
-<style>
-    /* -----------------------------------------------
-       LOGIN PAGE – PURE BASE.HTML INHERITANCE
-       Purple theme, dark mode support, Font Awesome icons
-       Modern minimalism for MMU student authentication
-    ----------------------------------------------- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Login - Hoka's Parlour | MMU Fashion</title>
     
-    .auth-container {
-        max-width: 500px;
-        margin: 2rem auto;
-        padding: 0 1.5rem;
-    }
-
-    .auth-card {
-        background: var(--card);
-        border-radius: 32px;
-        padding: 2.5rem;
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border);
-        transition: var(--transition);
-    }
-
-    .auth-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .auth-icon {
-        width: 80px;
-        height: 80px;
-        background: var(--accent-soft);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        border: 2px solid var(--accent);
-    }
-
-    .auth-icon i {
-        font-size: 2.5rem;
-        color: var(--accent);
-    }
-
-    .auth-header h2 {
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--text);
-        letter-spacing: -0.02em;
-        margin-bottom: 0.5rem;
-    }
-
-    .auth-header p {
-        color: var(--text-soft);
-        font-size: 0.95rem;
-    }
-
-    /* -----------------------------------------------
-       FORM STYLES
-    ----------------------------------------------- */
-    .auth-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .form-group label {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-        color: var(--text);
-        font-size: 0.95rem;
-    }
-
-    .form-group label i {
-        color: var(--accent);
-        width: 18px;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 1rem 1.2rem;
-        border: 2px solid var(--border);
-        border-radius: 16px;
-        font-size: 1rem;
-        background: var(--surface);
-        color: var(--text);
-        transition: var(--transition);
-        font-family: 'Inter', sans-serif;
-    }
-
-    .form-group input:focus {
-        outline: none;
-        border-color: var(--accent);
-        box-shadow: 0 0 0 4px rgba(123, 46, 218, 0.08);
-        background: var(--card);
-    }
-
-    .form-group input:hover {
-        border-color: var(--accent-light);
-    }
-
-    .form-group input::placeholder {
-        color: var(--text-soft);
-        opacity: 0.6;
-    }
-
-    /* Error messages */
-    .error-message {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #ef4444;
-        font-size: 0.85rem;
-        margin-top: 0.3rem;
-        background: rgba(239, 68, 68, 0.1);
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-
-    .error-message i {
-        color: #ef4444;
-        font-size: 0.85rem;
-    }
-
-    .non-field-errors {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        border-left: 6px solid #ef4444;
-        padding: 1rem 1.2rem;
-        border-radius: 16px;
-        margin-bottom: 1rem;
-        color: #ef4444;
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .non-field-errors i {
-        font-size: 1.1rem;
-    }
-
-    .non-field-errors ul {
-        margin: 0;
-        padding-left: 1.5rem;
-    }
-
-    /* Submit button */
-    .auth-btn {
-        width: 100%;
-        padding: 1.1rem;
-        background: var(--accent);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-size: 1rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        cursor: pointer;
-        transition: var(--transition);
-        border: 2px solid transparent;
-        margin-top: 0.5rem;
-    }
-
-    .auth-btn:hover {
-        background: transparent;
-        color: var(--accent);
-        border-color: var(--accent);
-        transform: translateY(-2px);
-    }
-
-    .auth-btn i {
-        transition: transform 0.25s;
-    }
-
-    .auth-btn:hover i {
-        transform: translateX(5px);
-    }
-
-    /* Footer links */
-    .auth-footer {
-        text-align: center;
-        margin-top: 2rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid var(--border);
-    }
-
-    .auth-footer p {
-        color: var(--text-soft);
-        font-size: 0.95rem;
-        margin-bottom: 0.8rem;
-    }
-
-    .auth-links {
-        display: flex;
-        justify-content: center;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .auth-link {
-        color: var(--text-soft);
-        text-decoration: none;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: var(--transition);
-    }
-
-    .auth-link i {
-        color: var(--accent);
-        font-size: 0.85rem;
-    }
-
-    .auth-link:hover {
-        color: var(--accent);
-    }
-
-    .signup-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--accent);
-        font-weight: 700;
-        text-decoration: none;
-        padding: 0.5rem 1.2rem;
-        background: var(--accent-soft);
-        border-radius: 50px;
-        transition: var(--transition);
-        border: 1px solid var(--border);
-    }
-
-    .signup-link:hover {
-        background: var(--accent);
-        color: white;
-        transform: translateY(-2px);
-    }
-
-    .signup-link i {
-        transition: transform 0.25s;
-    }
-
-    .signup-link:hover i {
-        transform: translateX(5px);
-    }
-
-    /* Messages */
-    .messages-container {
-        margin-bottom: 1.5rem;
-    }
-
-    .message {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 1rem 1.2rem;
-        border-radius: 16px;
-        font-size: 0.95rem;
-        animation: slideIn 0.3s ease;
-        border: 1px solid transparent;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .message.success {
-        background: rgba(16, 185, 129, 0.1);
-        border-color: rgba(16, 185, 129, 0.2);
-        color: #10b981;
-    }
-
-    .message.error {
-        background: rgba(239, 68, 68, 0.1);
-        border-color: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-    }
-
-    .message.info {
-        background: rgba(59, 130, 246, 0.1);
-        border-color: rgba(59, 130, 246, 0.2);
-        color: #3b82f6;
-    }
-
-    .message.warning {
-        background: rgba(245, 158, 11, 0.1);
-        border-color: rgba(245, 158, 11, 0.2);
-        color: #f59e0b;
-    }
-
-    .message i {
-        font-size: 1rem;
-    }
-
-    /* Demo credentials (for development) */
-    .demo-credentials {
-        background: var(--surface);
-        border-radius: 16px;
-        padding: 1rem;
-        margin-top: 1.5rem;
-        border: 1px dashed var(--accent);
-    }
-
-    .demo-credentials p {
-        color: var(--text-soft);
-        font-size: 0.85rem;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 0.3rem;
-    }
-
-    .demo-credentials i {
-        color: var(--accent);
-    }
-
-    .demo-credentials strong {
-        color: var(--accent);
-    }
-
-    /* -----------------------------------------------
-       RESPONSIVE
-    ----------------------------------------------- */
-    @media (max-width: 768px) {
-        .auth-card {
-            padding: 2rem;
-        }
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* -----------------------------------------------
+           LOGIN PAGE – PURPLE THEME, ZERO WASTED SPACE
+           Mobile-first, dark mode ready, MMU student focused
+        ----------------------------------------------- */
         
-        .auth-header h2 {
-            font-size: 1.8rem;
+        /* CSS Variables – Light Mode */
+        :root {
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --card: #ffffff;
+            --text: #0a0a0a;
+            --text-soft: #334155;
+            --border: #e2e8f0;
+            --accent: #7b2eda;
+            --accent-light: #a78bfa;
+            --accent-soft: #f3e8ff;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.02);
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.03);
+            --shadow-md: 0 20px 30px -10px rgba(0,0,0,0.05);
+            --transition: all 0.25s ease;
+            --header-bg: rgba(255,255,255,0.9);
+            --gradient: linear-gradient(145deg, #7b2eda, #a78bfa);
         }
-        
-        .auth-icon {
-            width: 70px;
-            height: 70px;
-        }
-        
-        .auth-icon i {
-            font-size: 2rem;
-        }
-    }
 
-    @media (max-width: 480px) {
-        .auth-container {
-            padding: 0 1rem;
+        /* Dark Mode */
+        .dark-mode {
+            --bg: #0a0a0c;
+            --surface: #16161c;
+            --card: #1e1e24;
+            --text: #f0f0fa;
+            --text-soft: #b0b0c5;
+            --border: #2c2c35;
+            --accent: #b287fd;
+            --accent-light: #d4adff;
+            --accent-soft: #281f3a;
+            --header-bg: rgba(10,10,12,0.9);
         }
-        
-        .auth-card {
-            padding: 1.5rem;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .auth-header h2 {
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, var(--bg), var(--surface));
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.25s, color 0.25s;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(123,46,218,0.03) 0%, transparent 70%);
+            animation: pulse 20s infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+
+        /* ---------- HEADER – SCROLLABLE, NO WASTE ---------- */
+        header {
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            position: relative;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
             font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Playfair Display', serif;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.5px;
         }
-        
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        /* Desktop Navigation */
+        .desktop-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .desktop-nav a {
+            color: var(--text-soft);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 40px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .desktop-nav a:hover {
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .desktop-nav a i {
+            color: var(--accent-light);
+        }
+
+        /* Mobile menu button */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .mobile-menu-btn:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        /* ---------- MAIN CONTENT – ZERO WASTE ---------- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+            z-index: 1;
+            min-height: calc(100vh - 80px);
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-card {
+            background: var(--card);
+            border-radius: 32px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Purple glow effect */
+        .auth-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(123,46,218,0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
         .auth-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
+            background: var(--accent-soft);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            border: 2px solid var(--accent);
+            box-shadow: 0 10px 20px -8px rgba(123,46,218,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .auth-card:hover .auth-icon {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .auth-icon i {
+            font-size: 2.5rem;
+            color: var(--accent);
+        }
+
+        .auth-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-header h1 span {
+            color: var(--accent);
+            position: relative;
+        }
+
+        .auth-header p {
+            color: var(--text-soft);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .auth-header p i {
+            color: var(--accent);
+        }
+
+        /* ---------- MESSAGES – CLEAN ALERTS ---------- */
+        .messages-container {
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .message {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1rem 1.25rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .message.info {
+            background: var(--accent-soft);
+            border-color: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .message i {
+            font-size: 1rem;
+        }
+
+        /* ---------- FORM – MODERN INPUTS ---------- */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .form-group label i {
+            color: var(--accent);
+            width: 18px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            font-size: 1rem;
+            background: var(--surface);
+            color: var(--text);
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(123,46,218,0.1);
+            background: var(--card);
+        }
+
+        .form-group input:hover {
+            border-color: var(--accent-light);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-soft);
+            opacity: 0.5;
+        }
+
+        /* Password wrapper with toggle */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-soft);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        /* Error states */
+        .error-message {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            background: rgba(239,68,68,0.08);
+            padding: 0.6rem 1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(239,68,68,0.1);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .non-field-errors {
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.1);
+            border-left: 6px solid #ef4444;
+            padding: 1rem 1.2rem;
+            border-radius: 20px;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Submit button */
+        .auth-btn {
+            width: 100%;
+            padding: 1.1rem;
+            background: linear-gradient(145deg, var(--accent), var(--accent-light));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            border: 2px solid transparent;
+            background-size: 200% 100%;
+            background-position: 0% 50%;
+        }
+
+        .auth-btn:hover {
+            background-position: 100% 50%;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px -8px rgba(123,46,218,0.5);
+        }
+
+        .auth-btn i {
+            transition: transform 0.25s;
+        }
+
+        .auth-btn:hover i {
+            transform: translateX(5px);
+        }
+
+        /* ---------- FOOTER LINKS ---------- */
+        .auth-footer {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-footer p {
+            color: var(--text-soft);
             margin-bottom: 1rem;
         }
-        
-        .auth-icon i {
-            font-size: 1.8rem;
-        }
-        
-        .form-group input {
-            padding: 0.9rem 1rem;
-        }
-        
-        .auth-btn {
-            padding: 1rem;
-        }
-        
-        .auth-links {
-            flex-direction: column;
-            gap: 0.8rem;
+
+        .signup-link {
+            display: inline-flex;
             align-items: center;
+            gap: 10px;
+            padding: 0.9rem 2rem;
+            background: var(--accent-soft);
+            color: var(--accent);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            margin-bottom: 1.25rem;
         }
-    }
 
-    /* Dark mode adjustments */
-    .dark-mode .demo-credentials {
-        background: var(--card);
-    }
-</style>
-{% endblock %}
+        .signup-link:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
 
-{% block content %}
-<div class="auth-container">
-    <div class="auth-card">
-        <!-- Header with Icon -->
-        <div class="auth-header">
-            <div class="auth-icon">
-                <i class="fas fa-lock"></i>
-            </div>
-            <h2>Welcome Back</h2>
-            <p>Log in to your Hoka's Parlour account</p>
-        </div>
+        .signup-link i {
+            transition: transform 0.25s;
+        }
 
-        <!-- Messages -->
-        {% if messages %}
-        <div class="messages-container">
-            {% for message in messages %}
-                <div class="message {{ message.tags }}">
-                    {% if message.tags == 'success' %}
-                        <i class="fas fa-check-circle"></i>
-                    {% elif message.tags == 'error' %}
-                        <i class="fas fa-exclamation-circle"></i>
-                    {% elif message.tags == 'warning' %}
-                        <i class="fas fa-exclamation-triangle"></i>
-                    {% else %}
-                        <i class="fas fa-info-circle"></i>
-                    {% endif %}
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+        .signup-link:hover i {
+            transform: translateX(5px);
+        }
 
-        <!-- Login Form -->
-        <form method="post" class="auth-form">
-            {% csrf_token %}
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
 
-            <div class="form-group">
-                <label for="id_username">
-                    <i class="fas fa-user"></i>
-                    Username
-                </label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        {{ form.username.errors.0 }}
-                    </div>
-                {% endif %}
-            </div>
+        .nav-link {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
 
-            <div class="form-group">
-                <label for="id_password">
-                    <i class="fas fa-key"></i>
-                    Password
-                </label>
-                {{ form.password }}
-                {% if form.password.errors %}
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        {{ form.password.errors.0 }}
-                    </div>
-                {% endif %}
-            </div>
+        .nav-link i {
+            color: var(--accent);
+        }
 
-            {% if form.non_field_errors %}
-                <div class="non-field-errors">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>
-                        {% for error in form.non_field_errors %}
-                            {{ error }}
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
+        .nav-link:hover {
+            color: var(--accent);
+        }
 
-            <button type="submit" class="auth-btn">
-                <span>Log In</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-        </form>
+        /* Dark mode toggle */
+        .theme-toggle {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--accent);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: 0.5rem;
+        }
 
-        <!-- Footer Links -->
-        <div class="auth-footer">
-            <p>Don't have an account?</p>
-            <a href="{% url 'signup' %}" class="signup-link">
-                <span>Create Account</span>
-                <i class="fas fa-user-plus"></i>
+        .theme-toggle:hover {
+            background: var(--accent);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Demo credentials (development only) */
+        .demo-credentials {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: var(--surface);
+            border-radius: 20px;
+            border: 1px dashed var(--accent);
+            font-size: 0.85rem;
+        }
+
+        .demo-credentials p {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-soft);
+            margin-bottom: 0.25rem;
+        }
+
+        .demo-credentials i {
+            color: var(--accent);
+        }
+
+        .demo-credentials strong {
+            color: var(--accent);
+        }
+
+        /* ---------- RESPONSIVE – MOBILE FIRST ---------- */
+        @media (max-width: 768px) {
+            .desktop-nav {
+                display: none;
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .auth-card {
+                padding: 1.75rem;
+            }
+            
+            .auth-icon {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .auth-icon i {
+                font-size: 2rem;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+            
+            .auth-card {
+                padding: 1.5rem;
+                border-radius: 28px;
+            }
+            
+            .auth-icon {
+                width: 60px;
+                height: 60px;
+                border-radius: 20px;
+            }
+            
+            .auth-icon i {
+                font-size: 1.8rem;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-group input {
+                padding: 0.9rem 1rem;
+            }
+            
+            .auth-btn {
+                padding: 1rem;
+            }
+            
+            .signup-link {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+        }
+
+        /* Touch-friendly targets */
+        button, a, input[type="submit"] {
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        /* Loading state */
+        .btn-loading {
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .btn-loading i {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER – SCROLLABLE -->
+    <header>
+        <div class="header-container">
+            <a href="{% url 'home' %}" class="logo">
+                HOKA'S<span>PARLOUR</span>
             </a>
             
-            <div class="auth-links">
-                <a href="{% url 'home' %}" class="auth-link">
-                    <i class="fas fa-home"></i>
-                    Home
-                </a>
-                <a href="{% url 'order_tracking' %}" class="auth-link">
-                    <i class="fas fa-truck"></i>
-                    Track Order
-                </a>
-                <a href="#" class="auth-link">
-                    <i class="fas fa-question-circle"></i>
-                    Need Help?
-                </a>
+            <!-- Desktop Navigation -->
+            <nav class="desktop-nav">
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+                <a href="{% url 'cart' %}"><i class="fas fa-shopping-bag"></i> Cart</a>
+                <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> Track</a>
+                <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </nav>
+            
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="auth-container">
+            <div class="auth-card">
+                <!-- Header with Icon -->
+                <div class="auth-header">
+                    <div class="auth-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h1>Welcome <span>Back</span></h1>
+                    <p>
+                        <i class="fas fa-graduation-cap"></i>
+                        MMU Student Exclusive
+                    </p>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Login Form -->
+                <form method="post" class="auth-form" id="loginForm">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="id_username">
+                            <i class="fas fa-user"></i>
+                            Username
+                        </label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.username.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password">
+                            <i class="fas fa-key"></i>
+                            Password
+                        </label>
+                        <div class="password-wrapper">
+                            {{ form.password }}
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                {{ form.password.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="non-field-errors">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <button type="submit" class="auth-btn" id="submitBtn">
+                        <span>Log In</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="auth-footer">
+                    <p>Don't have an account?</p>
+                    <a href="{% url 'signup' %}" class="signup-link">
+                        <span>Create Account</span>
+                        <i class="fas fa-user-plus"></i>
+                    </a>
+                    
+                    <div class="nav-links">
+                        <a href="{% url 'home' %}" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            Home
+                        </a>
+                        <a href="{% url 'order_tracking' %}" class="nav-link">
+                            <i class="fas fa-truck"></i>
+                            Track Order
+                        </a>
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-question-circle"></i>
+                            Help
+                        </a>
+                    </div>
+                </div>
+
+                
             </div>
         </div>
+    </main>
 
-        <!-- Demo Credentials (Remove in production) -->
-        <div class="demo-credentials">
-            <p><i class="fas fa-flask"></i> <strong>Demo Credentials:</strong></p>
-            <p style="margin-left: 1.2rem;">Username: <strong>student@mmu</strong> | Password: <strong>demo123</strong></p>
-            <p style="margin-left: 1.2rem; margin-top: 0.2rem;">
-                <i class="fab fa-whatsapp" style="color: #25D366;"></i> 
-                WhatsApp: <a href="https://wa.me/254783072098" style="color: var(--accent);">0783072098</a>
-            </p>
-        </div>
-    </div>
-</div>
-{% endblock %}
+    <script>
+        // Password visibility toggle
+        function togglePassword() {
+            const passwordInput = document.getElementById('id_password');
+            const toggleBtn = document.querySelector('.password-toggle i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.className = 'fas fa-eye';
+            }
+        }
+
+        // Dark mode toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const root = document.documentElement;
+        
+        function setDarkMode(isDark) {
+            if (isDark) {
+                root.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                root.classList.remove('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            localStorage.setItem('hokasparlour_theme', isDark ? 'dark' : 'light');
+        }
+
+        // Check for saved theme
+        const savedTheme = localStorage.getItem('hokasparlour_theme');
+        if (savedTheme === 'dark') {
+            setDarkMode(true);
+        } else if (savedTheme === 'light') {
+            setDarkMode(false);
+        } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setDarkMode(prefersDark);
+        }
+
+        // Theme toggle click
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const isDark = !root.classList.contains('dark-mode');
+                setDarkMode(isDark);
+            });
+        }
+
+        // Form loading state
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                submitBtn.classList.add('btn-loading');
+                submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Logging in...';
+                submitBtn.disabled = true;
+            });
+        }
+
+        // Mobile menu (you can implement this later)
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', function() {
+                // Add mobile menu functionality
+                console.log('Mobile menu clicked');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="description" content="Hoka's Parlour – Modern fusion fashion for MMU students. Located in Rongai, Nairobi.">
     <title>{% block title %}Hoka's Parlour · MMU Fashion{% endblock %}</title>
     
@@ -15,7 +15,7 @@
     <style>
         /* -----------------------------------------------
            BASE.HTML – PURPLE THEME, DARK MODE READY
-           Modern minimalist, MMU student focused
+           MOBILE-FIRST, ZERO WASTED SPACE, HAMBURGER MENU
         ----------------------------------------------- */
         
         /* ---------- CSS VARIABLES – LIGHT MODE (default) ---------- */
@@ -29,32 +29,27 @@
             --accent: #7b2eda;        /* signature purple */
             --accent-light: #a78bfa;
             --accent-soft: #f3e8ff;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.02);
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.03), 0 8px 10px -6px rgba(0,0,0,0.02);
-            --shadow-md: 0 20px 30px -10px rgba(0,0,0,0.05);
-            --shadow-lg: 0 25px 40px -12px rgba(0,0,0,0.08);
-            --transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
-            --header-bg: rgba(255,255,255,0.8);
-            --header-border: rgba(226,232,240,0.6);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
+            --shadow: 0 4px 6px -2px rgba(0,0,0,0.02);
+            --header-bg: #ffffff;
+            --header-border: #e2e8f0;
+            --transition: all 0.2s ease;
+            --header-padding: 0.75rem 1rem;
         }
 
         /* ---------- DARK MODE – purple remains accent ---------- */
         .dark-mode {
-            --bg: #121212;
-            --surface: #1e1e24;
-            --card: #25252b;
+            --bg: #0a0a0c;
+            --surface: #16161c;
+            --card: #1e1e24;
             --text: #f0f0fa;
-            --text-soft: #c2c2d6;
-            --border: #33333e;
-            --accent: #b287fd;         /* brighter purple for dark bg */
+            --text-soft: #b0b0c5;
+            --border: #2c2c35;
+            --accent: #b287fd;
             --accent-light: #d4adff;
-            --accent-soft: #2a1f3a;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
-            --shadow-md: 0 20px 30px -10px rgba(0,0,0,0.6);
-            --shadow-lg: 0 25px 40px -12px rgba(0,0,0,0.7);
-            --header-bg: rgba(18,18,18,0.8);
-            --header-border: rgba(51,51,62,0.8);
+            --accent-soft: #281f3a;
+            --header-bg: #0a0a0c;
+            --header-border: #2c2c35;
         }
 
         * {
@@ -67,152 +62,236 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            transition: background-color 0.25s, color 0.2s;
+            line-height: 1.5;
+            transition: background-color 0.2s, color 0.2s;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* ---------- MODERN STICKY HEADER – glassmorphism ---------- */
+        /* ---------- HEADER – SCROLLABLE, NO WASTED SPACE ---------- */
         header {
             background-color: var(--header-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--header-border);
-            padding: 1.2rem 2rem;
-            position: sticky;
-            top: 0;
+            padding: 0;  /* Remove padding, container handles it */
+            width: 100%;
+            position: relative;  /* Not sticky, scrolls away */
             z-index: 100;
-            box-shadow: var(--shadow-sm);
         }
 
         .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1.5rem;
+            padding: 0.75rem 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
         }
 
-        /* Logo with purple accent */
+        /* Logo – slightly smaller on mobile */
         .logo a {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             letter-spacing: -0.5px;
             text-decoration: none;
             color: var(--text);
             font-family: 'Playfair Display', serif;
+            line-height: 1.2;
         }
 
         .logo span {
             color: var(--accent);
         }
 
-        /* Navigation – clean, modern */
-        nav {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        nav a {
-            color: var(--text-soft);
-            text-decoration: none;
-            padding: 0.6rem 1.2rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border-radius: 40px;
-            transition: var(--transition);
+        /* ---------- HAMBURGER MENU BUTTON ---------- */
+        .hamburger-btn {
             background: transparent;
-            border: 1px solid transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        nav a i {
-            font-size: 1rem;
-            color: var(--accent-light);
-            transition: var(--transition);
-        }
-
-        nav a:hover {
-            color: var(--accent);
-            background: var(--accent-soft);
-            border-color: var(--accent-light);
-        }
-
-        nav a:hover i {
-            color: var(--accent);
-        }
-
-        /* Theme toggle button */
-        .theme-toggle {
-            background: var(--accent-soft);
             border: none;
-            color: var(--accent);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: inline-flex;
+            color: var(--text);
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            border-radius: 8px;
             transition: var(--transition);
-            border: 1px solid transparent;
-            margin-left: 0.5rem;
+            margin-left: auto;
+        }
+
+        .hamburger-btn:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        /* ---------- MOBILE NAVIGATION – SLIDE OVERLAY ---------- */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 320px;
+            height: 100vh;
+            background: var(--card);
+            border-left: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 1.5rem 1rem;
+        }
+
+        .mobile-nav.active {
+            right: 0;
+        }
+
+        /* Overlay when menu is open */
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+            display: none;
+        }
+
+        .nav-overlay.active {
+            display: block;
+        }
+
+        /* Mobile nav header */
+        .mobile-nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-nav-logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            font-family: 'Playfair Display', serif;
+            color: var(--text);
+        }
+
+        .mobile-nav-logo span {
+            color: var(--accent);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-soft);
+            font-size: 1.5rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .close-btn:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        /* Mobile navigation links */
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .mobile-nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.875rem 1rem;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 12px;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .mobile-nav-links a i {
+            width: 24px;
+            text-align: center;
+            color: var(--accent);
             font-size: 1.1rem;
         }
 
-        .theme-toggle:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-            transform: scale(1.05);
+        .mobile-nav-links a:hover {
+            background: var(--accent-soft);
         }
 
-        /* Cart icon special styling */
-        .cart-link {
-            position: relative;
-        }
-
-        .cart-count {
-            position: absolute;
-            top: -6px;
-            right: -6px;
+        /* Cart count in mobile menu */
+        .mobile-cart-count {
             background: var(--accent);
             color: white;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            padding: 0.2rem 0.45rem;
+            padding: 0.2rem 0.5rem;
             border-radius: 50px;
-            border: 2px solid var(--card);
-            min-width: 20px;
-            text-align: center;
+            margin-left: auto;
         }
 
-        /* ---------- MESSAGES / ALERTS – purple accent ---------- */
+        /* Desktop nav – hidden on mobile */
+        .desktop-nav {
+            display: none;
+        }
+
+        /* Theme toggle in mobile menu */
+        .mobile-theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.875rem 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .mobile-theme-btn {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--accent);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* ---------- MESSAGES – COMPACT ---------- */
         .messages-container {
-            max-width: 1400px;
-            margin: 1.5rem auto 0;
-            padding: 0 2rem;
+            padding: 0.5rem 1rem 0;
+            margin: 0;
         }
 
         .messages {
             background: var(--accent-soft);
             color: var(--accent);
-            padding: 1rem 1.5rem;
-            border-radius: 16px;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
             border: 1px solid var(--accent-light);
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-            box-shadow: var(--shadow-sm);
-            font-weight: 500;
+            font-size: 0.9rem;
         }
 
         .messages p {
@@ -221,26 +300,20 @@
             gap: 8px;
         }
 
-        .messages i {
-            color: var(--accent);
-            font-size: 1.1rem;
-        }
-
-        /* ---------- MAIN CONTENT CONTAINER ---------- */
+        /* ---------- MAIN CONTENT – ZERO WASTED SPACE ---------- */
         .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            flex: 1;
             width: 100%;
+            flex: 1;
+            padding: 1rem;
+            margin: 0;
         }
 
-        /* ---------- FOOTER – matches base, included here for completeness ---------- */
+        /* ---------- FOOTER – COMPACT ---------- */
         footer {
             background: var(--surface);
             border-top: 1px solid var(--border);
-            padding: 3rem 2rem 1.8rem;
-            margin-top: 3rem;
+            padding: 1.5rem 1rem;
+            margin-top: 0;
         }
 
         .footer-container {
@@ -248,19 +321,19 @@
             margin: 0 auto;
         }
 
+        /* Mobile-optimized footer */
         .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1.5fr;
-            gap: 2.5rem;
-            margin-bottom: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
         .footer-logo {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 800;
             font-family: 'Playfair Display', serif;
             color: var(--text);
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.5rem;
         }
 
         .footer-logo span {
@@ -269,45 +342,53 @@
 
         .footer-about p {
             color: var(--text-soft);
-            margin: 1rem 0 0.5rem;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
         }
 
-        .footer-links h4, .footer-social h4 {
-            font-size: 1.1rem;
-            margin-bottom: 1.2rem;
+        .footer-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .footer-contact p {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-soft);
+        }
+
+        .footer-links h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
             color: var(--text);
             font-weight: 700;
-            letter-spacing: 0.5px;
         }
 
         .footer-links ul {
             list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .footer-links a {
             color: var(--text-soft);
             text-decoration: none;
-            font-size: 0.95rem;
-            transition: color 0.2s;
+            font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
 
-        .footer-links a:hover {
-            color: var(--accent);
-            transform: translateX(4px);
-        }
-
         .social-list {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
+            margin-top: 0.5rem;
         }
 
         .social-list a {
@@ -318,94 +399,139 @@
             color: var(--accent);
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            transition: var(--transition);
+            border-radius: 12px;
+            font-size: 1.1rem;
             text-decoration: none;
         }
 
-        .social-list a:hover {
-            background: var(--accent);
-            color: white;
-            transform: translateY(-3px);
-        }
-
         .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
             border-top: 1px solid var(--border);
-            font-size: 0.9rem;
+            text-align: center;
+            font-size: 0.8rem;
             color: var(--text-soft);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .purple-heart {
             color: var(--accent);
-            font-weight: 600;
         }
 
-        /* ---------- RESPONSIVE ---------- */
-        @media (max-width: 900px) {
+        /* ---------- TABLET AND DESKTOP ---------- */
+        @media (min-width: 768px) {
             .header-container {
-                flex-direction: column;
-                align-items: flex-start;
+                padding: 1rem 2rem;
+            }
+            
+            .logo a {
+                font-size: 1.8rem;
+            }
+            
+            .hamburger-btn {
+                display: none;
+            }
+            
+            .desktop-nav {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .desktop-nav a {
+                color: var(--text-soft);
+                text-decoration: none;
+                padding: 0.6rem 1.2rem;
+                font-weight: 500;
+                font-size: 0.95rem;
+                border-radius: 40px;
+                transition: var(--transition);
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            .desktop-nav a:hover {
+                color: var(--accent);
+                background: var(--accent-soft);
+            }
+            
+            .desktop-nav .theme-toggle {
+                background: var(--accent-soft);
+                border: none;
+                color: var(--accent);
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                margin-left: 0.5rem;
+                font-size: 1.1rem;
+            }
+            
+            .cart-link {
+                position: relative;
+            }
+            
+            .cart-count {
+                position: absolute;
+                top: -6px;
+                right: -6px;
+                background: var(--accent);
+                color: white;
+                font-size: 0.7rem;
+                padding: 0.2rem 0.45rem;
+                border-radius: 50px;
+                min-width: 20px;
+            }
+            
+            .container {
+                padding: 2rem;
             }
             
             .footer-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            nav {
-                width: 100%;
-                justify-content: flex-start;
-            }
-        }
-
-        @media (max-width: 600px) {
-            header { padding: 1rem; }
-            .header-container { padding: 0; }
-            .container { padding: 0 1.2rem; }
-            
-            .footer-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            nav a {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
+                display: grid;
+                grid-template-columns: 2fr 1fr 1fr 1.5fr;
+                gap: 2rem;
+                flex-direction: row;
             }
             
             .footer-bottom {
-                flex-direction: column;
-                gap: 0.8rem;
-                text-align: center;
+                flex-direction: row;
+                justify-content: space-between;
             }
         }
 
-        /* ---------- UTILITY CLASSES ---------- */
-        .text-accent { color: var(--accent); }
-        .bg-accent-soft { background: var(--accent-soft); }
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0.8rem 2rem;
-            background: var(--accent);
-            color: white;
-            border-radius: 50px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-        .btn:hover {
-            background: transparent;
-            color: var(--accent);
-            border-color: var(--accent);
-            transform: translateY(-2px);
+        /* Remove all unnecessary margins/padding for mobile */
+        @media (max-width: 767px) {
+            .desktop-nav {
+                display: none;
+            }
+            
+            /* Zero wasted space - remove all side padding on mobile */
+            body {
+                overflow-x: hidden;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+            
+            /* Make images fluid */
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            /* Compact utility classes */
+            .compact-mobile {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
         }
 
         /* Block for child template extra styles */
@@ -413,14 +539,20 @@
     </style>
 </head>
 <body>
-    <!-- MODERN HEADER with purple accent, theme toggle, and cart count -->
+    <!-- HEADER – SCROLLABLE, NO WASTED SPACE -->
     <header>
         <div class="header-container">
             <div class="logo">
                 <a href="{% url 'home' %}">HOKA'S<span> PARLOUR</span></a>
             </div>
             
-            <nav>
+            <!-- Hamburger Button (mobile only) -->
+            <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Desktop Navigation (hidden on mobile) -->
+            <nav class="desktop-nav">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
                 <a href="{% url 'cart' %}" class="cart-link">
                     <i class="fas fa-bag-shopping"></i> Cart
@@ -429,7 +561,7 @@
                 <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> Track Order</a>
                 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout ({{ user.username }})</a>
+                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                     {% if user.is_staff %}
                         <a href="/admin/"><i class="fas fa-shield"></i> Admin</a>
                     {% endif %}
@@ -437,16 +569,75 @@
                     <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
                     <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
                 {% endif %}
+
+                 <a href="{% url 'profile' %}" class="profile-link">
+    <i class="fas fa-user"></i> Profile
+</a>
                 
-                <!-- Theme Toggle Button -->
-                <button class="theme-toggle" id="themeToggle" aria-label="Switch between dark and light mode">
+                <!-- Theme Toggle Button (desktop) -->
+                <button class="theme-toggle" id="themeToggleDesktop" aria-label="Switch between dark and light mode">
                     <i class="fas fa-moon"></i>
                 </button>
             </nav>
         </div>
     </header>
 
-    <!-- MESSAGES / ALERTS – styled with purple accent -->
+    <!-- MOBILE NAVIGATION OVERLAY -->
+    <div class="nav-overlay" id="navOverlay"></div>
+    
+    <!-- MOBILE NAVIGATION DRAWER -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <span class="mobile-nav-logo">HOKA'S<span> PARLOUR</span></span>
+            <button class="close-btn" id="closeNavBtn" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-nav-links">
+            <a href="{% url 'home' %}">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a href="{% url 'cart' %}" class="cart-link-mobile">
+                <i class="fas fa-bag-shopping"></i> Cart
+                <span class="mobile-cart-count">0</span>
+            </a>
+            <a href="{% url 'order_tracking' %}">
+                <i class="fas fa-truck"></i> Track Order
+            </a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+                <div style="margin: 0.5rem 1rem; font-size: 0.9rem; color: var(--text-soft);">
+                    <i class="fas fa-user" style="color: var(--accent);"></i> {{ user.username }}
+                </div>
+                {% if user.is_staff %}
+                    <a href="/admin/">
+                        <i class="fas fa-shield"></i> Admin
+                    </a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'login' %}">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{% url 'signup' %}">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+            {% endif %}
+            
+            <!-- Mobile theme toggle -->
+            <div class="mobile-theme-toggle">
+                <span><i class="fas fa-palette" style="color: var(--accent);"></i> Dark mode</span>
+                <button class="mobile-theme-btn" id="mobileThemeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MESSAGES / ALERTS – COMPACT -->
     {% if messages %}
     <div class="messages-container">
         <div class="messages">
@@ -465,19 +656,20 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- MODERN FOOTER – matches base theme, includes social links, MMU focus -->
+    <!-- COMPACT MOBILE FOOTER -->
     <footer>
         <div class="footer-container">
             <div class="footer-grid">
                 <div class="footer-about">
                     <div class="footer-logo">HOKA'S<span> PARLOUR</span></div>
-                    <p>Modern fusion fashion rooted in Rongai, built for MMU students. Trendy, affordable, always with purpose.</p>
-                    <div style="margin-top: 1.2rem; color: var(--text-soft);">
-                        <p><i class="fas fa-map-pin" style="color: var(--accent);"></i> Rongai, Kajiado County, Kenya</p>
+                    <p>Modern fusion fashion for MMU students. Rongai, Nairobi.</p>
+                    <div class="footer-contact">
+                        <p><i class="fas fa-map-pin" style="color: var(--accent);"></i> Rongai, Kajiado</p>
                         <p><i class="fas fa-envelope" style="color: var(--accent);"></i> hokasparlour@gmail.com</p>
                         <p><i class="fas fa-phone-alt" style="color: var(--accent);"></i> 0783072098</p>
                     </div>
                 </div>
+                
                 <div class="footer-links">
                     <h4>EXPLORE</h4>
                     <ul>
@@ -487,6 +679,7 @@
                         <li><a href="{% url 'order_tracking' %}"><i class="fas fa-chevron-right"></i> Track Order</a></li>
                     </ul>
                 </div>
+                
                 <div class="footer-links">
                     <h4>SUPPORT</h4>
                     <ul>
@@ -496,44 +689,48 @@
                         <li><a href="#"><i class="fas fa-chevron-right"></i> Size Guide</a></li>
                     </ul>
                 </div>
-                <div class="footer-social">
-                    <h4>FOLLOW US</h4>
+                
+                <div>
+                    <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">FOLLOW US</h4>
                     <div class="social-list">
                         <a href="https://www.instagram.com/hokasparlour/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="https://www.tiktok.com/@hokasparlour?is_from_webapp=1&sender_device=pc" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
                         <a href="https://x.com/hokasparlour" aria-label="X"><i class="fab fa-x-twitter"></i></a>
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                       <a href="https://wa.me/254783072098" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/254783072098" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
-                    <p style="margin-top: 1.8rem; color: var(--text-soft); font-size: 0.9rem;">
-                        <i class="fas fa-graduation-cap" style="color: var(--accent);"></i> Official MMU Student Partner
+                    <p style="margin-top: 1rem; color: var(--text-soft); font-size: 0.8rem;">
+                        <i class="fas fa-graduation-cap" style="color: var(--accent);"></i> MMU Student Partner
                     </p>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <span>© 2025 Hoka's Parlour. All rights reserved.</span>
-                <span class="purple-heart"><i class="fas fa-heart"></i> designed for MMU</span>
+                <span>© 2025 Hoka's Parlour</span>
+                <span class="purple-heart"><i class="fas fa-heart"></i> MMU</span>
             </div>
         </div>
     </footer>
 
-    <!-- DARK MODE TOGGLE SCRIPT – stores preference in localStorage -->
+    <!-- DARK MODE TOGGLE SCRIPT – unified for both buttons -->
     <script>
         (function() {
             const root = document.documentElement;
-            const themeToggle = document.getElementById('themeToggle');
+            const desktopToggle = document.getElementById('themeToggleDesktop');
+            const mobileToggle = document.getElementById('mobileThemeToggle');
             
-            if (!themeToggle) return;
-            
-            const icon = themeToggle.querySelector('i');
-
             function setDarkMode(isDark) {
                 if (isDark) {
                     root.classList.add('dark-mode');
-                    icon.className = 'fas fa-sun';   // sun indicates light mode available
+                    // Update all theme toggle icons
+                    document.querySelectorAll('.theme-toggle i, .mobile-theme-btn i').forEach(icon => {
+                        icon.className = 'fas fa-sun';
+                    });
                 } else {
                     root.classList.remove('dark-mode');
-                    icon.className = 'fas fa-moon';   // moon indicates dark mode available
+                    document.querySelectorAll('.theme-toggle i, .mobile-theme-btn i').forEach(icon => {
+                        icon.className = 'fas fa-moon';
+                    });
                 }
                 localStorage.setItem('hokasparlour_theme', isDark ? 'dark' : 'light');
             }
@@ -549,24 +746,76 @@
                 setDarkMode(prefersDark);
             }
 
-            // Toggle on button click
-            themeToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                const isDark = !root.classList.contains('dark-mode');
-                setDarkMode(isDark);
-            });
+            // Add event listeners to both toggles
+            if (desktopToggle) {
+                desktopToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isDark = !root.classList.contains('dark-mode');
+                    setDarkMode(isDark);
+                });
+            }
+            
+            if (mobileToggle) {
+                mobileToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const isDark = !root.classList.contains('dark-mode');
+                    setDarkMode(isDark);
+                });
+            }
         })();
     </script>
 
-    <!-- Cart count update placeholder – child templates can override with actual logic -->
+    <!-- HAMBURGER MENU SCRIPT -->
     <script>
-        // This is a placeholder. In production, you'd inject the actual cart count from Django.
-        // Example: document.querySelector('.cart-count').textContent = '{{ cart_items|length }}';
         document.addEventListener('DOMContentLoaded', function() {
-           
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            const navOverlay = document.getElementById('navOverlay');
+            const closeBtn = document.getElementById('closeNavBtn');
+            
+            function openMenu() {
+                mobileNav.classList.add('active');
+                navOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            }
+            
+            function closeMenu() {
+                mobileNav.classList.remove('active');
+                navOverlay.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+            
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', openMenu);
+            }
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeMenu);
+            }
+            
+            if (navOverlay) {
+                navOverlay.addEventListener('click', closeMenu);
+            }
+            
+            // Close menu when clicking a link (for single page apps, but good practice)
+            document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+                link.addEventListener('click', function() {
+                    // Don't close if it's the theme toggle button
+                    if (!this.closest('.mobile-theme-toggle')) {
+                        closeMenu();
+                    }
+                });
+            });
+            
+            // Update cart count placeholder
+            const cartCounts = document.querySelectorAll('.cart-count, .mobile-cart-count');
+            cartCounts.forEach(el => {
+                // Placeholder - replace with actual cart count from Django
+                // el.textContent = '{{ cart_items|length }}';
+            });
         });
     </script>
-
-   
+    
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>
