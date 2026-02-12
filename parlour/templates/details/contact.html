@@ -1,0 +1,980 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - Hoka's Parlour | MMU's Premier Fashion Store{% endblock %}
+
+{% block meta_description %}Get in touch with Hoka's Parlour. Visit our store in Rongai, contact our customer service, or send us a message. We're here to serve MMU students and all fashion lovers in Kenya.{% endblock %}
+
+{% block meta_keywords %}contact Hoka's Parlour, MMU fashion store contact, Rongai clothing store, customer service Kenya, MMU student support, fashion store contact Kenya{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       CONTACT PAGE – PURE BASE.HTML INHERITANCE
+       Uses only CSS variables from base, no custom :root
+       All emojis replaced with Font Awesome icons
+       Purple accent throughout, full dark mode support
+    ----------------------------------------------- */
+    
+    .contact-page {
+        max-width: 1280px;
+        margin: 40px auto;
+        padding: 0 2rem;
+    }
+
+    /* -----------------------------------------------
+       HERO SECTION – inherits base colors via var()
+    ----------------------------------------------- */
+    .contact-hero {
+        background: linear-gradient(145deg, var(--text) 0%, #2a2a3a 100%);
+        border-radius: 32px;
+        padding: 70px 50px;
+        margin-bottom: 60px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+
+    .dark-mode .contact-hero {
+        background: linear-gradient(145deg, #1a1a24 0%, #252530 100%);
+    }
+
+    .contact-hero::before {
+        content: '\f1d8'; /* fa-envelope-open */
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        bottom: -30px;
+        right: -30px;
+        font-size: 200px;
+        opacity: 0.06;
+        transform: rotate(8deg);
+        color: white;
+    }
+
+    .contact-hero::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.02) 0%, transparent 50%);
+    }
+
+    .contact-hero-content {
+        position: relative;
+        z-index: 2;
+        color: white;
+        max-width: 700px;
+    }
+
+    .contact-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        letter-spacing: -1.5px;
+        line-height: 1.1;
+        color: white;
+    }
+
+    .contact-hero p {
+        font-size: 1.3rem;
+        opacity: 0.95;
+        margin-bottom: 20px;
+        font-weight: 400;
+        max-width: 600px;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .contact-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(10px);
+        padding: 12px 28px;
+        border-radius: 100px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+        border: 1px solid rgba(255,255,255,0.15);
+        letter-spacing: 0.5px;
+        color: white;
+    }
+
+    .contact-badge i {
+        margin-right: 8px;
+        color: var(--accent-light);
+    }
+
+    /* -----------------------------------------------
+       CONTACT GRID – cards inherit base theme perfectly
+    ----------------------------------------------- */
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+
+    /* Contact Info Cards */
+    .contact-info {
+        background: var(--card);
+        border-radius: 32px;
+        padding: 45px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+
+    .info-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+
+    .info-header p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        margin-bottom: 35px;
+    }
+
+    .info-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-bottom: 35px;
+    }
+
+    .info-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 20px;
+        background: var(--surface);
+        border-radius: 20px;
+        transition: all 0.25s ease;
+        border: 1px solid transparent;
+    }
+
+    .info-card:hover {
+        background: var(--card);
+        border-color: var(--border);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+
+    .info-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--card);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--accent);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+    }
+
+    .info-details {
+        flex: 1;
+    }
+
+    .info-details h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text);
+    }
+
+    .info-details p {
+        color: var(--text-soft);
+        margin-bottom: 5px;
+        line-height: 1.5;
+    }
+
+    .info-details .small {
+        font-size: 0.9rem;
+        color: var(--text-soft);
+        opacity: 0.8;
+    }
+
+    .info-details strong {
+        color: var(--accent);
+    }
+
+    /* Business Hours - uses base colors */
+    .business-hours {
+        background: var(--text);
+        border-radius: 20px;
+        padding: 25px;
+        color: white;
+        margin-top: 15px;
+    }
+
+    .dark-mode .business-hours {
+        background: #2a2a35;
+    }
+
+    .business-hours h4 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+    }
+
+    .business-hours h4 i {
+        color: var(--accent-light);
+    }
+
+    .hours-grid {
+        display: grid;
+        gap: 12px;
+    }
+
+    .hour-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .hour-row:last-child {
+        border-bottom: none;
+    }
+
+    .day {
+        font-weight: 500;
+        color: white;
+    }
+
+    .time {
+        color: rgba(255,255,255,0.9);
+    }
+
+    .badge-closed {
+        background: rgba(239, 68, 68, 0.2);
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: #ffb3b3;
+        font-weight: 500;
+    }
+
+    /* MMU Badge */
+    .mmu-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--accent-soft);
+        padding: 16px 24px;
+        border-radius: 50px;
+        margin-top: 30px;
+        color: var(--accent);
+        font-weight: 600;
+        border: 1px solid var(--border);
+    }
+
+    .mmu-badge i {
+        font-size: 1.3rem;
+        color: var(--accent);
+    }
+
+    /* -----------------------------------------------
+       CONTACT FORM – pure base styling
+    ----------------------------------------------- */
+    .contact-form-container {
+        background: var(--card);
+        border-radius: 32px;
+        padding: 45px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+
+    .form-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+
+    .form-header p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        margin-bottom: 35px;
+    }
+
+    .contact-form {
+        display: grid;
+        gap: 25px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-group label span {
+        color: var(--accent);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px 18px;
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        font-size: 1rem;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.25s ease;
+        background: var(--surface);
+        color: var(--text);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: var(--card);
+        box-shadow: 0 0 0 4px rgba(123, 46, 218, 0.08);
+    }
+
+    .form-group input:hover,
+    .form-group select:hover,
+    .form-group textarea:hover {
+        border-color: var(--accent-light);
+    }
+
+    /* File Upload */
+    .file-upload {
+        border: 2px dashed var(--border);
+        border-radius: 14px;
+        padding: 25px;
+        text-align: center;
+        background: var(--surface);
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .file-upload:hover {
+        border-color: var(--accent);
+        background: var(--card);
+    }
+
+    .file-upload input {
+        display: none;
+    }
+
+    .file-upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    .file-upload-icon {
+        font-size: 2rem;
+        color: var(--accent);
+    }
+
+    .file-upload-text {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .file-upload-hint {
+        font-size: 0.85rem;
+        color: var(--text-soft);
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        margin-top: 15px;
+        border: 2px solid transparent;
+    }
+
+    .submit-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .submit-btn i {
+        transition: transform 0.25s ease;
+    }
+
+    .submit-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* -----------------------------------------------
+       MAP SECTION
+    ----------------------------------------------- */
+    .map-section {
+        background: var(--card);
+        border-radius: 32px;
+        padding: 45px;
+        margin-bottom: 60px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+
+    .map-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .map-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+
+    .map-header p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .map-container {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        height: 400px;
+    }
+
+    .map-placeholder {
+        background: var(--surface);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-soft);
+        position: relative;
+        border: 1px solid var(--border);
+    }
+
+    .map-pin {
+        font-size: 3.5rem;
+        margin-bottom: 15px;
+        color: var(--accent);
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .map-address {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 10px;
+    }
+
+    .map-directions {
+        margin-top: 20px;
+        display: inline-block;
+        padding: 12px 28px;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        border: 2px solid transparent;
+    }
+
+    .map-directions:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    /* -----------------------------------------------
+       FAQ SECTION
+    ----------------------------------------------- */
+    .faq-section {
+        background: var(--card);
+        border-radius: 32px;
+        padding: 45px;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+    }
+
+    .faq-header {
+        text-align: center;
+        margin-bottom: 45px;
+    }
+
+    .faq-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        letter-spacing: -0.02em;
+        color: var(--text);
+    }
+
+    .faq-header p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+    }
+
+    .faq-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .faq-item {
+        padding: 25px;
+        background: var(--surface);
+        border-radius: 20px;
+        transition: all 0.25s ease;
+        border: 1px solid transparent;
+    }
+
+    .faq-item:hover {
+        background: var(--card);
+        border-color: var(--border);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+
+    .faq-question {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .faq-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--accent);
+        color: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+
+    .faq-question h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+    }
+
+    .faq-item p {
+        color: var(--text-soft);
+        margin-left: 44px;
+        line-height: 1.6;
+    }
+
+    /* -----------------------------------------------
+       ALERTS & UTILITIES
+    ----------------------------------------------- */
+    .alert-success {
+        background: var(--accent);
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: slideIn 0.3s ease;
+        font-weight: 500;
+    }
+
+    .alert-success i {
+        font-size: 1.2rem;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* -----------------------------------------------
+       RESPONSIVE
+    ----------------------------------------------- */
+    @media (max-width: 1024px) {
+        .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        .faq-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .contact-page { padding: 0 1.2rem; }
+        .contact-hero h1 { font-size: 2.5rem; }
+        .contact-hero p { font-size: 1.1rem; }
+        .contact-hero { padding: 50px 30px; }
+        .contact-info, .contact-form-container, .map-section, .faq-section { padding: 30px; }
+        .form-row { grid-template-columns: 1fr; gap: 15px; }
+        .map-container { height: 300px; }
+    }
+
+    @media (max-width: 480px) {
+        .contact-page { margin: 20px auto; }
+        .contact-hero h1 { font-size: 2rem; }
+        .contact-hero { padding: 40px 20px; }
+        .info-header h2, .form-header h2, .map-header h2, .faq-header h2 { font-size: 1.8rem; }
+        .info-icon { width: 48px; height: 48px; font-size: 1.5rem; }
+        .faq-item { padding: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- HERO SECTION -->
+    <div class="contact-hero">
+        <div class="contact-hero-content">
+            <span class="contact-badge">
+                <i class="fas fa-handshake"></i> WE'RE HERE TO HELP
+            </span>
+            <h1>Get in Touch</h1>
+            <p>Have questions about your order? Need styling advice? Our team at Hoka's Parlour is ready to assist you.</p>
+        </div>
+    </div>
+
+    <!-- CONTACT GRID -->
+    <div class="contact-grid">
+        <!-- CONTACT INFORMATION -->
+        <div class="contact-info">
+            <div class="info-header">
+                <h2>Contact Information</h2>
+                <p>We're just a message away from serving you better.</p>
+            </div>
+
+            <div class="info-cards">
+                <!-- Visit Our Store -->
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-map-pin"></i>
+                    </div>
+                    <div class="info-details">
+                        <h3>Visit Our Store</h3>
+                        <p>Rongai, Kajiado County</p>
+                        <p class="small">Near Nairobi National Park</p>
+                        <p class="small" style="margin-top: 8px;">
+                            <strong><i class="fas fa-university"></i> Proudly serving Multi Media University of Kenya (MMU)</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Email Us - UPDATED -->
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-details">
+                        <h3>Email Us</h3>
+                        <p><strong>General:</strong> hokasparlour@gmail.com</p>
+                        <p><strong>Orders:</strong> hokasparlour@gmail.com</p>
+                        <p><strong>Support:</strong> hokasparlour@gmail.com</p>
+                        <p class="small"><i class="fas fa-globe"></i> hokasparlour.adcent.online</p>
+                    </div>
+                </div>
+
+                <!-- Call or WhatsApp - UPDATED -->
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div class="info-details">
+                        <h3>Call or WhatsApp</h3>
+                        <p><strong>Customer Service:</strong> 0783072098</p>
+                        <p><strong>Orders:</strong> 0783072098</p>
+                        <p class="small">Mon-Fri: 9am - 6pm | Sat: 10am - 4pm</p>
+                    </div>
+                </div>
+
+                <!-- Social Media - UPDATED domain -->
+                <div class="info-card">
+                    <div class="info-icon">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <div class="info-details">
+                        <h3>Social Media</h3>
+                        <p><i class="fab fa-instagram"></i> @hokasparlour</p>
+                        <p><i class="fab fa-x-twitter"></i> @hokasparlour</p>
+                        <p><i class="fab fa-tiktok"></i> @hokasparlour</p>
+                        <p class="small"><i class="fas fa-store"></i> hokasparlour.adcent.online</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BUSINESS HOURS -->
+            <div class="business-hours">
+                <h4>
+                    <i class="fas fa-clock"></i>
+                    Business Hours
+                </h4>
+                <div class="hours-grid">
+                    <div class="hour-row">
+                        <span class="day">Monday - Friday</span>
+                        <span class="time">9:00 AM - 6:00 PM</span>
+                    </div>
+                    <div class="hour-row">
+                        <span class="day">Saturday</span>
+                        <span class="time">10:00 AM - 4:00 PM</span>
+                    </div>
+                    <div class="hour-row">
+                        <span class="day">Sunday</span>
+                        <span class="badge-closed"><i class="fas fa-circle"></i> Closed</span>
+                    </div>
+                    <div class="hour-row">
+                        <span class="day">Public Holidays</span>
+                        <span class="badge-closed"><i class="fas fa-circle"></i> Closed</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MMU BADGE -->
+            <div class="mmu-badge">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Official MMU Student Partner • Serving the Campus Community Since 2024</span>
+            </div>
+        </div>
+
+        <!-- CONTACT FORM -->
+        <div class="contact-form-container">
+            <div class="form-header">
+                <h2>Send Us a Message</h2>
+                <p>Fill out the form below and we'll get back to you within 24 hours.</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'contact' %}" class="contact-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="full_name">
+                            <i class="fas fa-user"></i> Full Name <span>*</span>
+                        </label>
+                        <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email Address <span>*</span>
+                        </label>
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </label>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g., 0783072098">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">
+                            <i class="fas fa-tag"></i> Subject <span>*</span>
+                        </label>
+                        <select id="subject" name="subject" required>
+                            <option value="" disabled selected>Select a subject</option>
+                            <option value="order">Order Inquiry</option>
+                            <option value="delivery">Delivery Status</option>
+                            <option value="product">Product Question</option>
+                            <option value="return">Return/Exchange</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="order_number">
+                        <i class="fas fa-hashtag"></i> Order Number (if applicable)
+                    </label>
+                    <input type="text" id="order_number" name="order_number" placeholder="e.g., HOKA-2024-001">
+                </div>
+
+                <div class="form-group">
+                    <label for="message">
+                        <i class="fas fa-comment"></i> Your Message <span>*</span>
+                    </label>
+                    <textarea id="message" name="message" placeholder="Please describe your inquiry in detail..." required></textarea>
+                </div>
+
+                <div class="file-upload">
+                    <input type="file" id="attachment" name="attachment" accept=".jpg,.jpeg,.png,.pdf">
+                    <label for="attachment" class="file-upload-label">
+                        <span class="file-upload-icon"><i class="fas fa-paperclip"></i></span>
+                        <span class="file-upload-text">Attach a file (optional)</span>
+                        <span class="file-upload-hint">Screenshots, order receipts, or product images</span>
+                        <span class="file-upload-hint" style="font-size: 0.8rem;">Max size: 5MB | Supported: JPG, PNG, PDF</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label style="flex-direction: row; gap: 12px; cursor: pointer;">
+                        <input type="checkbox" name="privacy_consent" required style="width: auto; margin: 0;">
+                        <span style="font-weight: normal; color: var(--text-soft);">
+                            I agree to the <a href="{% url 'privacy' %}" style="color: var(--accent); font-weight: 600;">Privacy Policy</a> and consent to Hoka's Parlour processing my information. <span style="color: var(--accent);">*</span>
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Send Message
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAP SECTION -->
+    <div class="map-section">
+        <div class="map-header">
+            <h2>Find Us in Rongai</h2>
+            <p>Visit our store — we're conveniently located near Multi Media University of Kenya (MMU)</p>
+        </div>
+        
+        <div class="map-container">
+            <div class="map-placeholder">
+                <div class="map-pin"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="map-address">Hoka's Parlour, Rongai</div>
+                <p style="margin-bottom: 10px; color: var(--text-soft);">Kajiado County, near Nairobi National Park</p>
+                <p style="color: var(--accent); font-weight: 600;"><i class="fas fa-university"></i> Serving MMU Students Daily</p>
+                <a href="#" class="map-directions">
+                    <i class="fas fa-location-dot"></i> Get Directions
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ SECTION -->
+    <div class="faq-section">
+        <div class="faq-header">
+            <h2>Frequently Asked Questions</h2>
+            <p>Quick answers to common questions from our MMU community</p>
+        </div>
+
+        <div class="faq-grid">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon"><i class="fas fa-question"></i></span>
+                    <h3>How do I track my order?</h3>
+                </div>
+                <p>Once your order is dispatched, you'll receive a tracking link via SMS and email. You can also contact us directly with your order number.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon"><i class="fas fa-truck"></i></span>
+                    <h3>Do you deliver to MMU campus?</h3>
+                </div>
+                <p>Yes! We specialize in delivering to Multi Media University of Kenya (MMU). Your orders are our priority and we ensure reliable, on-time delivery to campus.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon"><i class="fas fa-credit-card"></i></span>
+                    <h3>What payment methods do you accept?</h3>
+                </div>
+                <p>We accept M-Pesa (paybill/buy goods) and Cash on Delivery for MMU students. Secure online payments are processed instantly.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon"><i class="fas fa-return"></i></span>
+                    <h3>How do I return an item?</h3>
+                </div>
+                <p>Contact us within 7 days of delivery. Items must be unused with tags attached. We'll guide you through our simple return process.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon"><i class="fas fa-store"></i></span>
+                    <h3>Do you have a physical store?</h3>
+                </div>
+                <p>Yes, we're located in Rongai, Kajiado County. Visit us Monday-Friday, 9am-6pm. MMU students get special in-store discounts!</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span class="faq-icon"><i class="fas fa-pen-fancy"></i></span>
+                    <h3>How can I get style advice?</h3>
+                </div>
+                <p>DM us on Instagram @hokasparlour or email hokasparlour@gmail.com. Our fashion consultants are ready to help you find your look.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

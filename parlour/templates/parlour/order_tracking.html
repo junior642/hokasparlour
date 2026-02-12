@@ -1,0 +1,815 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Track Your Order - Hoka's Parlour | MMU Fashion{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       ORDER TRACKING PAGE – PURE BASE.HTML INHERITANCE
+       Purple theme, dark mode support, Font Awesome icons
+       Modern minimalism for MMU student order tracking
+    ----------------------------------------------- */
+    
+    .tracking-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    /* -----------------------------------------------
+       TRACKING HEADER
+    ----------------------------------------------- */
+    .tracking-header {
+        margin-bottom: 2.5rem;
+        text-align: center;
+    }
+
+    .tracking-header h2 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 0.8rem;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .tracking-header h2 i {
+        color: var(--accent);
+    }
+
+    .tracking-header p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+    }
+
+    /* -----------------------------------------------
+       TRACKING FORM
+    ----------------------------------------------- */
+    .tracking-form-card {
+        background: var(--card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .tracking-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--text);
+        font-size: 1rem;
+    }
+
+    .form-group label i {
+        color: var(--accent);
+    }
+
+    .form-group input {
+        padding: 1rem 1.2rem;
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        font-size: 1rem;
+        background: var(--surface);
+        color: var(--text);
+        transition: var(--transition);
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(123, 46, 218, 0.08);
+        background: var(--card);
+    }
+
+    .form-group input:hover {
+        border-color: var(--accent-light);
+    }
+
+    .form-group input::placeholder {
+        color: var(--text-soft);
+        opacity: 0.7;
+    }
+
+    .tracking-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 1.1rem 2rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 2px solid transparent;
+        margin-top: 0.5rem;
+    }
+
+    .tracking-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .tracking-btn i {
+        transition: transform 0.25s;
+    }
+
+    .tracking-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* -----------------------------------------------
+       ORDER RESULT CARD
+    ----------------------------------------------- */
+    .order-result-card {
+        background: var(--card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 2.5rem;
+        margin-top: 2rem;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .order-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .order-header h3 i {
+        color: var(--accent);
+    }
+
+    .order-id-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent);
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .order-id-badge i {
+        font-size: 0.9rem;
+    }
+
+    /* Status Timeline */
+    .status-timeline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 2rem 0 2.5rem;
+        position: relative;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        top: 30px;
+        left: 60px;
+        right: 60px;
+        height: 3px;
+        background: var(--border);
+        z-index: 1;
+    }
+
+    .status-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        min-width: 100px;
+    }
+
+    .status-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--surface);
+        border: 3px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--text-soft);
+        transition: var(--transition);
+    }
+
+    .status-step.completed .status-icon {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    .status-step.active .status-icon {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .status-label {
+        font-weight: 600;
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .status-step.completed .status-label {
+        color: var(--accent);
+    }
+
+    .status-step.active .status-label {
+        color: var(--text);
+        font-weight: 700;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.2rem;
+        margin: 1.5rem 0;
+    }
+
+    .info-item {
+        padding: 1.2rem;
+        background: var(--surface);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .info-item:hover {
+        border-color: var(--accent-light);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .info-item strong {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--accent);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-item strong i {
+        font-size: 0.9rem;
+    }
+
+    .info-item span {
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+        display: block;
+        line-height: 1.4;
+    }
+
+    /* Pickup Highlight */
+    .pickup-highlight {
+        background: var(--accent-soft);
+        border-left: 6px solid var(--accent);
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin: 1.5rem 0;
+        border: 1px solid var(--border);
+    }
+
+    .pickup-highlight h4 {
+        color: var(--accent);
+        margin-bottom: 1.2rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .pickup-highlight h4 i {
+        color: var(--accent);
+    }
+
+    .pickup-highlight .info-grid {
+        margin: 0;
+    }
+
+    .pickup-highlight .info-item {
+        background: var(--card);
+    }
+
+    /* Items Table */
+    .items-section {
+        margin-top: 2rem;
+    }
+
+    .items-section h4 {
+        color: var(--text);
+        margin-bottom: 1.2rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .items-section h4 i {
+        color: var(--accent);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+    }
+
+    .order-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--surface);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .order-table th {
+        background: var(--accent);
+        color: white;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1rem;
+        text-align: left;
+    }
+
+    .order-table td {
+        padding: 1rem 1rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        background: var(--card);
+    }
+
+    .order-table tbody tr:hover td {
+        background: var(--surface);
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .product-size {
+        display: inline-block;
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.2rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .total-amount {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--surface);
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--accent);
+    }
+
+    /* Back Button */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        padding: 0.9rem 1.8rem;
+        border: 2px solid var(--border);
+        border-radius: 50px;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .back-link:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .back-link i {
+        transition: transform 0.25s;
+    }
+
+    .back-link:hover i {
+        transform: translateX(-4px);
+    }
+
+    /* No Order Found */
+    .no-order {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: var(--surface);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+    }
+
+    .no-order i {
+        font-size: 3.5rem;
+        color: var(--accent-light);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .no-order h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .no-order p {
+        color: var(--text-soft);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 2rem;
+    }
+
+    .message {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        border: 1px solid var(--accent-light);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+    }
+
+    .message i {
+        color: var(--accent);
+        font-size: 1.1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .tracking-container {
+            padding: 0 1.2rem;
+        }
+
+        .tracking-form-card {
+            padding: 1.8rem;
+        }
+
+        .order-result-card {
+            padding: 1.8rem;
+        }
+
+        .tracking-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .status-timeline::before {
+            left: 40px;
+            right: 40px;
+        }
+
+        .status-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .tracking-container {
+            padding: 0 1rem;
+        }
+
+        .tracking-form-card {
+            padding: 1.5rem;
+        }
+
+        .order-result-card {
+            padding: 1.5rem;
+        }
+
+        .tracking-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .status-timeline {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .status-timeline::before {
+            display: none;
+        }
+
+        .status-step {
+            flex-direction: row;
+            width: 100%;
+            gap: 1rem;
+        }
+
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .status-label {
+            text-align: left;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tracking-container">
+    <!-- Tracking Header -->
+    <div class="tracking-header">
+        <h2>
+            <i class="fas fa-truck"></i>
+            Track Your Order
+        </h2>
+        <p>Enter your order ID to track your package</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+            <div class="message">
+                <i class="fas fa-info-circle"></i>
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tracking Form -->
+    <div class="tracking-form-card">
+        <form method="post" class="tracking-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="order_id">
+                    <i class="fas fa-hashtag"></i>
+                    Enter Order ID
+                </label>
+                <input 
+                    type="number" 
+                    name="order_id" 
+                    id="order_id" 
+                    placeholder="e.g., 12345"
+                    required
+                >
+            </div>
+            <button type="submit" class="tracking-btn">
+                <span>Track Order</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Order Results -->
+    {% if order %}
+    <div class="order-result-card">
+        <div class="order-header">
+            <h3>
+                <i class="fas fa-clipboard-list"></i>
+                Order Information
+            </h3>
+            <span class="order-id-badge">
+                <i class="fas fa-hashtag"></i> {{ order.id }}
+            </span>
+        </div>
+
+        <!-- Status Timeline -->
+        <div class="status-timeline">
+            {% with status=order.order_status %}
+            <div class="status-step {% if status == 'pending' or status == 'processing' or status == 'dispatched' or status == 'delivered' %}completed{% elif status == 'pending' %}active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <span class="status-label">Order Placed</span>
+            </div>
+            <div class="status-step {% if status == 'processing' or status == 'dispatched' or status == 'delivered' %}completed{% elif status == 'processing' %}active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <span class="status-label">Processing</span>
+            </div>
+            <div class="status-step {% if status == 'dispatched' or status == 'delivered' %}completed{% elif status == 'dispatched' %}active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <span class="status-label">Dispatched</span>
+            </div>
+            <div class="status-step {% if status == 'delivered' %}completed active{% endif %}">
+                <div class="status-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <span class="status-label">Delivered</span>
+            </div>
+            {% endwith %}
+        </div>
+
+        <!-- Order Details Grid -->
+        <div class="info-grid">
+            <div class="info-item">
+                <strong><i class="fas fa-user"></i> Customer Name</strong>
+                <span>{{ order.customer_name }}</span>
+            </div>
+            <div class="info-item">
+                <strong><i class="fas fa-calendar"></i> Order Date</strong>
+                <span>{{ order.created_at|date:"F d, Y" }} at {{ order.created_at|time:"h:i A" }}</span>
+            </div>
+            <div class="info-item">
+                <strong><i class="fas fa-tag"></i> Order Status</strong>
+                <span style="color: var(--accent); font-weight: 700;">{{ order.get_order_status_display }}</span>
+            </div>
+            {% if order.expected_delivery_date %}
+            <div class="info-item">
+                <strong><i class="fas fa-clock"></i> Expected Delivery</strong>
+                <span>{{ order.expected_delivery_date|date:"F d, Y" }}</span>
+            </div>
+            {% endif %}
+            {% if order.delivery_location %}
+            <div class="info-item">
+                <strong><i class="fas fa-location-dot"></i> Current Location</strong>
+                <span>{{ order.delivery_location }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pickup Information -->
+        <div class="pickup-highlight">
+            <h4>
+                <i class="fas fa-store-alt"></i>
+                Pickup Information
+            </h4>
+            {% with pickup_info=order.get_pickup_info %}
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong><i class="fas fa-location-dot"></i> Pickup Location</strong>
+                    <span>{{ pickup_info.location|default:"Hoka's Parlour, Rongai" }}</span>
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-calendar-day"></i> Pickup Date</strong>
+                    <span>{{ pickup_info.date|date:"F d, Y"|default:"March 15, 2025" }}</span>
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-clock"></i> Pickup Time</strong>
+                    <span>{{ pickup_info.time|time:"h:i A"|default:"10:00 AM - 6:00 PM" }}</span>
+                </div>
+                <div class="info-item">
+                    <strong><i class="fas fa-calendar-week"></i> Available Days</strong>
+                    <span>{{ pickup_info.days|default:"Monday - Saturday" }}</span>
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+
+        <!-- Items Ordered -->
+        <div class="items-section">
+            <h4>
+                <i class="fas fa-boxes"></i>
+                Items Ordered
+            </h4>
+            
+            <div class="table-responsive">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Size</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.orderitem_set.all %}
+                        <tr>
+                            <td>
+                                <span class="product-name">{{ item.product.name }}</span>
+                            </td>
+                            <td>
+                                <span class="product-size">{{ item.size|default:"M" }}</span>
+                            </td>
+                            <td>{{ item.quantity }}</td>
+                            <td>KSh {{ item.price|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="total-amount">
+                <span>Total Amount:</span>
+                <span>KSh {{ order.get_total|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+    {% elif request.method == 'POST' %}
+    <!-- No Order Found -->
+    <div class="order-result-card">
+        <div class="no-order">
+            <i class="fas fa-search"></i>
+            <h4>Order Not Found</h4>
+            <p>We couldn't find an order with that ID. Please check and try again.</p>
+            <a href="{% url 'home' %}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 0.8rem 2rem;">
+                <i class="fas fa-tshirt"></i> Browse Products
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Back to Home -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'home' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

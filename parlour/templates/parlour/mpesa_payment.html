@@ -1,0 +1,762 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}M-Pesa Payment - Hoka's Parlour | MMU Fashion{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       M-PESA PAYMENT PAGE – PURE BASE.HTML INHERITANCE
+       Purple theme, dark mode support, Font Awesome icons
+       Modern minimalism for MMU student payments
+    ----------------------------------------------- */
+    
+    .mpesa-container {
+        background: var(--card);
+        border-radius: 32px;
+        padding: 3rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        margin: 2rem auto;
+        max-width: 600px;
+        transition: var(--transition);
+    }
+
+    /* -----------------------------------------------
+       HEADER SECTION
+    ----------------------------------------------- */
+    .mpesa-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .mpesa-icon-wrapper {
+        width: 100px;
+        height: 100px;
+        background: var(--accent-soft);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        border: 2px solid var(--accent);
+    }
+
+    .mpesa-icon {
+        font-size: 3.5rem;
+        color: var(--accent);
+    }
+
+    .mpesa-header h2 {
+        color: var(--text);
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+    }
+
+    .mpesa-header p {
+        color: var(--text-soft);
+        font-size: 1rem;
+    }
+
+    /* -----------------------------------------------
+       ORDER TOTAL
+    ----------------------------------------------- */
+    .order-total {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--accent);
+        margin: 1.5rem 0;
+        padding: 1.5rem;
+        background: var(--surface);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+    }
+
+    .order-total small {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-soft);
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* -----------------------------------------------
+       CUSTOMER INFO CARD
+    ----------------------------------------------- */
+    .customer-info {
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 24px;
+        margin: 1.5rem 0;
+        border: 1px solid var(--border);
+    }
+
+    .customer-info h3 {
+        color: var(--accent);
+        margin-bottom: 1.2rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+    }
+
+    .customer-info h3 i {
+        color: var(--accent);
+    }
+
+    .customer-info-row {
+        display: flex;
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .customer-info-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .customer-info-label {
+        flex: 0 0 100px;
+        color: var(--text-soft);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .customer-info-label i {
+        color: var(--accent);
+        width: 18px;
+    }
+
+    .customer-info-value {
+        flex: 1;
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    /* -----------------------------------------------
+       ALERTS & NOTIFICATIONS
+    ----------------------------------------------- */
+    .alert {
+        padding: 1.2rem 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        border: 1px solid transparent;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert i {
+        font-size: 1.2rem;
+        margin-top: 0.1rem;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-content strong {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 1rem;
+    }
+
+    .alert-content p {
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+
+    .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+    }
+
+    /* -----------------------------------------------
+       STK PUSH SECTION
+    ----------------------------------------------- */
+    .stk-section {
+        background: var(--accent-soft);
+        border: 2px solid var(--accent);
+        border-radius: 24px;
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+    }
+
+    .stk-section h3 {
+        color: var(--accent);
+        margin-bottom: 0.8rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .stk-section h3 i {
+        color: var(--accent);
+    }
+
+    .stk-section p {
+        color: var(--text);
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .stk-section p strong {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .stk-push-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 2px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .stk-push-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .stk-push-btn i {
+        transition: transform 0.25s;
+    }
+
+    .stk-push-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* -----------------------------------------------
+       STEPS / MANUAL PAYMENT
+    ----------------------------------------------- */
+    .steps-section {
+        background: var(--surface);
+        padding: 1.8rem;
+        border-radius: 24px;
+        margin: 1.5rem 0;
+        border: 1px solid var(--border);
+    }
+
+    .steps-section h3 {
+        color: var(--text);
+        margin-bottom: 1.2rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+    }
+
+    .steps-section h3 i {
+        color: var(--accent);
+    }
+
+    .steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .step-item {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-soft);
+    }
+
+    .step-item:last-child {
+        border-bottom: none;
+    }
+
+    .step-number {
+        width: 28px;
+        height: 28px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .step-content {
+        flex: 1;
+        line-height: 1.5;
+    }
+
+    .step-content strong {
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        margin-left: 0.3rem;
+    }
+
+    /* -----------------------------------------------
+       INFO BOX
+    ----------------------------------------------- */
+    .info-box {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-left: 6px solid #f59e0b;
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin: 1.5rem 0;
+        color: var(--text);
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .info-box i {
+        color: #f59e0b;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .info-box-content {
+        flex: 1;
+    }
+
+    .info-box-content strong {
+        display: block;
+        margin-bottom: 0.3rem;
+        color: #f59e0b;
+        font-size: 1rem;
+    }
+
+    .info-box-content p {
+        margin: 0;
+        line-height: 1.6;
+        color: var(--text);
+    }
+
+    /* -----------------------------------------------
+       CONFIRM SECTION
+    ----------------------------------------------- */
+    .confirm-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px dashed var(--border);
+    }
+
+    .confirm-section h3 {
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .confirm-section h3 i {
+        color: var(--accent);
+    }
+
+    .confirm-section p {
+        color: var(--text-soft);
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        text-align: center;
+        font-size: 1rem;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-success {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .btn i {
+        transition: transform 0.25s;
+    }
+
+    .btn-success:hover i {
+        transform: scale(1.1);
+    }
+
+    .btn-secondary:hover i {
+        transform: translateX(-4px);
+    }
+
+    /* -----------------------------------------------
+       RESPONSIVE
+    ----------------------------------------------- */
+    @media (max-width: 768px) {
+        .mpesa-container {
+            padding: 1.8rem;
+            margin: 1rem;
+        }
+
+        .mpesa-icon-wrapper {
+            width: 80px;
+            height: 80px;
+        }
+
+        .mpesa-icon {
+            font-size: 2.5rem;
+        }
+
+        .mpesa-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .order-total {
+            font-size: 2.5rem;
+            padding: 1.2rem;
+        }
+
+        .customer-info-row {
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .customer-info-label {
+            flex: none;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .step-item {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            margin-bottom: 0.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .mpesa-container {
+            padding: 1.2rem;
+        }
+
+        .mpesa-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .order-total {
+            font-size: 2rem;
+        }
+
+        .stk-section {
+            padding: 1.5rem;
+        }
+
+        .stk-section h3 {
+            font-size: 1.1rem;
+        }
+
+        .stk-push-btn {
+            padding: 1rem;
+            font-size: 1rem;
+        }
+
+        .info-box {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .mpesa-icon-wrapper {
+        background: var(--surface);
+    }
+
+    .dark-mode .step-number {
+        background: var(--accent-soft);
+    }
+
+    .dark-mode .step-content strong {
+        background: var(--accent-soft);
+    }
+
+    .dark-mode .stk-section {
+        background: var(--surface);
+    }
+
+    .dark-mode .info-box {
+        background: rgba(245, 158, 11, 0.05);
+    }
+
+    .dark-mode .alert-success {
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .dark-mode .alert-error {
+        background: rgba(239, 68, 68, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="mpesa-container">
+        <!-- Header -->
+        <div class="mpesa-header">
+            <div class="mpesa-icon-wrapper">
+                <i class="fas fa-mobile-alt mpesa-icon"></i>
+            </div>
+            <h2>Lipa Na M-Pesa</h2>
+            <p>Secure mobile money payment</p>
+        </div>
+        
+        <!-- Order Total -->
+        <div class="order-total">
+            <small>Total Amount</small>
+            KSh {{ pending_order.total|floatformat:0 }}
+        </div>
+        
+        <!-- Customer Information -->
+        <div class="customer-info">
+            <h3>
+                <i class="fas fa-receipt"></i>
+                Order Summary
+            </h3>
+            <div class="customer-info-row">
+                <span class="customer-info-label">
+                    <i class="fas fa-user"></i> Name:
+                </span>
+                <span class="customer-info-value">{{ pending_order.customer_name }}</span>
+            </div>
+            <div class="customer-info-row">
+                <span class="customer-info-label">
+                    <i class="fas fa-phone"></i> Phone:
+                </span>
+                <span class="customer-info-value">{{ pending_order.phone_number }}</span>
+            </div>
+            <div class="customer-info-row">
+                <span class="customer-info-label">
+                    <i class="fas fa-envelope"></i> Email:
+                </span>
+                <span class="customer-info-value">{{ pending_order.email }}</span>
+            </div>
+            <div class="customer-info-row">
+                <span class="customer-info-label">
+                    <i class="fas fa-credit-card"></i> Payment:
+                </span>
+                <span class="customer-info-value">
+                    <span style="color: var(--accent); font-weight: 600;">M-Pesa</span>
+                </span>
+            </div>
+        </div>
+        
+        <!-- STK Push Status Messages -->
+        {% if stk_result %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <div class="alert-content">
+                    <strong>STK Push Sent!</strong>
+                    <p>Check your phone <strong>{{ pending_order.phone_number }}</strong> and enter your M-Pesa PIN to complete payment.</p>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if stk_error %}
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <div class="alert-content">
+                    <strong>Payment Error</strong>
+                    <p>{{ stk_error }}. Please try again or follow the manual steps below.</p>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- STK Push Section -->
+        <div class="stk-section">
+            <h3>
+                <i class="fas fa-bolt"></i>
+                STK Push
+            </h3>
+            <p>Receive a payment prompt directly on <strong>{{ pending_order.phone_number }}</strong></p>
+            
+            <form method="post" action="{% url 'mpesa_payment' %}">
+                {% csrf_token %}
+                <button type="submit" class="stk-push-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Payment Request
+                </button>
+            </form>
+        </div>
+        
+        <!-- Manual Payment Steps -->
+        <div class="steps-section">
+            <h3>
+                <i class="fas fa-list-ol"></i>
+                Pay Manually
+            </h3>
+            <ol class="steps-list">
+                <li class="step-item">
+                    <span class="step-number">1</span>
+                    <span class="step-content">Go to <strong>M-Pesa</strong> on your phone</span>
+                </li>
+                <li class="step-item">
+                    <span class="step-number">2</span>
+                    <span class="step-content">Select <strong>"Lipa na M-Pesa"</strong></span>
+                </li>
+                <li class="step-item">
+                    <span class="step-number">3</span>
+                    <span class="step-content">Select <strong>"Pay Bill"</strong></span>
+                </li>
+                <li class="step-item">
+                    <span class="step-number">4</span>
+                    <span class="step-content">Business No: <strong>174379</strong></span>
+                </li>
+                <li class="step-item">
+                    <span class="step-number">5</span>
+                    <span class="step-content">Account No: <strong>HOKA{{ pending_order.phone_number|slice:"-4:" }}</strong></span>
+                </li>
+                <li class="step-item">
+                    <span class="step-number">6</span>
+                    <span class="step-content">Amount: <strong>KSh {{ pending_order.total|floatformat:0 }}</strong></span>
+                </li>
+                <li class="step-item">
+                    <span class="step-number">7</span>
+                    <span class="step-content">Enter your <strong>M-Pesa PIN</strong> and confirm</span>
+                </li>
+            </ol>
+        </div>
+        
+        <!-- Important Note -->
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <div class="info-box-content">
+                <strong>Important</strong>
+                <p>After completing payment on your phone, click <strong style="color: var(--accent);">"I Have Paid"</strong> below to confirm your order.</p>
+            </div>
+        </div>
+        
+        <!-- Confirmation Section -->
+        <div class="confirm-section">
+            <h3>
+                <i class="fas fa-check-circle"></i>
+                Completed Payment?
+            </h3>
+            <p>Once you receive the M-Pesa confirmation SMS, click below</p>
+            
+            <form method="post" action="{% url 'confirm_mpesa_payment' %}">
+                {% csrf_token %}
+                <div class="action-buttons">
+                    <a href="{% url 'checkout' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i>
+                        I Have Paid
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

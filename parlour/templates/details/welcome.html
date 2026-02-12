@@ -1,0 +1,266 @@
+{% extends "parlour/base.html" %}
+{% load static %}
+
+{% block title %}Hoka's Parlour – MMU Fusion Fashion{% endblock %}
+
+{% block content %}
+<!-- 
+    HOKA'S PARLOUR – WELCOME PAGE 
+    Extends base.html with purple theme, dark/light mode, and social footer.
+    Added: hero, brand strip, categories, trust section, founders, testimonials, urgency banner, final CTA.
+-->
+
+<!-- 1️⃣ HERO SECTION (Above the Fold) -->
+<section class="hero" style="min-height: 85vh; display: flex; align-items: center; justify-content: center; text-align: center; background: radial-gradient(circle at 80% 30%, var(--accent-soft), var(--bg)); padding: 3rem 0; animation: fadeIn 1s ease-out;">
+    <div style="max-width: 950px; margin: 0 auto;">
+        <h1 style="font-size: 4.2rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; color: var(--text); margin-bottom: 1rem;">
+            Welcome to <span style="color: var(--accent);">Hoka's Parlour</span>
+        </h1>
+        <div style="font-size: 1.8rem; font-weight: 600; color: var(--text-soft); margin-bottom: 1.5rem;">
+            Modern Fusion Fashion for MMU Students
+        </div>
+        <p style="font-size: 1.2rem; color: var(--text-soft); max-width: 700px; margin: 0 auto 2.4rem; font-weight: 400;">
+            Bold, comfortable, and built for the campus rhythm. From Rongai to MMU – we bring you limited drops that fuse streetwear with student life.
+        </p>
+        <div style="display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/shop/" class="btn" style="background: var(--accent); color: white; border: none; padding: 0.9rem 2.6rem; border-radius: 40px; font-weight: 600; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 0.6rem;">
+                <i class="fas fa-bag-shopping"></i> Shop Now
+            </a>
+            <a href="/collections/" class="btn" style="background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 0.9rem 2.6rem; border-radius: 40px; font-weight: 600; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 0.6rem;">
+                <i class="fas fa-tshirt"></i> Explore Collection
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- 2️⃣ BRAND IDENTITY STRIP (value props) -->
+<div style="background: var(--accent); color: white; padding: 1.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+    <div class="container" style="display: flex; justify-content: space-evenly; align-items: center; flex-wrap: wrap; gap: 1.2rem 2rem;">
+        <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><i class="fas fa-check-circle" style="color: white;"></i> Trendy Fusion Styles</span>
+        <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><i class="fas fa-graduation-cap" style="color: white;"></i> Affordable Student Pricing</span>
+        <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><i class="fas fa-truck" style="color: white;"></i> Reliable Delivery</span>
+        <span style="display: flex; align-items: center; gap: 0.5rem; font-weight: 500;"><i class="fas fa-map-pin" style="color: white;"></i> Designed for MMU Students</span>
+    </div>
+</div>
+
+<!-- 3️⃣ FEATURED CATEGORIES SECTION -->
+<div class="container" style="margin-top: 5rem; margin-bottom: 2rem;">
+    <h2 class="section-title" style="font-size: 2.2rem; font-weight: 700; margin-bottom: 2rem; letter-spacing: -0.02em; color: var(--text);">
+        Fresh <span style="color: var(--accent);">drops</span> by category
+    </h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 2rem;">
+        <!-- Category Card: Hoodies -->
+        <div class="category-card" style="background: var(--card); border-radius: 1.5rem; padding: 2rem 1rem 1.5rem; text-align: center; border: 1px solid var(--border); transition: all 0.25s; box-shadow: var(--shadow);">
+            <div style="width: 100%; aspect-ratio: 1/1; background: var(--accent-soft); border-radius: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent);">
+                <i class="fas fa-hoodie"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Hoodies</h3>
+            <a href="/shop/hoodies/" class="shop-link" style="display: inline-block; margin-top: 0.7rem; font-weight: 600; color: var(--accent); border-bottom: 2px solid transparent; transition: 0.2s; padding-bottom: 2px;">
+                Shop Now <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        <!-- Sweatpants -->
+        <div class="category-card" style="background: var(--card); border-radius: 1.5rem; padding: 2rem 1rem 1.5rem; text-align: center; border: 1px solid var(--border);">
+            <div style="width: 100%; aspect-ratio: 1/1; background: var(--accent-soft); border-radius: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent);">
+                <i class="fas fa-vest"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Sweatpants</h3>
+            <a href="/shop/sweatpants/" class="shop-link" style="display: inline-block; margin-top: 0.7rem; font-weight: 600; color: var(--accent);">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Sweatshirts -->
+        <div class="category-card" style="background: var(--card); border-radius: 1.5rem; padding: 2rem 1rem 1.5rem; text-align: center; border: 1px solid var(--border);">
+            <div style="width: 100%; aspect-ratio: 1/1; background: var(--accent-soft); border-radius: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent);">
+                <i class="fas fa-tshirt"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Sweatshirts</h3>
+            <a href="/shop/sweatshirts/" class="shop-link" style="display: inline-block; margin-top: 0.7rem; font-weight: 600; color: var(--accent);">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Socks -->
+        <div class="category-card" style="background: var(--card); border-radius: 1.5rem; padding: 2rem 1rem 1.5rem; text-align: center; border: 1px solid var(--border);">
+            <div style="width: 100%; aspect-ratio: 1/1; background: var(--accent-soft); border-radius: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent);">
+                <i class="fas fa-socks"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Socks</h3>
+            <a href="/shop/socks/" class="shop-link" style="display: inline-block; margin-top: 0.7rem; font-weight: 600; color: var(--accent);">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Shorts -->
+        <div class="category-card" style="background: var(--card); border-radius: 1.5rem; padding: 2rem 1rem 1.5rem; text-align: center; border: 1px solid var(--border);">
+            <div style="width: 100%; aspect-ratio: 1/1; background: var(--accent-soft); border-radius: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent);">
+                <i class="fas fa-umbrella-beach"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Shorts</h3>
+            <a href="/shop/shorts/" class="shop-link" style="display: inline-block; margin-top: 0.7rem; font-weight: 600; color: var(--accent);">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <!-- Capes -->
+        <div class="category-card" style="background: var(--card); border-radius: 1.5rem; padding: 2rem 1rem 1.5rem; text-align: center; border: 1px solid var(--border);">
+            <div style="width: 100%; aspect-ratio: 1/1; background: var(--accent-soft); border-radius: 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--accent);">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text);">Capes</h3>
+            <a href="/shop/capes/" class="shop-link" style="display: inline-block; margin-top: 0.7rem; font-weight: 600; color: var(--accent);">Shop Now <i class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<!-- 4️⃣ WHY CHOOSE HOKA'S PARLOUR (trust & location) -->
+<div class="container" style="margin-top: 4rem;">
+    <h2 class="section-title" style="font-size: 2.2rem; font-weight: 700; margin-bottom: 2rem; color: var(--text);">
+        Why <span style="color: var(--accent);">Hoka's Parlour</span>
+    </h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+        <div class="why-item" style="background: var(--surface); padding: 2rem 1.5rem; border-radius: 2rem; transition: 0.25s; border: 1px solid transparent;">
+            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 1.2rem;"><i class="fas fa-university"></i></div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text);">MMU Focused</h4>
+            <p style="color: var(--text-soft); font-size: 0.96rem;">Designed by students, for students. We know what fits on campus.</p>
+        </div>
+        <div class="why-item" style="background: var(--surface); padding: 2rem 1.5rem; border-radius: 2rem;">
+            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 1.2rem;"><i class="fas fa-map-marker-alt"></i></div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text);">Located in Rongai</h4>
+            <p style="color: var(--text-soft);">Just near Nairobi — quick pickup & local vibe. We're your neighbours.</p>
+        </div>
+        <div class="why-item" style="background: var(--surface); padding: 2rem 1.5rem; border-radius: 2rem;">
+            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 1.2rem;"><i class="fas fa-rocket"></i></div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text);">Reliable delivery</h4>
+            <p style="color: var(--text-soft);">Fast, trackable, and always on time. MMU main campus? we got you.</p>
+        </div>
+        <div class="why-item" style="background: var(--surface); padding: 2rem 1.5rem; border-radius: 2rem;">
+            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 1.2rem;"><i class="fas fa-sparkles"></i></div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text);">Fashion-forward trends</h4>
+            <p style="color: var(--text-soft);">Fusion of modern and classic – hoodies, capes, limited socks.</p>
+        </div>
+        <div class="why-item" style="background: var(--surface); padding: 2rem 1.5rem; border-radius: 2rem;">
+            <div style="font-size: 2rem; color: var(--accent); margin-bottom: 1.2rem;"><i class="fas fa-medal"></i></div>
+            <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--text);">Quality materials</h4>
+            <p style="color: var(--text-soft);">Premium cotton, durable stitching. Made to last beyond semester.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 5️⃣ FOUNDER HIGHLIGHT (credibility) -->
+<div class="container" style="margin-top: 4rem;">
+    <div style="background: var(--accent-soft); border-radius: 3rem; padding: 2.8rem 2.2rem; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 2.5rem; flex-wrap: wrap;">
+            <div style="width: 110px; height: 110px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: var(--bg); border: 4px solid white; box-shadow: 0 12px 18px -8px rgba(123,46,218,0.2);">
+                <i class="fas fa-user-astronaut"></i>
+            </div>
+            <div style="flex: 1;">
+                <h3 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--text);">Founded with vision</h3>
+                <div style="font-size: 1.2rem; font-weight: 600; color: var(--accent); margin-bottom: 0.5rem;">Getrine Hoka · Vincent Omwenga</div>
+                <p style="color: var(--text-soft); max-width: 550px;">“We started Hoka's Parlour in our MMU dorm room — tired of the same generic campus wear. Our mission: fuse modern aesthetics with student budgets. Every piece tells a story of Rongai, late night studies, and the energy of Nairobi's youth.”</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6️⃣ TESTIMONIALS – MMU student reviews -->
+<div class="container" style="margin-top: 4rem;">
+    <h2 class="section-title" style="font-size: 2.2rem; font-weight: 700; margin-bottom: 2rem; color: var(--text);">
+        From the <span style="color: var(--accent);">campus</span>
+    </h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 1.8rem;">
+        <div class="testimonial" style="background: var(--card); border-radius: 2rem; padding: 1.8rem 2rem; flex: 1 1 280px; border: 1px solid var(--border);">
+            <i class="fas fa-quote-right" style="color: var(--accent-light); font-size: 1.5rem; margin-bottom: 0.8rem;"></i>
+            <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 1rem; color: var(--text);">“Best hoodies at MMU! The fleece is thick, and the purple accents are clean.”</p>
+            <div style="font-weight: 600; color: var(--accent);">— John, <span style="color: var(--text-soft); font-weight: 400;">MMU Student</span></div>
+        </div>
+        <div class="testimonial" style="background: var(--card); border-radius: 2rem; padding: 1.8rem 2rem; flex: 1 1 280px; border: 1px solid var(--border);">
+            <i class="fas fa-quote-right" style="color: var(--accent-light); font-size: 1.5rem;"></i>
+            <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 1rem; color: var(--text);">“I copped the limited cape drop — insane quality. Everyone asks where I got it.”</p>
+            <div style="font-weight: 600; color: var(--accent);">— Aisha, <span style="color: var(--text-soft);">MMU Business</span></div>
+        </div>
+        <div class="testimonial" style="background: var(--card); border-radius: 2rem; padding: 1.8rem 2rem; flex: 1 1 280px; border: 1px solid var(--border);">
+            <i class="fas fa-quote-right" style="color: var(--accent-light); font-size: 1.5rem;"></i>
+            <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 1rem; color: var(--text);">“Delivery to Rongai took one day. Fits perfect, fair price. My new go-to.”</p>
+            <div style="font-weight: 600; color: var(--accent);">— Brian, <span style="color: var(--text-soft);">MMU Engineering</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- 🔥 STRATEGIC URGENCY: Limited Campus Drops -->
+<div class="container" style="margin-top: 4rem;">
+    <div style="background: var(--text); color: white; border-radius: 2.5rem; padding: 2.2rem 2.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <h2 style="font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em; color: white;">
+            <span style="color: #d4adff;">⚠️ Exclusive Campus Drops</span><br>Only at Hoka's Parlour
+        </h2>
+        <span style="background: var(--accent); padding: 0.5rem 1.4rem; border-radius: 40px; font-weight: 600; color: white; font-size: 0.95rem;">
+            <i class="fas fa-bolt"></i> 2 days left
+        </span>
+    </div>
+</div>
+
+<!-- 7️⃣ FINAL CALL TO ACTION (conversion push) -->
+<div class="container" style="margin-top: 5rem; margin-bottom: 4rem;">
+    <div style="background: var(--accent); color: white; border-radius: 2.8rem; padding: 4rem 2rem; text-align: center;">
+        <h2 style="font-size: 2.8rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1.2rem; color: white;">
+            Ready to Upgrade Your Campus Style?
+        </h2>
+        <a href="/shop/" class="btn" style="background: white; color: var(--accent); border: none; font-size: 1.3rem; padding: 1rem 3rem; border-radius: 40px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.6rem; margin-top: 1rem;">
+            <i class="fas fa-cart-shopping"></i> Start Shopping
+        </a>
+    </div>
+</div>
+
+<!-- 
+    FOOTER is already provided by base.html 
+    (social links, location, quick links, copyright)
+    So we don't duplicate it here.
+-->
+
+<style>
+    /* Additional hover effects & animations that integrate with base theme */
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(12px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .category-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent-light) !important;
+        box-shadow: 0 20px 30px -10px rgba(123, 46, 218, 0.12) !important;
+    }
+    
+    .category-card:hover .category-img {
+        background: var(--accent-soft);
+    }
+    
+    .shop-link:hover {
+        border-bottom-color: var(--accent) !important;
+    }
+    
+    .shop-link:hover i {
+        transform: translateX(4px);
+    }
+    
+    .why-item:hover {
+        background: var(--card) !important;
+        border-color: var(--border) !important;
+        box-shadow: var(--shadow);
+    }
+    
+    .testimonial:hover {
+        transform: scale(1.01);
+        box-shadow: var(--shadow);
+    }
+    
+    .btn {
+        transition: all 0.25s ease;
+    }
+    .btn:hover {
+        transform: scale(1.03);
+        filter: brightness(1.1);
+    }
+    
+    /* Ensure dark mode respects component backgrounds */
+    .dark-mode .category-card,
+    .dark-mode .testimonial,
+    .dark-mode .why-item {
+        background: var(--card);
+    }
+    
+    .dark-mode .founder-section {
+        background: var(--surface);
+    }
+</style>
+
+{% endblock %}

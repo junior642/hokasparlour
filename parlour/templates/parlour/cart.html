@@ -1,0 +1,645 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Cart - Hoka's Parlour | MMU Fashion{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       CART PAGE – PURE BASE.HTML INHERITANCE
+       Purple theme, dark mode support, Font Awesome icons
+       Modern minimalism for MMU student shopping cart
+    ----------------------------------------------- */
+    
+    .cart-container {
+        background: var(--card);
+        border-radius: 32px;
+        padding: 3rem;
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        margin: 2rem auto;
+        max-width: 1000px;
+        transition: var(--transition);
+    }
+
+    /* -----------------------------------------------
+       CART HEADER
+    ----------------------------------------------- */
+    .cart-header {
+        border-bottom: 3px solid var(--accent);
+        padding-bottom: 1.2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .cart-header h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text);
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+    }
+
+    .cart-header h2 i {
+        color: var(--accent);
+    }
+
+    .cart-item-count {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border: 1px solid var(--border);
+    }
+
+    /* -----------------------------------------------
+       CART TABLE – DESKTOP
+    ----------------------------------------------- */
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 2rem;
+    }
+
+    .cart-table th {
+        padding: 1.2rem 1rem;
+        text-align: left;
+        background: var(--surface);
+        color: var(--accent);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .cart-table td {
+        padding: 1.5rem 1rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+
+    .cart-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .cart-table tbody tr:hover {
+        background: var(--surface);
+    }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-light);
+        font-size: 1.5rem;
+    }
+
+    .product-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .product-name {
+        font-weight: 700;
+        color: var(--text);
+        font-size: 1.1rem;
+    }
+
+    .product-category {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .product-category i {
+        color: var(--accent);
+        font-size: 0.75rem;
+    }
+
+    .product-size {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.3rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid var(--border);
+    }
+
+    .product-price, 
+    .product-subtotal {
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .product-subtotal {
+        color: var(--accent);
+        font-size: 1.1rem;
+    }
+
+    .product-quantity {
+        display: inline-flex;
+        align-items: center;
+        background: var(--surface);
+        border-radius: 50px;
+        padding: 0.2rem;
+        border: 1px solid var(--border);
+    }
+
+    .quantity-value {
+        padding: 0.3rem 1rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    /* Remove Button */
+    .remove-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0.6rem 1.2rem;
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .remove-btn:hover {
+        background: #ef4444;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .remove-btn i {
+        font-size: 0.85rem;
+    }
+
+    /* -----------------------------------------------
+       CART SUMMARY
+    ----------------------------------------------- */
+    .cart-summary {
+        background: var(--surface);
+        padding: 1.8rem;
+        border-radius: 24px;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8rem 0;
+        color: var(--text-soft);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1.2rem;
+        margin-top: 0.8rem;
+        border-top: 2px solid var(--border);
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+
+    .total-amount {
+        color: var(--accent);
+        font-size: 1.5rem;
+    }
+
+    /* -----------------------------------------------
+       CART ACTIONS
+    ----------------------------------------------- */
+    .cart-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .continue-shopping {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 1rem 2rem;
+        background: transparent;
+        color: var(--text);
+        text-decoration: none;
+        border: 2px solid var(--border);
+        border-radius: 50px;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .continue-shopping:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateX(-4px);
+    }
+
+    .continue-shopping i {
+        transition: transform 0.25s;
+    }
+
+    .continue-shopping:hover i {
+        transform: translateX(-4px);
+    }
+
+    .checkout-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 1rem 2.5rem;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .checkout-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .checkout-btn i {
+        transition: transform 0.25s;
+    }
+
+    .checkout-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* -----------------------------------------------
+       EMPTY CART
+    ----------------------------------------------- */
+    .empty-cart {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-cart-icon {
+        font-size: 5rem;
+        color: var(--accent-light);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-cart h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.8rem;
+    }
+
+    .empty-cart p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .shop-now-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 1.2rem 3rem;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .shop-now-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .shop-now-btn i {
+        transition: transform 0.25s;
+    }
+
+    .shop-now-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* -----------------------------------------------
+       MOBILE RESPONSIVE – CARD VIEW
+    ----------------------------------------------- */
+    @media (max-width: 768px) {
+        .cart-container {
+            padding: 1.5rem;
+            margin: 1rem;
+        }
+
+        .cart-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .cart-header h2 {
+            font-size: 1.8rem;
+        }
+
+        /* Hide table headers */
+        .cart-table thead {
+            display: none;
+        }
+
+        /* Display as cards */
+        .cart-table,
+        .cart-table tbody,
+        .cart-table tr,
+        .cart-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .cart-table tr {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid var(--border);
+        }
+
+        .cart-table td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-table td:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .cart-table td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .product-info {
+            width: 100%;
+        }
+
+        .remove-btn {
+            padding: 0.5rem 1.2rem;
+        }
+
+        .cart-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .continue-shopping,
+        .checkout-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .total-row {
+            font-size: 1.1rem;
+        }
+
+        .total-amount {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cart-container {
+            padding: 1.2rem;
+        }
+
+        .cart-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .empty-cart h3 {
+            font-size: 1.5rem;
+        }
+
+        .empty-cart p {
+            font-size: 1rem;
+        }
+
+        .shop-now-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .product-image {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+
+        .product-name {
+            font-size: 1rem;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .cart-table tbody tr:hover {
+        background: var(--surface);
+    }
+
+    .dark-mode .product-image {
+        background: var(--card);
+    }
+
+    .dark-mode .cart-table tr {
+        background: var(--card);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="cart-container">
+        <!-- Cart Header -->
+        <div class="cart-header">
+            <h2>
+                <i class="fas fa-shopping-cart"></i>
+                Your Shopping Cart
+            </h2>
+            {% if cart_items %}
+            <span class="cart-item-count">
+                <i class="fas fa-box"></i>
+                {{ cart_items|length }} item{{ cart_items|length|pluralize }}
+            </span>
+            {% endif %}
+        </div>
+        
+        {% if cart_items %}
+            <!-- Cart Table – Desktop & Mobile Responsive -->
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Size</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                        <tr>
+                            <td data-label="Product">
+                                <div class="product-info">
+                                    <div class="product-image">
+                                        <i class="fas fa-tshirt"></i>
+                                    </div>
+                                    <div class="product-details">
+                                        <span class="product-name">{{ item.product.name }}</span>
+                                        <span class="product-category">
+                                            <i class="fas fa-tag"></i>
+                                            {{ item.product.get_category_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="Size">
+                                <span class="product-size">
+                                    <i class="fas fa-ruler"></i>
+                                    {{ item.size }}
+                                </span>
+                            </td>
+                            <td data-label="Price" class="product-price">
+                                KSh {{ item.price|floatformat:0 }}
+                            </td>
+                            <td data-label="Quantity">
+                                <div class="product-quantity">
+                                    <span class="quantity-value">{{ item.quantity }}</span>
+                                </div>
+                            </td>
+                            <td data-label="Subtotal" class="product-subtotal">
+                                KSh {{ item.subtotal|floatformat:0 }}
+                            </td>
+                            <td data-label="Action">
+                                <a href="{% url 'remove_from_cart' item.key %}" class="remove-btn">
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span class="remove-text">Remove</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- Cart Summary -->
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>
+                        <i class="fas fa-boxes" style="color: var(--accent); margin-right: 8px;"></i>
+                        Subtotal ({{ cart_items|length }} item{{ cart_items|length|pluralize }}):
+                    </span>
+                    <span style="font-weight: 600;">KSh {{ total|floatformat:0 }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>
+                        <i class="fas fa-truck" style="color: var(--accent); margin-right: 8px;"></i>
+                        Delivery:
+                    </span>
+                    <span style="color: var(--accent); font-weight: 600;">Free to MMU</span>
+                </div>
+                <div class="total-row">
+                    <span>
+                        <i class="fas fa-calculator" style="color: var(--accent); margin-right: 8px;"></i>
+                        Total:
+                    </span>
+                    <span class="total-amount">KSh {{ total|floatformat:0 }}</span>
+                </div>
+            </div>
+            
+            <!-- Cart Actions -->
+            <div class="cart-actions">
+                <a href="{% url 'home' %}" class="continue-shopping">
+                    <i class="fas fa-arrow-left"></i>
+                    Continue Shopping
+                </a>
+                <a href="{% url 'checkout' %}" class="checkout-btn">
+                    Proceed to Checkout
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        {% else %}
+            <!-- Empty Cart -->
+            <div class="empty-cart">
+                <div class="empty-cart-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>Your cart is empty</h3>
+                <p>Looks like you haven't added anything to your cart yet.</p>
+                <a href="{% url 'home' %}" class="shop-now-btn">
+                    <i class="fas fa-tshirt"></i>
+                    Start Shopping
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

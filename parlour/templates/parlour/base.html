@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hoka's Parlour – Modern fusion fashion for MMU students. Located in Rongai, Nairobi.">
+    <title>{% block title %}Hoka's Parlour · MMU Fashion{% endblock %}</title>
+    
+    <!-- Google Fonts: Playfair Display for headings, Inter for body -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 (free icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* -----------------------------------------------
+           BASE.HTML – PURPLE THEME, DARK MODE READY
+           Modern minimalist, MMU student focused
+        ----------------------------------------------- */
+        
+        /* ---------- CSS VARIABLES – LIGHT MODE (default) ---------- */
+        :root {
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --card: #ffffff;
+            --text: #0a0a0a;
+            --text-soft: #334155;
+            --border: #e2e8f0;
+            --accent: #7b2eda;        /* signature purple */
+            --accent-light: #a78bfa;
+            --accent-soft: #f3e8ff;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.02);
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.03), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --shadow-md: 0 20px 30px -10px rgba(0,0,0,0.05);
+            --shadow-lg: 0 25px 40px -12px rgba(0,0,0,0.08);
+            --transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
+            --header-bg: rgba(255,255,255,0.8);
+            --header-border: rgba(226,232,240,0.6);
+        }
+
+        /* ---------- DARK MODE – purple remains accent ---------- */
+        .dark-mode {
+            --bg: #121212;
+            --surface: #1e1e24;
+            --card: #25252b;
+            --text: #f0f0fa;
+            --text-soft: #c2c2d6;
+            --border: #33333e;
+            --accent: #b287fd;         /* brighter purple for dark bg */
+            --accent-light: #d4adff;
+            --accent-soft: #2a1f3a;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            --shadow-md: 0 20px 30px -10px rgba(0,0,0,0.6);
+            --shadow-lg: 0 25px 40px -12px rgba(0,0,0,0.7);
+            --header-bg: rgba(18,18,18,0.8);
+            --header-border: rgba(51,51,62,0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background-color 0.25s, color 0.2s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ---------- MODERN STICKY HEADER – glassmorphism ---------- */
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--header-border);
+            padding: 1.2rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        /* Logo with purple accent */
+        .logo a {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        /* Navigation – clean, modern */
+        nav {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        nav a {
+            color: var(--text-soft);
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 40px;
+            transition: var(--transition);
+            background: transparent;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        nav a i {
+            font-size: 1rem;
+            color: var(--accent-light);
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-color: var(--accent-light);
+        }
+
+        nav a:hover i {
+            color: var(--accent);
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--accent);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            margin-left: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* Cart icon special styling */
+        .cart-link {
+            position: relative;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.45rem;
+            border-radius: 50px;
+            border: 2px solid var(--card);
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* ---------- MESSAGES / ALERTS – purple accent ---------- */
+        .messages-container {
+            max-width: 1400px;
+            margin: 1.5rem auto 0;
+            padding: 0 2rem;
+        }
+
+        .messages {
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 1rem 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--accent-light);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            box-shadow: var(--shadow-sm);
+            font-weight: 500;
+        }
+
+        .messages p {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .messages i {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        /* ---------- MAIN CONTENT CONTAINER ---------- */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* ---------- FOOTER – matches base, included here for completeness ---------- */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 3rem 2rem 1.8rem;
+            margin-top: 3rem;
+        }
+
+        .footer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Playfair Display', serif;
+            color: var(--text);
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-logo span {
+            color: var(--accent);
+        }
+
+        .footer-about p {
+            color: var(--text-soft);
+            margin: 1rem 0 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-links h4, .footer-social h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+            color: var(--text);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.7rem;
+        }
+
+        .footer-links a {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        .social-list {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .social-list a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-soft);
+            color: var(--accent);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .social-list a:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .purple-heart {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 900px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            nav {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 1rem; }
+            .header-container { padding: 0; }
+            .container { padding: 0 1.2rem; }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            nav a {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                gap: 0.8rem;
+                text-align: center;
+            }
+        }
+
+        /* ---------- UTILITY CLASSES ---------- */
+        .text-accent { color: var(--accent); }
+        .bg-accent-soft { background: var(--accent-soft); }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.8rem 2rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        .btn:hover {
+            background: transparent;
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Block for child template extra styles */
+        {% block extra_style %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- MODERN HEADER with purple accent, theme toggle, and cart count -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <a href="{% url 'home' %}">HOKA'S<span> PARLOUR</span></a>
+            </div>
+            
+            <nav>
+                <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
+                <a href="{% url 'cart' %}" class="cart-link">
+                    <i class="fas fa-bag-shopping"></i> Cart
+                    <span class="cart-count">0</span>
+                </a>
+                <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> Track Order</a>
+                
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout ({{ user.username }})</a>
+                    {% if user.is_staff %}
+                        <a href="/admin/"><i class="fas fa-shield"></i> Admin</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
+                {% endif %}
+                
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle" id="themeToggle" aria-label="Switch between dark and light mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MESSAGES / ALERTS – styled with purple accent -->
+    {% if messages %}
+    <div class="messages-container">
+        <div class="messages">
+            {% for message in messages %}
+                <p>
+                    <i class="fas fa-info-circle"></i>
+                    {{ message }}
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- MAIN CONTENT BLOCK -->
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- MODERN FOOTER – matches base theme, includes social links, MMU focus -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="footer-logo">HOKA'S<span> PARLOUR</span></div>
+                    <p>Modern fusion fashion rooted in Rongai, built for MMU students. Trendy, affordable, always with purpose.</p>
+                    <div style="margin-top: 1.2rem; color: var(--text-soft);">
+                        <p><i class="fas fa-map-pin" style="color: var(--accent);"></i> Rongai, Kajiado County, Kenya</p>
+                        <p><i class="fas fa-envelope" style="color: var(--accent);"></i> hokasparlour@gmail.com</p>
+                        <p><i class="fas fa-phone-alt" style="color: var(--accent);"></i> 0783072098</p>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>EXPLORE</h4>
+                    <ul>
+                        <li><a href="{% url 'home' %}"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li><a href="{% url 'about' %}"><i class="fas fa-chevron-right"></i> About Us</a></li>
+                        <li><a href="{% url 'contact' %}"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                        <li><a href="{% url 'order_tracking' %}"><i class="fas fa-chevron-right"></i> Track Order</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>SUPPORT</h4>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Returns</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Size Guide</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>FOLLOW US</h4>
+                    <div class="social-list">
+                        <a href="https://www.instagram.com/hokasparlour/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@hokasparlour?is_from_webapp=1&sender_device=pc" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://x.com/hokasparlour" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                       <a href="https://wa.me/254783072098" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                    <p style="margin-top: 1.8rem; color: var(--text-soft); font-size: 0.9rem;">
+                        <i class="fas fa-graduation-cap" style="color: var(--accent);"></i> Official MMU Student Partner
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2025 Hoka's Parlour. All rights reserved.</span>
+                <span class="purple-heart"><i class="fas fa-heart"></i> designed for MMU</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DARK MODE TOGGLE SCRIPT – stores preference in localStorage -->
+    <script>
+        (function() {
+            const root = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (!themeToggle) return;
+            
+            const icon = themeToggle.querySelector('i');
+
+            function setDarkMode(isDark) {
+                if (isDark) {
+                    root.classList.add('dark-mode');
+                    icon.className = 'fas fa-sun';   // sun indicates light mode available
+                } else {
+                    root.classList.remove('dark-mode');
+                    icon.className = 'fas fa-moon';   // moon indicates dark mode available
+                }
+                localStorage.setItem('hokasparlour_theme', isDark ? 'dark' : 'light');
+            }
+
+            // Check localStorage or system preference
+            const stored = localStorage.getItem('hokasparlour_theme');
+            if (stored === 'dark') {
+                setDarkMode(true);
+            } else if (stored === 'light') {
+                setDarkMode(false);
+            } else {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setDarkMode(prefersDark);
+            }
+
+            // Toggle on button click
+            themeToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isDark = !root.classList.contains('dark-mode');
+                setDarkMode(isDark);
+            });
+        })();
+    </script>
+
+    <!-- Cart count update placeholder – child templates can override with actual logic -->
+    <script>
+        // This is a placeholder. In production, you'd inject the actual cart count from Django.
+        // Example: document.querySelector('.cart-count').textContent = '{{ cart_items|length }}';
+        document.addEventListener('DOMContentLoaded', function() {
+           
+        });
+    </script>
+
+   
+</body>
+</html>

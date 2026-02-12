@@ -1,0 +1,688 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy - Hoka's Parlour | Protecting MMU Student Data{% endblock %}
+
+{% block meta_description %}Read Hoka's Parlour Privacy Policy. Learn how we protect your personal information, payment data, and delivery details. Your privacy matters at Kenya's trusted MMU clothing store.{% endblock %}
+
+{% block meta_keywords %}Hoka's Parlour privacy, data protection Kenya, MMU student privacy, secure online shopping Kenya, payment data protection, privacy policy fashion store{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Modern Privacy Policy Styling */
+    :root {
+        --primary-navy: #0a1a2f;
+        --secondary-navy: #1a2c42;
+        --soft-cream: #faf9f7;
+        --medium-gray: #eaeef2;
+        --accent-blue: #2c5282;
+        --pure-white: #ffffff;
+        --border-soft: #e2e8f0;
+        --shadow-elegant: 0 20px 25px -5px rgba(0,0,0,0.02), 0 10px 10px -5px rgba(0,0,0,0.01);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-body);
+        color: var(--primary-navy);
+        line-height: 1.7;
+        background: var(--soft-cream);
+    }
+
+    .privacy-page {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    /* Hero Section */
+    .privacy-hero {
+        background: linear-gradient(145deg, var(--primary-navy) 0%, var(--secondary-navy) 100%);
+        border-radius: 24px;
+        padding: 60px 40px;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-elegant);
+    }
+
+    .privacy-hero::after {
+        content: '🔒';
+        position: absolute;
+        bottom: -30px;
+        right: -30px;
+        font-size: 180px;
+        opacity: 0.06;
+        transform: rotate(-8deg);
+    }
+
+    .privacy-hero-content {
+        position: relative;
+        z-index: 2;
+        color: var(--pure-white);
+        max-width: 800px;
+    }
+
+    .privacy-hero h1 {
+        font-size: 3.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        font-family: var(--font-heading);
+        letter-spacing: -1px;
+    }
+
+    .privacy-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(10px);
+        padding: 10px 24px;
+        border-radius: 100px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 25px;
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .last-updated {
+        display: inline-block;
+        margin-left: 15px;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.9rem;
+    }
+
+    /* Content Container */
+    .privacy-container {
+        background: var(--pure-white);
+        border-radius: 24px;
+        padding: 60px;
+        box-shadow: var(--shadow-elegant);
+    }
+
+    /* Section Styling */
+    .privacy-section {
+        margin-bottom: 50px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .privacy-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .section-icon {
+        width: 52px;
+        height: 52px;
+        background: var(--soft-cream);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        color: var(--primary-navy);
+    }
+
+    .privacy-section h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--primary-navy);
+        font-family: var(--font-heading);
+        margin-bottom: 0;
+    }
+
+    .privacy-section h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary-navy);
+        margin: 30px 0 15px;
+    }
+
+    .privacy-section p {
+        font-size: 1.05rem;
+        color: #4a5568;
+        margin-bottom: 20px;
+        line-height: 1.8;
+    }
+
+    /* Data Collection Grid */
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin: 30px 0;
+    }
+
+    .data-card {
+        background: var(--soft-cream);
+        padding: 25px;
+        border-radius: 16px;
+        border: 1px solid var(--border-soft);
+        transition: transform 0.3s ease;
+    }
+
+    .data-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .data-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+
+    .data-icon {
+        font-size: 1.8rem;
+    }
+
+    .data-card h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--primary-navy);
+    }
+
+    .data-card ul {
+        list-style: none;
+    }
+
+    .data-card ul li {
+        padding: 8px 0 8px 24px;
+        position: relative;
+        color: #4a5568;
+    }
+
+    .data-card ul li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--accent-blue);
+        font-weight: 700;
+    }
+
+    /* Privacy Badges */
+    .privacy-badges {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin: 30px 0;
+    }
+
+    .badge-item {
+        background: var(--soft-cream);
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1 1 200px;
+    }
+
+    .badge-icon {
+        font-size: 2rem;
+    }
+
+    .badge-text {
+        font-weight: 500;
+        color: var(--primary-navy);
+    }
+
+    .badge-subtext {
+        font-size: 0.85rem;
+        color: #718096;
+    }
+
+    /* Rights Grid */
+    .rights-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 25px;
+    }
+
+    .right-card {
+        background: linear-gradient(145deg, var(--soft-cream) 0%, #ffffff 100%);
+        padding: 25px;
+        border-radius: 16px;
+        text-align: center;
+        border: 1px solid var(--border-soft);
+    }
+
+    .right-icon {
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+    }
+
+    .right-card h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .right-card p {
+        font-size: 0.95rem;
+        color: #718096;
+        margin-bottom: 0;
+    }
+
+    /* Commitment Box */
+    .commitment-box {
+        background: linear-gradient(145deg, var(--primary-navy) 0%, var(--secondary-navy) 100%);
+        color: var(--pure-white);
+        padding: 40px;
+        border-radius: 20px;
+        margin: 40px 0;
+        text-align: center;
+    }
+
+    .commitment-box h3 {
+        color: var(--pure-white);
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+
+    .commitment-box p {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    /* Contact Section */
+    .privacy-contact {
+        background: var(--soft-cream);
+        padding: 40px;
+        border-radius: 20px;
+        margin-top: 40px;
+    }
+
+    .contact-methods {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .method {
+        text-align: center;
+    }
+
+    .method .icon {
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+    }
+
+    .method strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--primary-navy);
+    }
+
+    .method span {
+        color: #718096;
+        font-size: 0.95rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .privacy-hero h1 {
+            font-size: 2.2rem;
+        }
+
+        .privacy-container {
+            padding: 30px;
+        }
+
+        .privacy-section h2 {
+            font-size: 1.5rem;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .privacy-hero {
+            padding: 40px 20px;
+        }
+
+        .privacy-hero h1 {
+            font-size: 1.8rem;
+        }
+
+        .privacy-container {
+            padding: 20px;
+        }
+
+        .data-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-methods {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="privacy-page">
+    <!-- Hero Section -->
+    <div class="privacy-hero">
+        <div class="privacy-hero-content">
+            <span class="privacy-badge">
+                🔐 YOUR PRIVACY MATTERS
+                <span class="last-updated">Last Updated: February 2026</span>
+            </span>
+            <h1>Privacy Policy</h1>
+            <p style="font-size: 1.2rem; opacity: 0.95; max-width: 600px;">
+                How Hoka's Parlour protects and respects your personal information. Our commitment to MMU students and all customers.
+            </p>
+        </div>
+    </div>
+
+    <!-- Privacy Content -->
+    <div class="privacy-container">
+        
+        <!-- Section 1: Introduction -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">📋</span>
+                <h2>Introduction</h2>
+            </div>
+            <p><strong>Hoka's Parlour</strong> values your privacy and is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you visit our website or make purchases from our <strong>MMU clothing store</strong>.</p>
+            <p>By using our website and services, you consent to the practices described in this Privacy Policy.</p>
+            
+            <div class="commitment-box">
+                <h3>🎓 Our Promise to MMU Students</h3>
+                <p>We serve the Multi Media University of Kenya (MMU) community with integrity. Your trust is earned through transparency and respect for your privacy. We never sell your personal information.</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Information We Collect -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">📊</span>
+                <h2>Information We Collect</h2>
+            </div>
+            
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <span class="data-icon">👤</span>
+                        <h4>Personal Information</h4>
+                    </div>
+                    <ul>
+                        <li>Full name</li>
+                        <li>Email address</li>
+                        <li>Phone number</li>
+                        <li>Delivery address</li>
+                        <li>Payment information</li>
+                    </ul>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <span class="data-icon">🔐</span>
+                        <h4>Account Information</h4>
+                    </div>
+                    <ul>
+                        <li>Username</li>
+                        <li>Encrypted password</li>
+                        <li>Profile preferences</li>
+                        <li>Saved delivery addresses</li>
+                    </ul>
+                </div>
+
+                <div class="data-card">
+                    <div class="data-card-header">
+                        <span class="data-icon">📦</span>
+                        <h4>Order Information</h4>
+                    </div>
+                    <ul>
+                        <li>Products purchased</li>
+                        <li>Order history</li>
+                        <li>Delivery preferences</li>
+                        <li>Payment method used</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: How We Use Your Information -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">⚙️</span>
+                <h2>How We Use Your Information</h2>
+            </div>
+            
+            <p>Your information helps us serve you better. We use your data to:</p>
+            
+            <div class="privacy-badges">
+                <div class="badge-item">
+                    <span class="badge-icon">📱</span>
+                    <div>
+                        <div class="badge-text">Process & Deliver Orders</div>
+                        <div class="badge-subtext">Ensure your fashion arrives on time</div>
+                    </div>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-icon">📧</span>
+                    <div>
+                        <div class="badge-text">Send Confirmations</div>
+                        <div class="badge-subtext">Order updates & delivery status</div>
+                    </div>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-icon">💬</span>
+                    <div>
+                        <div class="badge-text">Customer Support</div>
+                        <div class="badge-subtext">Answer questions & resolve issues</div>
+                    </div>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-icon">📈</span>
+                    <div>
+                        <div class="badge-text">Improve Services</div>
+                        <div class="badge-subtext">Better experience for MMU students</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box" style="background: #e8f0fe; border-left-color: var(--accent-blue); padding: 25px; border-radius: 12px; margin-top: 20px;">
+                <p style="margin-bottom: 0;"><strong>📌 Important:</strong> We <u>do not sell</u> your personal data to third parties. Your information is used exclusively to serve you better as a valued customer of Hoka's Parlour.</p>
+            </div>
+        </div>
+
+        <!-- Section 4: Email Communication -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">📨</span>
+                <h2>Email Communication</h2>
+            </div>
+            
+            <p>We may send you the following types of emails:</p>
+            <ul class="terms-list" style="margin-bottom: 25px;">
+                <li><strong>Order confirmations</strong> — Every purchase you make</li>
+                <li><strong>Delivery updates</strong> — Track your order status</li>
+                <li><strong>Account verification</strong> — Secure your account with OTP</li>
+                <li><strong>Important service updates</strong> — Changes to policies or service</li>
+            </ul>
+            <p>You may opt out of promotional emails at any time by clicking the "unsubscribe" link in our emails. Transactional emails (order confirmations, delivery updates) are necessary for service and cannot be opted out of.</p>
+        </div>
+
+        <!-- Section 5: Data Protection -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">🛡️</span>
+                <h2>Data Protection</h2>
+            </div>
+            
+            <p>Hoka's Parlour implements reasonable and appropriate security measures to protect your personal information from unauthorized access, alteration, disclosure, or destruction.</p>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin: 25px 0;">
+                <span style="background: var(--soft-cream); padding: 10px 20px; border-radius: 50px; font-size: 0.95rem;">🔒 SSL Encryption</span>
+                <span style="background: var(--soft-cream); padding: 10px 20px; border-radius: 50px; font-size: 0.95rem;">🔐 Secure Payment Gateway</span>
+                <span style="background: var(--soft-cream); padding: 10px 20px; border-radius: 50px; font-size: 0.95rem;">📱 Password Protection</span>
+            </div>
+            
+            <p><strong>However, please note:</strong> No method of transmission over the Internet or electronic storage is 100% secure. While we strive to protect your data, we cannot guarantee absolute security.</p>
+        </div>
+
+        <!-- Section 6: Cookies -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">🍪</span>
+                <h2>Cookies</h2>
+            </div>
+            
+            <p>Our website uses cookies to enhance your browsing experience. Cookies help us:</p>
+            <ul class="terms-list">
+                <li>Remember your shopping cart items</li>
+                <li>Keep you logged into your account</li>
+                <li>Understand how visitors use our site</li>
+                <li>Improve website performance</li>
+            </ul>
+            <p>You can disable cookies through your browser settings, but this may affect certain functionality of our website.</p>
+        </div>
+
+        <!-- Section 7: Data Sharing -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">🤝</span>
+                <h2>Data Sharing</h2>
+            </div>
+            
+            <p>We share your information only when necessary to complete your order:</p>
+            <ul class="terms-list">
+                <li><strong>Delivery service providers</strong> — To deliver your fashion items to MMU and beyond</li>
+                <li><strong>Payment processors</strong> — To securely process your transactions</li>
+            </ul>
+            <p>These third parties are contractually obligated to protect your data and only use it for the specific service provided.</p>
+        </div>
+
+        <!-- Section 8: Data Retention -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">⏳</span>
+                <h2>Data Retention</h2>
+            </div>
+            
+            <p>We retain your personal information only for as long as necessary to:</p>
+            <ul class="terms-list">
+                <li>Process and fulfill your orders</li>
+                <li>Comply with legal and regulatory requirements</li>
+                <li>Maintain business records for operational purposes</li>
+            </ul>
+            <p>When data is no longer needed, we securely delete or anonymize it.</p>
+        </div>
+
+        <!-- Section 9: Your Rights -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">⚖️</span>
+                <h2>Your Rights</h2>
+            </div>
+            
+            <div class="rights-grid">
+                <div class="right-card">
+                    <div class="right-icon">👁️</div>
+                    <h4>Access</h4>
+                    <p>Request a copy of your personal data</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">✏️</div>
+                    <h4>Correction</h4>
+                    <p>Update inaccurate information</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">🗑️</div>
+                    <h4>Deletion</h4>
+                    <p>Request account deletion</p>
+                </div>
+                <div class="right-card">
+                    <div class="right-icon">⏸️</div>
+                    <h4>Restriction</h4>
+                    <p>Limit how we use your data</p>
+                </div>
+            </div>
+            
+            <p style="margin-top: 25px;">To exercise any of these rights, please contact us using the information below. We will respond to your request within a reasonable timeframe.</p>
+        </div>
+
+        <!-- Section 10: Policy Updates -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">🔄</span>
+                <h2>Policy Updates</h2>
+            </div>
+            
+            <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technologies, or legal requirements. When we make changes:</p>
+            <ul class="terms-list">
+                <li>The "Last Updated" date at the top of this page will be revised</li>
+                <li>Material changes will be notified via email or website notice</li>
+                <li>Continued use of our website constitutes acceptance of the updated policy</li>
+            </ul>
+        </div>
+
+        <!-- Section 11: Contact Us -->
+        <div class="privacy-section">
+            <div class="section-header">
+                <span class="section-icon">📬</span>
+                <h2>Contact Us</h2>
+            </div>
+            
+            <div class="privacy-contact">
+                <h3 style="font-size: 1.8rem; margin-bottom: 15px; font-family: var(--font-heading);">Privacy Questions?</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 30px; color: #4a5568;">We're here to address your concerns about data privacy.</p>
+                
+                <div class="contact-methods">
+                    <div class="method">
+                        <div class="icon">📍</div>
+                        <strong>Visit Our Store</strong>
+                        <span>Rongai, Kajiado County<br>Kenya</span>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="icon">📧</div>
+                        <strong>Email Us</strong>
+                        <span>privacy@hokasparlour.co.ke</span>
+                    </div>
+                    
+                    <div class="method">
+                        <div class="icon">📞</div>
+                        <strong>Call Us</strong>
+                        <span>+254 700 000 000<br>Mon-Fri, 9am-6pm</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid var(--border-soft); text-align: center;">
+                    <p style="margin-bottom: 0; color: var(--primary-navy); font-weight: 500;">
+                        🎓 Proudly serving <strong>Multi Media University of Kenya (MMU)</strong> and the Rongai community.
+                    </p>
+                    <p style="margin-top: 10px; color: #718096; font-size: 0.95rem;">
+                        Your trusted MMU fashion destination — protecting your privacy, delivering your style.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

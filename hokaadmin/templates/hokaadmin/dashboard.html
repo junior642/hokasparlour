@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - Hoka's Parlour</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <nav>
+        <a href="{% url 'hokaadmin:dashboard' %}">Dashboard</a>
+        <a href="/admin/">Django Admin</a>
+    </nav>
+    
+    <h2>Summary</h2>
+    
+    <div>
+        <h3>Total Revenue</h3>
+        <p>${{ total_revenue }}</p>
+    </div>
+    
+    <div>
+        <h3>Total Orders</h3>
+        <p>{{ total_orders }}</p>
+    </div>
+    
+    <div>
+        <h3>Average Order Value</h3>
+        <p>${{ avg_order_value }}</p>
+    </div>
+    
+    <div>
+        <h3>Total Products</h3>
+        <p>{{ total_products }}</p>
+    </div>
+    
+    <h2>Reports</h2>
+    <ul>
+        <li><a href="{% url 'hokaadmin:sales_summary' %}">Sales Summary</a></li>
+        <li><a href="{% url 'hokaadmin:daily_sales' %}">Daily Sales</a></li>
+        <li><a href="{% url 'hokaadmin:weekly_sales' %}">Weekly Sales</a></li>
+        <li><a href="{% url 'hokaadmin:monthly_sales' %}">Monthly Sales</a></li>
+        <li><a href="{% url 'hokaadmin:top_products' %}">Top Products</a></li>
+        <li><a href="{% url 'hokaadmin:revenue_trends' %}">Revenue Trends</a></li>
+    </ul>
+</body>
+</html>

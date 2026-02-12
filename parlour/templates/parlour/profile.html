@@ -1,0 +1,786 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Hoka's Parlour | MMU Fashion{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       PROFILE PAGE – PURE BASE.HTML INHERITANCE
+       Purple theme, dark mode support, Font Awesome icons
+       Modern minimalism for MMU student profiles
+    ----------------------------------------------- */
+    
+    .profile-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    /* -----------------------------------------------
+       SIDEBAR CARDS
+    ----------------------------------------------- */
+    .profile-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sidebar-card {
+        background: var(--card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .sidebar-header {
+        background: var(--accent);
+        color: white;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-header h5, .sidebar-header h6 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: white;
+    }
+
+    .sidebar-header i {
+        font-size: 1.2rem;
+    }
+
+    /* Profile Navigation */
+    .profile-nav {
+        list-style: none;
+        padding: 0.8rem;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .profile-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        border-radius: 16px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .profile-nav-item i {
+        width: 20px;
+        color: var(--accent);
+        transition: var(--transition);
+    }
+
+    .profile-nav-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .profile-nav-item:hover i {
+        color: var(--accent);
+    }
+
+    .profile-nav-item.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .profile-nav-item.active i {
+        color: white;
+    }
+
+    .profile-nav-item.text-danger {
+        color: #ef4444;
+    }
+
+    .profile-nav-item.text-danger i {
+        color: #ef4444;
+    }
+
+    .profile-nav-item.text-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .profile-nav-item.text-danger:hover i {
+        color: #ef4444;
+    }
+
+    /* Progress Card */
+    .progress-card {
+        background: var(--card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+    }
+
+    .progress-card h6 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .progress-card h6 i {
+        color: var(--accent);
+    }
+
+    .progress {
+        background: var(--surface);
+        border-radius: 50px;
+        height: 10px;
+        overflow: hidden;
+        margin-bottom: 0.8rem;
+    }
+
+    .progress-bar {
+        background: var(--accent);
+        border-radius: 50px;
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .progress-bar.bg-success {
+        background: #10b981;
+    }
+
+    .progress-bar.bg-warning {
+        background: #f59e0b;
+    }
+
+    .complete-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 0.8rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: var(--transition);
+        margin-top: 1rem;
+        text-decoration: none;
+        border: 2px solid transparent;
+    }
+
+    .complete-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    /* -----------------------------------------------
+       MAIN CONTENT CARDS
+    ----------------------------------------------- */
+    .main-card {
+        background: var(--card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .main-card-header {
+        background: var(--surface);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .main-card-header h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .main-card-header h4 i {
+        color: var(--accent);
+    }
+
+    .edit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.7rem 1.5rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: var(--transition);
+        text-decoration: none;
+        border: 2px solid transparent;
+    }
+
+    .edit-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .main-card-body {
+        padding: 2rem;
+    }
+
+    /* Profile Picture Section */
+    .profile-picture-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid var(--accent);
+        box-shadow: var(--shadow);
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-avatar i {
+        font-size: 4rem;
+        color: var(--accent-light);
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0.5rem 0 0.2rem;
+    }
+
+    .member-since {
+        color: var(--text-soft);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-section {
+        margin-bottom: 2rem;
+    }
+
+    .info-section h5 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+    }
+
+    .info-section h5 i {
+        color: var(--accent);
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+
+    .info-label {
+        width: 140px;
+        color: var(--text-soft);
+        font-size: 0.95rem;
+    }
+
+    .info-value {
+        flex: 1;
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .info-value.default {
+        color: var(--text-soft);
+        font-weight: 400;
+    }
+
+    /* Orders Table */
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table th {
+        text-align: left;
+        padding: 1rem 0.5rem;
+        color: var(--text-soft);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .orders-table td {
+        padding: 1rem 0.5rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-delivered {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .status-dispatched {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    .status-processing {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    .status-pending {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+    }
+
+    .view-order-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.5rem 1.2rem;
+        background: var(--surface);
+        color: var(--text);
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: var(--transition);
+        border: 1px solid var(--border);
+    }
+
+    .view-order-btn:hover {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    .view-order-btn i {
+        font-size: 0.8rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: var(--accent-light);
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .shop-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.9rem 2rem;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .shop-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    /* -----------------------------------------------
+       RESPONSIVE
+    ----------------------------------------------- */
+    @media (max-width: 992px) {
+        .profile-container {
+            padding: 0 1.5rem;
+        }
+        
+        .info-row {
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .info-label {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0 1.2rem;
+        }
+        
+        .main-card-header {
+            padding: 1.2rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .main-card-body {
+            padding: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-container {
+            padding: 0 1rem;
+        }
+        
+        .main-card-header h4 {
+            font-size: 1.2rem;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .profile-name {
+            font-size: 1.2rem;
+        }
+        
+        .edit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .profile-avatar {
+        border-color: var(--accent-light);
+    }
+
+    .dark-mode .order-status {
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="row" style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <!-- Sidebar -->
+        <div style="flex: 1; min-width: 280px;">
+            <div class="profile-sidebar">
+                <!-- Account Navigation Card -->
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h5>My Account</h5>
+                    </div>
+                    <div class="profile-nav">
+                        <a href="{% url 'profile' %}" class="profile-nav-item {% if active_tab == 'profile' %}active{% endif %}">
+                            <i class="fas fa-user"></i> Profile Overview
+                        </a>
+                        <a href="{% url 'edit_profile' %}" class="profile-nav-item {% if active_tab == 'edit' %}active{% endif %}">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'order_history' %}" class="profile-nav-item {% if active_tab == 'orders' %}active{% endif %}">
+                            <i class="fas fa-shopping-bag"></i> Order History
+                        </a>
+                        <a href="{% url 'change_password' %}" class="profile-nav-item {% if active_tab == 'password' %}active{% endif %}">
+                            <i class="fas fa-lock"></i> Change Password
+                        </a>
+                        <a href="{% url 'cart' %}" class="profile-nav-item">
+                            <i class="fas fa-shopping-cart"></i> My Cart
+                        </a>
+                        <div style="border-top: 1px solid var(--border); margin: 0.5rem 0;"></div>
+                        <a href="{% url 'logout' %}" class="profile-nav-item text-danger">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Profile Completion Card -->
+                <div class="progress-card">
+                    <h6>
+                        <i class="fas fa-chart-pie"></i>
+                        Profile Completion
+                    </h6>
+                    <div class="progress">
+                        {% if profile.has_complete_profile %}
+                            <div class="progress-bar bg-success" style="width: 100%">100%</div>
+                        {% else %}
+                            <div class="progress-bar bg-warning" style="width: 50%">50%</div>
+                        {% endif %}
+                    </div>
+                    {% if not profile.has_complete_profile %}
+                        <small style="color: var(--text-soft); display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-info-circle" style="color: var(--accent);"></i>
+                            Add your delivery address to complete profile
+                        </small>
+                        <a href="{% url 'edit_profile' %}" class="complete-btn">
+                            <i class="fas fa-check-circle"></i> Complete Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div style="flex: 3; min-width: 350px;">
+            <!-- Profile Overview Card -->
+            <div class="main-card">
+                <div class="main-card-header">
+                    <h4>
+                        <i class="fas fa-id-card"></i>
+                        Profile Overview
+                    </h4>
+                    <a href="{% url 'edit_profile' %}" class="edit-btn">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </a>
+                </div>
+                
+                <div class="main-card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+                        <!-- Profile Picture -->
+                        <div class="profile-picture-section">
+                            <div class="profile-avatar">
+                                {% if profile.profile_picture %}
+                                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture">
+                                {% else %}
+                                    <i class="fas fa-user-circle"></i>
+                                {% endif %}
+                            </div>
+                            <h5 class="profile-name">{{ user.get_full_name|default:user.username }}</h5>
+                            <span class="member-since">
+                                <i class="fas fa-calendar-alt" style="color: var(--accent);"></i>
+                                Member since {{ user.date_joined|date:"M Y" }}
+                            </span>
+                        </div>
+                        
+                        <!-- Personal Information -->
+                        <div>
+                            <div class="info-section">
+                                <h5>
+                                    <i class="fas fa-info-circle"></i>
+                                    Personal Information
+                                </h5>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div>
+                                        <div class="info-label">Username</div>
+                                        <div class="info-value">{{ user.username }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Email</div>
+                                        <div class="info-value">{{ user.email }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">First Name</div>
+                                        <div class="info-value {% if not user.first_name %}default{% endif %}">
+                                            {{ user.first_name|default:"Not provided" }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Last Name</div>
+                                        <div class="info-value {% if not user.last_name %}default{% endif %}">
+                                            {{ user.last_name|default:"Not provided" }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Phone Number</div>
+                                        <div class="info-value {% if not profile.phone_number %}default{% endif %}">
+                                            {{ profile.phone_number|default:"Not provided" }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Preferred Payment</div>
+                                        <div class="info-value {% if not profile.get_preferred_payment_method_display %}default{% endif %}">
+                                            {{ profile.get_preferred_payment_method_display|default:"Not set" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="info-section">
+                                <h5>
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Delivery Information
+                                </h5>
+                                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                                    <div>
+                                        <div class="info-label">Delivery Address</div>
+                                        <div class="info-value {% if not profile.delivery_address %}default{% endif %}" style="white-space: pre-line;">
+                                            {{ profile.delivery_address|default:"Not provided"|linebreaks }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="info-label">Delivery Location</div>
+                                        <div class="info-value {% if not profile.default_delivery_location %}default{% endif %}">
+                                            {{ profile.default_delivery_location|default:"Not provided" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders Card -->
+            <div class="main-card">
+                <div class="main-card-header">
+                    <h5 style="display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.2rem;">
+                        <i class="fas fa-clock"></i>
+                        Recent Orders
+                    </h5>
+                    <a href="{% url 'order_history' %}" class="edit-btn" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+                
+                <div class="main-card-body">
+                    {% if orders %}
+                        <div style="overflow-x: auto;">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td style="font-weight: 600;">#{{ order.id }}</td>
+                                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <span class="order-status 
+                                                {% if order.order_status == 'delivered' %}status-delivered
+                                                {% elif order.order_status == 'dispatched' %}status-dispatched
+                                                {% elif order.order_status == 'processing' %}status-processing
+                                                {% else %}status-pending{% endif %}">
+                                                <i class="fas 
+                                                    {% if order.order_status == 'delivered' %}fa-check-circle
+                                                    {% elif order.order_status == 'dispatched' %}fa-truck
+                                                    {% elif order.order_status == 'processing' %}fa-clock
+                                                    {% else %}fa-circle{% endif %}">
+                                                </i>
+                                                {{ order.get_order_status_display }}
+                                            </span>
+                                        </td>
+                                        <td style="font-weight: 700; color: var(--accent);">
+                                            KSh {{ order.get_total|floatformat:2 }}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'order_confirmation' order.id %}" class="view-order-btn">
+                                                View <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-bag"></i>
+                            <p>No orders yet.</p>
+                            <a href="{% url 'home' %}" class="shop-btn">
+                                <i class="fas fa-tshirt"></i> Start Shopping
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

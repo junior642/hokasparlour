@@ -1,0 +1,692 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Order History - Hoka's Parlour | MMU Fashion{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       ORDER HISTORY PAGE – PURE BASE.HTML INHERITANCE
+       Purple theme, dark mode support, Font Awesome icons
+       Modern minimalism for MMU student orders
+    ----------------------------------------------- */
+    
+    .order-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    /* -----------------------------------------------
+       SIDEBAR – matches profile page styling
+    ----------------------------------------------- */
+    .orders-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sidebar-card {
+        background: var(--card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .sidebar-header {
+        background: var(--accent);
+        color: white;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-header h5 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: white;
+    }
+
+    .sidebar-header i {
+        font-size: 1.2rem;
+    }
+
+    /* Profile Navigation */
+    .profile-nav {
+        list-style: none;
+        padding: 0.8rem;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .profile-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        border-radius: 16px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .profile-nav-item i {
+        width: 20px;
+        color: var(--accent);
+        transition: var(--transition);
+    }
+
+    .profile-nav-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .profile-nav-item:hover i {
+        color: var(--accent);
+    }
+
+    .profile-nav-item.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .profile-nav-item.active i {
+        color: white;
+    }
+
+    /* -----------------------------------------------
+       MAIN CONTENT – ORDERS TABLE
+    ----------------------------------------------- */
+    .orders-main-card {
+        background: var(--card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        height: fit-content;
+    }
+
+    .orders-header {
+        background: var(--surface);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .orders-header h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .orders-header h4 i {
+        color: var(--accent);
+    }
+
+    .orders-body {
+        padding: 2rem;
+    }
+
+    /* Orders Table */
+    .orders-table-container {
+        overflow-x: auto;
+        border-radius: 16px;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table th {
+        text-align: left;
+        padding: 1rem 0.75rem;
+        color: var(--text-soft);
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-bottom: 2px solid var(--border);
+        background: var(--surface);
+    }
+
+    .orders-table td {
+        padding: 1.25rem 0.75rem;
+        color: var(--text);
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+    }
+
+    .order-id {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 1rem;
+    }
+
+    .order-date {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .order-date-main {
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .order-date-time {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        margin-top: 0.2rem;
+    }
+
+    /* Order Items List */
+    .order-items-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .order-item {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        font-size: 0.95rem;
+        color: var(--text);
+        margin-bottom: 0.3rem;
+    }
+
+    .item-quantity {
+        font-weight: 700;
+        color: var(--accent);
+        min-width: 30px;
+    }
+
+    .item-name {
+        color: var(--text);
+    }
+
+    .more-items-badge {
+        display: inline-block;
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-top: 0.3rem;
+        border: 1px solid var(--border);
+    }
+
+    /* Order Total */
+    .order-total {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 1.1rem;
+    }
+
+    /* Status Badges */
+    .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.5rem 1.2rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+    }
+
+    .status-delivered {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    .status-dispatched {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    .status-processing {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border-color: rgba(245, 158, 11, 0.2);
+    }
+
+    .status-pending {
+        background: rgba(107, 114, 128, 0.1);
+        color: #6b7280;
+        border-color: rgba(107, 114, 128, 0.2);
+    }
+
+    .status-cancelled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    /* View Details Button */
+    .view-details-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.6rem 1.4rem;
+        background: var(--surface);
+        color: var(--text);
+        text-decoration: none;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: var(--transition);
+        border: 1px solid var(--border);
+        white-space: nowrap;
+    }
+
+    .view-details-btn:hover {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .view-details-btn i {
+        font-size: 0.8rem;
+        transition: transform 0.25s;
+    }
+
+    .view-details-btn:hover i {
+        transform: translateX(4px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--accent-light);
+        margin-bottom: 1.5rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h5 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-soft);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    .shop-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 1rem 2.5rem;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .shop-btn:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .shop-btn i {
+        transition: transform 0.25s;
+    }
+
+    .shop-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* Order Summary Card (for mobile) */
+    .order-summary-card {
+        display: none;
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+    }
+
+    .order-summary-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .order-summary-id {
+        font-weight: 700;
+        color: var(--accent);
+        font-size: 1.1rem;
+    }
+
+    .order-summary-items {
+        margin-bottom: 1rem;
+    }
+
+    .order-summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        color: var(--text-soft);
+    }
+
+    .order-summary-total {
+        display: flex;
+        justify-content: space-between;
+        font-weight: 700;
+        color: var(--text);
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    /* -----------------------------------------------
+       RESPONSIVE
+    ----------------------------------------------- */
+    @media (max-width: 992px) {
+        .order-container {
+            padding: 0 1.5rem;
+        }
+        
+        .orders-header {
+            padding: 1.2rem 1.5rem;
+        }
+        
+        .orders-body {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .order-container {
+            padding: 0 1.2rem;
+        }
+        
+        /* Hide table on mobile, show cards */
+        .orders-table {
+            display: none;
+        }
+        
+        .order-summary-card {
+            display: block;
+        }
+        
+        .orders-header h4 {
+            font-size: 1.3rem;
+        }
+        
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+        }
+        
+        .empty-state h5 {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .order-container {
+            padding: 0 1rem;
+        }
+        
+        .orders-header {
+            padding: 1rem 1.2rem;
+        }
+        
+        .orders-body {
+            padding: 1.2rem;
+        }
+        
+        .shop-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .order-status {
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    .dark-mode .more-items-badge {
+        background: var(--accent-soft);
+        border-color: rgba(255,255,255,0.1);
+    }
+
+    .dark-mode .orders-table th {
+        background: var(--surface);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-container">
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <!-- Sidebar -->
+        <div style="flex: 1; min-width: 280px;">
+            <div class="orders-sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h5>My Account</h5>
+                    </div>
+                    <div class="profile-nav">
+                        <a href="{% url 'profile' %}" class="profile-nav-item">
+                            <i class="fas fa-user"></i> Profile Overview
+                        </a>
+                        <a href="{% url 'edit_profile' %}" class="profile-nav-item">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'order_history' %}" class="profile-nav-item active">
+                            <i class="fas fa-shopping-bag"></i> Order History
+                        </a>
+                        <a href="{% url 'change_password' %}" class="profile-nav-item">
+                            <i class="fas fa-lock"></i> Change Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div style="flex: 3; min-width: 350px;">
+            <div class="orders-main-card">
+                <div class="orders-header">
+                    <h4>
+                        <i class="fas fa-history"></i>
+                        Order History
+                    </h4>
+                </div>
+                
+                <div class="orders-body">
+                    {% if orders %}
+                        <!-- Desktop Table View -->
+                        <div class="orders-table-container">
+                            <table class="orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Date</th>
+                                        <th>Items</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                    <tr>
+                                        <td>
+                                            <span class="order-id">#{{ order.id }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="order-date">
+                                                <span class="order-date-main">{{ order.created_at|date:"M d, Y" }}</span>
+                                                <span class="order-date-time">{{ order.created_at|time:"g:i A" }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <ul class="order-items-list">
+                                                {% for item in order.orderitem_set.all|slice:":2" %}
+                                                    <li class="order-item">
+                                                        <span class="item-quantity">{{ item.quantity }}x</span>
+                                                        <span class="item-name">{{ item.product.name }}</span>
+                                                    </li>
+                                                {% empty %}
+                                                    <li class="order-item">No items</li>
+                                                {% endfor %}
+                                                {% if order.orderitem_set.count > 2 %}
+                                                    <li>
+                                                        <span class="more-items-badge">
+                                                            <i class="fas fa-plus-circle"></i>
+                                                            {{ order.orderitem_set.count|add:"-2" }} more
+                                                        </span>
+                                                    </li>
+                                                {% endif %}
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <span class="order-total">KSh {{ order.get_total|floatformat:2 }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="order-status 
+                                                {% if order.order_status == 'delivered' %}status-delivered
+                                                {% elif order.order_status == 'dispatched' %}status-dispatched
+                                                {% elif order.order_status == 'processing' %}status-processing
+                                                {% elif order.order_status == 'cancelled' %}status-cancelled
+                                                {% else %}status-pending{% endif %}">
+                                                <i class="fas 
+                                                    {% if order.order_status == 'delivered' %}fa-check-circle
+                                                    {% elif order.order_status == 'dispatched' %}fa-truck
+                                                    {% elif order.order_status == 'processing' %}fa-clock
+                                                    {% elif order.order_status == 'cancelled' %}fa-times-circle
+                                                    {% else %}fa-circle{% endif %}">
+                                                </i>
+                                                {{ order.get_order_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'order_confirmation' order.id %}" class="view-details-btn">
+                                                View <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        {% for order in orders %}
+                        <div class="order-summary-card">
+                            <div class="order-summary-header">
+                                <span class="order-summary-id">#{{ order.id }}</span>
+                                <span class="order-status 
+                                    {% if order.order_status == 'delivered' %}status-delivered
+                                    {% elif order.order_status == 'dispatched' %}status-dispatched
+                                    {% elif order.order_status == 'processing' %}status-processing
+                                    {% elif order.order_status == 'cancelled' %}status-cancelled
+                                    {% else %}status-pending{% endif %}">
+                                    <i class="fas 
+                                        {% if order.order_status == 'delivered' %}fa-check-circle
+                                        {% elif order.order_status == 'dispatched' %}fa-truck
+                                        {% elif order.order_status == 'processing' %}fa-clock
+                                        {% elif order.order_status == 'cancelled' %}fa-times-circle
+                                        {% else %}fa-circle{% endif %}">
+                                    </i>
+                                    {{ order.get_order_status_display }}
+                                </span>
+                            </div>
+                            
+                            <div class="order-date" style="margin-bottom: 1rem;">
+                                <span class="order-date-main">{{ order.created_at|date:"M d, Y" }}</span>
+                                <span class="order-date-time">{{ order.created_at|time:"g:i A" }}</span>
+                            </div>
+                            
+                            <div class="order-summary-items">
+                                <strong style="color: var(--text); display: block; margin-bottom: 0.5rem;">
+                                    <i class="fas fa-box" style="color: var(--accent);"></i> Items:
+                                </strong>
+                                {% for item in order.orderitem_set.all|slice:":3" %}
+                                <div class="order-summary-item">
+                                    <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                                    <span style="color: var(--accent);">KSh {{ item.get_cost|floatformat:2 }}</span>
+                                </div>
+                                {% endfor %}
+                                {% if order.orderitem_set.count > 3 %}
+                                    <div style="color: var(--text-soft); font-size: 0.9rem; margin-top: 0.3rem;">
+                                        <i class="fas fa-plus-circle" style="color: var(--accent);"></i>
+                                        +{{ order.orderitem_set.count|add:"-3" }} more items
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="order-summary-total">
+                                <span>Total:</span>
+                                <span style="color: var(--accent); font-size: 1.2rem;">KSh {{ order.get_total|floatformat:2 }}</span>
+                            </div>
+                            
+                            <div style="margin-top: 1.5rem;">
+                                <a href="{% url 'order_confirmation' order.id %}" class="view-details-btn" style="width: 100%; justify-content: center;">
+                                    View Order Details <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-bag"></i>
+                            <h5>No orders yet</h5>
+                            <p>Looks like you haven't placed any orders yet.</p>
+                            <a href="{% url 'home' %}" class="shop-btn">
+                                <i class="fas fa-tshirt"></i> Start Shopping
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

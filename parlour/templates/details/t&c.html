@@ -1,0 +1,574 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Terms and Conditions - Hoka's Parlour | MMU Fashion Store{% endblock %}
+
+{% block meta_description %}Read Hoka's Parlour Terms and Conditions. Learn about our order policies, delivery terms for MMU students, returns, payments, and your rights when shopping at Kenya's premier campus fashion store.{% endblock %}
+
+{% block meta_keywords %}Hoka's Parlour terms, MMU fashion terms, Rongai clothing store policies, student fashion Kenya terms, delivery policy Kenya, returns policy campus wear{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Modern Legal Page Styling */
+    :root {
+        --primary-black: #1a1a1a;
+        --secondary-black: #2d2d2d;
+        --soft-gray: #f8fafc;
+        --medium-gray: #e2e8f0;
+        --accent-gray: #64748b;
+        --pure-white: #ffffff;
+        --border-light: #edf2f7;
+        --shadow-sm: 0 4px 6px rgba(0,0,0,0.02);
+        --shadow-md: 0 10px 15px rgba(0,0,0,0.03);
+        --font-heading: 'Playfair Display', serif;
+        --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: var(--font-body);
+        color: var(--primary-black);
+        line-height: 1.7;
+        background: var(--soft-gray);
+    }
+
+    .terms-page {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    /* Hero Section */
+    .terms-hero {
+        background: linear-gradient(135deg, var(--primary-black) 0%, var(--secondary-black) 100%);
+        border-radius: 24px;
+        padding: 60px 40px;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+
+    .terms-hero::before {
+        content: '⚖️';
+        position: absolute;
+        bottom: -30px;
+        right: -30px;
+        font-size: 180px;
+        opacity: 0.06;
+        transform: rotate(12deg);
+    }
+
+    .terms-hero-content {
+        position: relative;
+        z-index: 2;
+        color: var(--pure-white);
+        max-width: 800px;
+    }
+
+    .terms-hero h1 {
+        font-size: 3.2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        font-family: var(--font-heading);
+        letter-spacing: -1px;
+    }
+
+    .terms-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        padding: 10px 24px;
+        border-radius: 100px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 25px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .last-updated {
+        display: inline-block;
+        margin-left: 15px;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.95rem;
+    }
+
+    /* Content Container */
+    .terms-container {
+        background: var(--pure-white);
+        border-radius: 24px;
+        padding: 60px;
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Section Styling */
+    .terms-section {
+        margin-bottom: 50px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .terms-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .section-number {
+        width: 48px;
+        height: 48px;
+        background: var(--primary-black);
+        color: var(--pure-white);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        font-family: var(--font-heading);
+    }
+
+    .terms-section h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--primary-black);
+        font-family: var(--font-heading);
+        margin-bottom: 0;
+    }
+
+    .terms-section h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary-black);
+        margin: 25px 0 15px;
+    }
+
+    .terms-section p {
+        font-size: 1.05rem;
+        color: var(--accent-gray);
+        margin-bottom: 20px;
+        line-height: 1.8;
+    }
+
+    /* List Styling */
+    .terms-list {
+        list-style: none;
+        margin: 25px 0;
+    }
+
+    .terms-list li {
+        padding: 12px 0 12px 35px;
+        position: relative;
+        font-size: 1.05rem;
+        color: var(--accent-gray);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .terms-list li:last-child {
+        border-bottom: none;
+    }
+
+    .terms-list li::before {
+        content: '•';
+        position: absolute;
+        left: 12px;
+        color: var(--primary-black);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 25px 0;
+        background: var(--soft-gray);
+        padding: 25px;
+        border-radius: 16px;
+    }
+
+    .product-tag {
+        background: var(--pure-white);
+        padding: 12px 20px;
+        border-radius: 50px;
+        text-align: center;
+        font-weight: 500;
+        color: var(--primary-black);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-light);
+    }
+
+    /* Highlight Box */
+    .highlight-box {
+        background: linear-gradient(145deg, var(--soft-gray) 0%, #f1f5f9 100%);
+        padding: 30px;
+        border-radius: 16px;
+        margin: 30px 0;
+        border-left: 4px solid var(--primary-black);
+    }
+
+    .highlight-box p {
+        margin-bottom: 0;
+        font-style: italic;
+    }
+
+    /* Contact Card */
+    .contact-card {
+        background: var(--soft-gray);
+        padding: 40px;
+        border-radius: 20px;
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .contact-details {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.1rem;
+        color: var(--accent-gray);
+    }
+
+    .contact-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--pure-white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .terms-hero h1 {
+            font-size: 2.2rem;
+        }
+
+        .terms-container {
+            padding: 30px;
+        }
+
+        .terms-section h2 {
+            font-size: 1.5rem;
+        }
+
+        .section-number {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+
+        .contact-details {
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .terms-hero {
+            padding: 40px 20px;
+        }
+
+        .terms-hero h1 {
+            font-size: 1.8rem;
+        }
+
+        .terms-container {
+            padding: 20px;
+        }
+
+        .product-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .terms-hero {
+            background: none;
+            color: black;
+            padding: 20px;
+        }
+
+        .terms-badge, .last-updated {
+            color: black;
+        }
+
+        .contact-card {
+            break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-page">
+    <!-- Hero Section -->
+    <div class="terms-hero">
+        <div class="terms-hero-content">
+            <span class="terms-badge">
+                📜 LEGAL AGREEMENT
+                <span class="last-updated">Last Updated: February 2026</span>
+            </span>
+            <h1>Terms and Conditions</h1>
+            <p style="font-size: 1.2rem; opacity: 0.95; max-width: 600px;">
+                Welcome to Hoka's Parlour. These terms govern your use of our website and purchases from your trusted MMU clothing store.
+            </p>
+        </div>
+    </div>
+
+    <!-- Terms Content -->
+    <div class="terms-container">
+        
+        <!-- Section 1: Introduction -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">1</span>
+                <h2>Introduction</h2>
+            </div>
+            <p>Welcome to <strong>Hoka's Parlour</strong>. These Terms and Conditions govern your use of our website and the purchase of products from our store.</p>
+            <p>By accessing this website or placing an order, you agree to be bound by these Terms and Conditions.</p>
+            <div class="highlight-box">
+                <p><strong>📍 Our Location:</strong> Hoka's Parlour operates primarily in Rongai, Kajiado County, Kenya, proudly serving students of <strong>Multi Media University of Kenya (MMU)</strong> and the surrounding community.</p>
+            </div>
+        </div>
+
+        <!-- Section 2: Eligibility -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">2</span>
+                <h2>Eligibility</h2>
+            </div>
+            <p>To place an order with Hoka's Parlour, you must:</p>
+            <ul class="terms-list">
+                <li>Be at least 18 years old, or</li>
+                <li>Have permission from a parent or legal guardian</li>
+            </ul>
+            <p>By using our website, you confirm that all information you provide is accurate, complete, and up-to-date. As a <strong>student-focused fashion brand serving MMU</strong>, we rely on accurate delivery information to ensure your orders reach you on time.</p>
+        </div>
+
+        <!-- Section 3: Products and Pricing -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">3</span>
+                <h2>Products and Pricing</h2>
+            </div>
+            <p>Hoka's Parlour specializes in modern fusion fashion for all genders. Our collection includes:</p>
+            
+            <div class="product-grid">
+                <span class="product-tag">🧥 Hoodies</span>
+                <span class="product-tag">👖 Sweatpants</span>
+                <span class="product-tag">👕 Sweatshirts</span>
+                <span class="product-tag">🧦 Socks</span>
+                <span class="product-tag">🩳 Shorts</span>
+                <span class="product-tag">👘 Capes</span>
+            </div>
+            
+            <p>All prices are listed in <strong>Kenyan Shillings (KES)</strong> unless otherwise stated. As a <strong>campus clothing store dedicated to MMU students</strong>, we strive to maintain student-friendly pricing while delivering quality fashion.</p>
+            
+            <h3>We Reserve The Right To:</h3>
+            <ul class="terms-list">
+                <li>Modify product prices at any time without prior notice</li>
+                <li>Update product descriptions and specifications</li>
+                <li>Discontinue products or collections as we evolve our brand</li>
+            </ul>
+        </div>
+
+        <!-- Section 4: Orders -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">4</span>
+                <h2>Orders</h2>
+            </div>
+            <p>When you place an order with Hoka's Parlour:</p>
+            <ul class="terms-list">
+                <li>You confirm that all delivery and contact details provided are accurate</li>
+                <li>You will receive an order confirmation via email within 24 hours</li>
+                <li>All orders are subject to product availability</li>
+            </ul>
+            
+            <h3>Order Cancellation:</h3>
+            <p>Hoka's Parlour reserves the right to cancel or refuse any order if:</p>
+            <ul class="terms-list">
+                <li>Payment is not completed successfully</li>
+                <li>Incorrect or fraudulent information is provided</li>
+                <li>Suspicious activity is detected</li>
+                <li>Product is no longer available in stock</li>
+            </ul>
+        </div>
+
+        <!-- Section 5: Payment -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">5</span>
+                <h2>Payment</h2>
+            </div>
+            <p>We accept various payment methods displayed on our website during checkout, including M-Pesa and Cash on Delivery for MMU students within our delivery zone.</p>
+            <p><strong>Important:</strong> Orders will only be processed and dispatched once full payment has been received and confirmed. For Cash on Delivery orders, payment is collected upon delivery.</p>
+        </div>
+
+        <!-- Section 6: Delivery -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">6</span>
+                <h2>Delivery</h2>
+            </div>
+            <p>At Hoka's Parlour, we take pride in our commitment to <strong>reliable and timely delivery for all MMU students</strong>. This is our core promise.</p>
+            
+            <div class="highlight-box">
+                <p><strong>🎓 MMU Commitment:</strong> Every order placed by a student of Multi Media University of Kenya (MMU) is prioritized and handled with special attention to ensure it arrives when you need it.</p>
+            </div>
+            
+            <p>Delivery timelines and specific location details are provided during checkout or communicated directly by our team.</p>
+            
+            <h3>Hoka's Parlour is not responsible for delays caused by:</h3>
+            <ul class="terms-list">
+                <li>Incorrect or incomplete delivery information provided by the customer</li>
+                <li>External courier service delays beyond our control</li>
+                <li>Events beyond reasonable control (force majeure)</li>
+            </ul>
+        </div>
+
+        <!-- Section 7: Returns and Exchanges -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">7</span>
+                <h2>Returns and Exchanges</h2>
+            </div>
+            <p>We want you to love your Hoka's Parlour fashion. Returns or exchanges may be accepted under the following conditions:</p>
+            <ul class="terms-list">
+                <li>The item is defective or damaged upon arrival</li>
+                <li>The wrong item was delivered</li>
+                <li>The item is unused, unwashed, and in original condition with tags attached</li>
+            </ul>
+            
+            <p>All return requests must be made within <strong>7 days of delivery</strong>. Hoka's Parlour reserves the right to reject return requests that do not meet these conditions.</p>
+        </div>
+
+        <!-- Section 8: Intellectual Property -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">8</span>
+                <h2>Intellectual Property</h2>
+            </div>
+            <p>All content on this website, including but not limited to:</p>
+            <ul class="terms-list">
+                <li>Logos and brand identities</li>
+                <li>Product images and photography</li>
+                <li>Text, descriptions, and marketing copy</li>
+                <li>Original designs and graphics</li>
+            </ul>
+            <p>are the exclusive property of <strong>Hoka's Parlour</strong> and may not be copied, reproduced, or used without explicit written permission.</p>
+        </div>
+
+        <!-- Section 9: Account Responsibility -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">9</span>
+                <h2>Account Responsibility</h2>
+            </div>
+            <p>If you create an account with Hoka's Parlour, you are solely responsible for:</p>
+            <ul class="terms-list">
+                <li>Maintaining the confidentiality of your login credentials</li>
+                <li>All activities that occur under your account</li>
+            </ul>
+            <p>We reserve the right to suspend or terminate accounts that violate our policies or engage in suspicious activity.</p>
+        </div>
+
+        <!-- Section 10: Limitation of Liability -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">10</span>
+                <h2>Limitation of Liability</h2>
+            </div>
+            <p>Hoka's Parlour shall not be liable for:</p>
+            <ul class="terms-list">
+                <li>Indirect, incidental, or consequential damages</li>
+                <li>Losses arising from misuse of products</li>
+                <li>Temporary technical website interruptions or downtime</li>
+            </ul>
+        </div>
+
+        <!-- Section 11: Changes to Terms -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">11</span>
+                <h2>Changes to Terms</h2>
+            </div>
+            <p>We may update these Terms and Conditions periodically to reflect changes in our practices or legal requirements. All updates will be posted on this page with an updated "Last Updated" date.</p>
+            <p>Your continued use of the Hoka's Parlour website after changes constitutes acceptance of the updated terms.</p>
+        </div>
+
+        <!-- Section 12: Contact Information -->
+        <div class="terms-section">
+            <div class="section-header">
+                <span class="section-number">12</span>
+                <h2>Contact Information</h2>
+            </div>
+            
+            <div class="contact-card">
+                <h3 style="margin-bottom: 20px; font-size: 1.6rem;">📬 Get In Touch</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 30px;">Have questions about our terms? We're here to help.</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <span class="contact-icon">📍</span>
+                        <div>
+                            <strong>Visit Us</strong><br>
+                            Rongai, Kajiado County<br>
+                            Kenya
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <div>
+                            <strong>Email Us</strong><br>
+                            legal@hokasparlour.co.ke
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <span class="contact-icon">📱</span>
+                        <div>
+                            <strong>Customer Support</strong><br>
+                            +254 700 000 000
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+                    <p style="margin-bottom: 0; font-size: 0.95rem; color: var(--accent-gray);">
+                        <strong>📍 Serving Multi Media University of Kenya (MMU)</strong> — Your trusted MMU fashion destination since 2024.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

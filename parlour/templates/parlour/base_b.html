@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Modern clothing store – fresh styles, purple accents, and dark mode comfort.">
+    <title>{% block title %}Purple Threads{% endblock %}</title>
+
+    <!-- Google Fonts & Font Awesome (social icons) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* ---------- LIGHT MODE (default) – white & purple accent ---------- */
+        :root {
+            --bg: #ffffff;
+            --surface: #f9fafb;
+            --card: #ffffff;
+            --text: #1e1e2f;
+            --text-soft: #3a3a4a;
+            --border: #eaeef2;
+            --accent: #7b2eda;        /* primary purple */
+            --accent-light: #a56eff;   /* hover / secondary */
+            --accent-soft: #f3e8ff;    /* backgrounds */
+            --shadow: 0 8px 20px rgba(0,0,0,0.02);
+            --footer-bg: #f5f7fb;
+            --footer-text: #2d2d3a;
+            --transition: 0.2s ease;
+        }
+
+        /* ---------- DARK MODE – purple remains, dark base ---------- */
+        .dark-mode {
+            --bg: #121212;
+            --surface: #1e1e24;
+            --card: #25252b;
+            --text: #f0f0fa;
+            --text-soft: #c2c2d6;
+            --border: #33333e;
+            --accent: #b287fd;         /* brighter purple for dark bg */
+            --accent-light: #d4adff;
+            --accent-soft: #2a1f3a;
+            --shadow: 0 8px 20px rgba(0,0,0,0.6);
+            --footer-bg: #1a1a20;
+            --footer-text: #ddddff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background-color 0.25s, color 0.2s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* container – consistent width */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* ---------- HEADER – modern, sticky, glassy ---------- */
+        header {
+            background-color: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1.2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+            background-color: rgba(var(--card-rgb), 0.85); /* fallback */
+            box-shadow: var(--shadow);
+        }
+
+        /* we need rgb vars for opacity – define them */
+        :root, .dark-mode {
+            --card-rgb: 255, 255, 255;
+            --bg-rgb: 255, 255, 255;
+        }
+        .dark-mode {
+            --card-rgb: 37, 37, 43;
+            --bg-rgb: 18, 18, 18;
+        }
+        header {
+            background-color: rgba(var(--card-rgb), 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .logo a {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+            color: var(--text);
+        }
+        .logo span {
+            color: var(--accent);
+        }
+
+        /* navigation */
+        .main-nav ul {
+            display: flex;
+            gap: 2.2rem;
+            list-style: none;
+            font-weight: 500;
+        }
+        .main-nav a {
+            text-decoration: none;
+            color: var(--text-soft);
+            transition: color 0.2s;
+            font-size: 1rem;
+        }
+        .main-nav a:hover {
+            color: var(--accent);
+        }
+
+        /* header actions: theme toggle + icons */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .theme-toggle {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--accent);
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .theme-toggle:hover {
+            background: var(--accent-light);
+            color: white;
+            border-color: var(--accent);
+        }
+        .cart-icon, .user-icon {
+            color: var(--text-soft);
+            font-size: 1.2rem;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .cart-icon:hover, .user-icon:hover {
+            color: var(--accent);
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.15rem 0.45rem;
+            border-radius: 20px;
+            border: 2px solid var(--card);
+        }
+
+        /* ---------- MAIN CONTENT – dynamic block ---------- */
+        main {
+            flex: 1;
+            padding: 3rem 0;
+        }
+
+        /* ---------- FOOTER – purple vibe, social links ---------- */
+        footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            border-top: 1px solid var(--border);
+            padding: 3rem 0 1.8rem;
+            margin-top: 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .footer-about p {
+            color: var(--text-soft);
+            margin: 1rem 0 0.5rem;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .footer-links h4, .footer-social h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+            color: var(--text);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .footer-links ul, .footer-social ul {
+            list-style: none;
+        }
+        .footer-links li {
+            margin-bottom: 0.7rem;
+        }
+        .footer-links a {
+            color: var(--text-soft);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: var(--accent);
+            padding-left: 4px;
+        }
+
+        /* social media icons – always purple touch */
+        .social-list {
+            display: flex;
+            gap: 1.2rem;
+        }
+        .social-list a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-soft);
+            color: var(--accent);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .social-list a:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .footer-bottom .purple-heart {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .payment-icons i {
+            font-size: 1.5rem;
+            margin-left: 0.6rem;
+            color: var(--text-soft);
+            opacity: 0.7;
+        }
+
+        /* responsive */
+        @media (max-width: 900px) {
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header-content {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .main-nav ul {
+                gap: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        /* placeholder content style */
+        .demo-content {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .demo-content h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.8rem;
+        }
+        .demo-content .purple-badge {
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 0.4rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 1.2rem;
+        }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn:hover {
+            background: var(--accent-light);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER – with logo, nav, theme toggler, cart -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <a href="/">PURPLE<span>THREADS</span></a>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/shop/">Shop</a></li>
+                    <li><a href="/new/">New arrivals</a></li>
+                    <li><a href="/sale/">Sale</a></li>
+                    <li><a href="/about/">About</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Switch between dark and light mode">
+                    <i class="fas fa-moon"></i> <!-- moon for dark mode activation, toggled via js -->
+                </button>
+                <a href="/cart/" class="cart-icon" aria-label="Shopping cart">
+                    <i class="fas fa-bag-shopping"></i>
+                    <span class="cart-count">3</span>
+                </a>
+                <a href="/account/" class="user-icon" aria-label="User account">
+                    <i class="far fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BLOCK – child templates insert content here -->
+    <main>
+        <div class="container">
+            {% block content %}
+            <!-- demo preview content – light/dark friendly, purple accents -->
+            <div class="demo-content">
+                <span class="purple-badge"><i class="fas fa-tag"></i> fresh summer drop</span>
+                <h1>vintage purple,<br>redefined.</h1>
+                <p style="color: var(--text-soft); max-width: 600px; margin: 0.8rem auto 2rem;">Premium essentials with a signature purple soul. Light mode, dark mode – always iconic.</p>
+                <button class="btn" onclick="alert('✨ welcome to purple threads – your style, your shade.')">shop the collection →</button>
+            </div>
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- FOOTER – with social links, clothing store info, dummy payment icons -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h3 style="color: var(--text); font-weight: 700; margin-bottom: 0.5rem;">PURPLE<span style="color: var(--accent);">THREADS</span></h3>
+                    <p>Where comfort meets purple edge. We design clothing that moves with you – sustainable, soft, and always with a pop of violet. </p>
+                    <div style="margin-top: 1.2rem;">
+                        <i class="fas fa-tshirt" style="color: var(--accent); margin-right: 0.8rem;"></i>
+                        <i class="fas fa-vest" style="color: var(--accent-light);"></i>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>EXPLORE</h4>
+                    <ul>
+                        <li><a href="/new/">New arrivals</a></li>
+                        <li><a href="/best-sellers/">Best sellers</a></li>
+                        <li><a href="/sustainable/">Sustainable</a></li>
+                        <li><a href="/lookbook/">Lookbook</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>SUPPORT</h4>
+                    <ul>
+                        <li><a href="/faq/">FAQ</a></li>
+                        <li><a href="/shipping/">Shipping</a></li>
+                        <li><a href="/returns/">Returns</a></li>
+                        <li><a href="/contact/">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h4>PURPLE HOURS</h4>
+                    <!-- SOCIAL MEDIA LINKS – all present for later updates -->
+                    <div class="social-list">
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Twitter / X"><i class="fab fa-x-twitter"></i></a>
+                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                    <p style="margin-top: 1.5rem; color: var(--text-soft); font-size: 0.9rem;">
+                        <i class="fas fa-envelope" style="color: var(--accent);"></i> hello@purplethreads.com
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2025 PURPLE THREADS – violet mode since forever.</span>
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="purple-heart">made with <i class="fas fa-heart" style="color: var(--accent);"></i> for dark & light</span>
+                    <span class="payment-icons">
+                        <i class="fab fa-cc-visa"></i>
+                        <i class="fab fa-cc-mastercard"></i>
+                        <i class="fab fa-cc-paypal"></i>
+                        <i class="fab fa-cc-apple-pay"></i>
+                    </span>
+                </span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DARK MODE TOGGLE SCRIPT – sets/removes .dark-mode, remembers preference -->
+    <script>
+        (function() {
+            // get from localStorage or system preference
+            const root = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const icon = themeToggle.querySelector('i');
+
+            function setDarkMode(isDark) {
+                if (isDark) {
+                    root.classList.add('dark-mode');
+                    icon.className = 'fas fa-sun';   // sun for light mode availability
+                } else {
+                    root.classList.remove('dark-mode');
+                    icon.className = 'fas fa-moon';   // moon for dark mode availability
+                }
+                // store preference
+                localStorage.setItem('purpleTheme', isDark ? 'dark' : 'light');
+            }
+
+            // initial theme: check localStorage or prefers-color-scheme
+            const stored = localStorage.getItem('purpleTheme');
+            if (stored === 'dark') {
+                setDarkMode(true);
+            } else if (stored === 'light') {
+                setDarkMode(false);
+            } else {
+                // if no stored, check system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setDarkMode(prefersDark);
+            }
+
+            // toggle on button click
+            themeToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isDark = !root.classList.contains('dark-mode');
+                setDarkMode(isDark);
+            });
+
+            // update card rgb vars to support backdrop blur – we used style var but keep consistency
+            // adjust header background based on computed style – just fine.
+        })();
+    </script>
+
+    <!-- extra small script to sync rgb custom props (for backdrop) -->
+    <script>
+        (function updateRgbVars() {
+            // ensure rgb values for card and bg are set – since we hardcoded them in :root we are safe.
+            // but we can recompute on dark mode toggle for absolute correctness (optional)
+            const root = document.documentElement;
+            function setRgb() {
+                const isDark = root.classList.contains('dark-mode');
+                if (isDark) {
+                    root.style.setProperty('--card-rgb', '37, 37, 43');
+                    root.style.setProperty('--bg-rgb', '18, 18, 18');
+                } else {
+                    root.style.setProperty('--card-rgb', '255, 255, 255');
+                    root.style.setProperty('--bg-rgb', '255, 255, 255');
+                }
+            }
+            setRgb();
+            // observer if class changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        setRgb();
+                    }
+                });
+            });
+            observer.observe(root, { attributes: true });
+        })();
+    </script>
+
+    <!-- django block for extra scripts -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

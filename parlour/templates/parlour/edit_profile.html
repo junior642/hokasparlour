@@ -1,0 +1,709 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Hoka's Parlour | MMU Fashion{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* -----------------------------------------------
+       EDIT PROFILE PAGE – PURE BASE.HTML INHERITANCE
+       Purple theme, dark mode support, Font Awesome icons
+       Modern minimalism for MMU student profiles
+    ----------------------------------------------- */
+    
+    .profile-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+
+    /* -----------------------------------------------
+       SIDEBAR – matches profile page styling
+    ----------------------------------------------- */
+    .profile-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .sidebar-card {
+        background: var(--card);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .sidebar-header {
+        background: var(--accent);
+        color: white;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .sidebar-header h5 {
+        margin: 0;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: white;
+    }
+
+    .sidebar-header i {
+        font-size: 1.2rem;
+    }
+
+    .profile-nav {
+        list-style: none;
+        padding: 0.8rem;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .profile-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        border-radius: 16px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .profile-nav-item i {
+        width: 20px;
+        color: var(--accent);
+        transition: var(--transition);
+    }
+
+    .profile-nav-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .profile-nav-item:hover i {
+        color: var(--accent);
+    }
+
+    .profile-nav-item.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .profile-nav-item.active i {
+        color: white;
+    }
+
+    /* -----------------------------------------------
+       EDIT PROFILE CARD
+    ----------------------------------------------- */
+    .edit-card {
+        background: var(--card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .edit-header {
+        background: var(--surface);
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .edit-header h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .edit-header h4 i {
+        color: var(--accent);
+    }
+
+    .edit-body {
+        padding: 2rem;
+    }
+
+    /* -----------------------------------------------
+       FORM SECTIONS
+    ----------------------------------------------- */
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .form-section h5 {
+        color: var(--accent);
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+    }
+
+    .form-section h5 i {
+        color: var(--accent);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        margin-bottom: 0.6rem;
+        color: var(--text);
+        font-size: 0.95rem;
+    }
+
+    .form-group label i {
+        color: var(--accent);
+        width: 18px;
+    }
+
+    .form-group label span.required {
+        color: var(--accent);
+        margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        font-size: 0.95rem;
+        background: var(--surface);
+        color: var(--text);
+        transition: var(--transition);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(123, 46, 218, 0.08);
+        background: var(--card);
+    }
+
+    .form-group input:hover,
+    .form-group select:hover,
+    .form-group textarea:hover {
+        border-color: var(--accent-light);
+    }
+
+    .form-group input[type="file"] {
+        padding: 0.7rem;
+        background: var(--surface);
+        border: 2px dashed var(--border);
+        cursor: pointer;
+    }
+
+    .form-group input[type="file"]:hover {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .form-group select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237b2eda' stroke-width='2' stroke-linecap='round' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1.2rem center;
+        background-size: 1.2rem;
+        padding-right: 2.5rem;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .help-text {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .help-text i {
+        color: var(--accent);
+        font-size: 0.8rem;
+    }
+
+    .error-text {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: #ef4444;
+    }
+
+    .error-text i {
+        color: #ef4444;
+    }
+
+    /* -----------------------------------------------
+       FORM ACTIONS
+    ----------------------------------------------- */
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 2px solid var(--border);
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0.9rem 2rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 2px solid transparent;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: transparent;
+        color: var(--accent);
+        border-color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text);
+        border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-2px);
+    }
+
+    .btn i {
+        transition: transform 0.25s;
+    }
+
+    .btn-primary:hover i {
+        transform: translateX(5px);
+    }
+
+    .btn-secondary:hover i {
+        transform: translateX(-4px);
+    }
+
+    /* -----------------------------------------------
+       CURRENT PROFILE PICTURE CARD
+    ----------------------------------------------- */
+    .profile-picture-card {
+        background: var(--surface);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-picture {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--accent);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .profile-picture img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-picture-info {
+        flex: 1;
+    }
+
+    .profile-picture-info h6 {
+        color: var(--text);
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .profile-picture-info h6 i {
+        color: var(--accent);
+    }
+
+    .profile-picture-info small {
+        color: var(--text-soft);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .profile-picture-info small i {
+        color: var(--accent);
+        font-size: 0.8rem;
+    }
+
+    /* -----------------------------------------------
+       RESPONSIVE
+    ----------------------------------------------- */
+    @media (max-width: 992px) {
+        .profile-container {
+            padding: 0 1.5rem;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0 1.2rem;
+        }
+        
+        .edit-header {
+            padding: 1.2rem;
+        }
+        
+        .edit-header h4 {
+            font-size: 1.3rem;
+        }
+        
+        .edit-body {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .profile-picture-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .profile-picture-info {
+            text-align: center;
+        }
+        
+        .profile-picture-info h6 {
+            justify-content: center;
+        }
+        
+        .profile-picture-info small {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-container {
+            padding: 0 1rem;
+        }
+        
+        .edit-header h4 {
+            font-size: 1.1rem;
+        }
+        
+        .edit-body {
+            padding: 1.2rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem 1rem;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .form-group input[type="file"] {
+        background: var(--card);
+    }
+    
+    .dark-mode .form-group input[type="file"]:hover {
+        background: var(--surface);
+    }
+    
+    .dark-mode .profile-picture-card {
+        background: var(--card);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+        <!-- Sidebar -->
+        <div style="flex: 1; min-width: 280px;">
+            <div class="profile-sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h5>My Account</h5>
+                    </div>
+                    <div class="profile-nav">
+                        <a href="{% url 'profile' %}" class="profile-nav-item {% if active_tab == 'profile' %}active{% endif %}">
+                            <i class="fas fa-user"></i> Profile Overview
+                        </a>
+                        <a href="{% url 'edit_profile' %}" class="profile-nav-item {% if active_tab == 'edit' %}active{% endif %}">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a href="{% url 'order_history' %}" class="profile-nav-item">
+                            <i class="fas fa-shopping-bag"></i> Order History
+                        </a>
+                        <a href="{% url 'change_password' %}" class="profile-nav-item">
+                            <i class="fas fa-lock"></i> Change Password
+                        </a>
+                        <div style="border-top: 1px solid var(--border); margin: 0.5rem 0;"></div>
+                        <a href="{% url 'cart' %}" class="profile-nav-item">
+                            <i class="fas fa-shopping-cart"></i> My Cart
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Profile Form -->
+        <div style="flex: 3; min-width: 350px;">
+            <div class="edit-card">
+                <div class="edit-header">
+                    <h4>
+                        <i class="fas fa-edit"></i>
+                        Edit Profile
+                    </h4>
+                </div>
+                
+                <div class="edit-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Account Information Section -->
+                        <div class="form-section">
+                            <h5>
+                                <i class="fas fa-id-card"></i>
+                                Account Information
+                            </h5>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="{{ user_form.username.id_for_label }}">
+                                        <i class="fas fa-user"></i> Username <span class="required">*</span>
+                                    </label>
+                                    {{ user_form.username }}
+                                    {% if user_form.username.errors %}
+                                        <div class="error-text">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ user_form.username.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ user_form.email.id_for_label }}">
+                                        <i class="fas fa-envelope"></i> Email <span class="required">*</span>
+                                    </label>
+                                    {{ user_form.email }}
+                                    {% if user_form.email.errors %}
+                                        <div class="error-text">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ user_form.email.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="{{ user_form.first_name.id_for_label }}">
+                                        <i class="fas fa-signature"></i> First Name
+                                    </label>
+                                    {{ user_form.first_name }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ user_form.last_name.id_for_label }}">
+                                        <i class="fas fa-signature"></i> Last Name
+                                    </label>
+                                    {{ user_form.last_name }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contact & Delivery Information Section -->
+                        <div class="form-section">
+                            <h5>
+                                <i class="fas fa-truck"></i>
+                                Contact & Delivery Information
+                            </h5>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="{{ profile_form.phone_number.id_for_label }}">
+                                        <i class="fas fa-phone"></i> Phone Number <span class="required">*</span>
+                                    </label>
+                                    {{ profile_form.phone_number }}
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle"></i>
+                                        Format: +2547XXXXXXXX (e.g., +254783072098)
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ profile_form.default_delivery_location.id_for_label }}">
+                                        <i class="fas fa-map-marker-alt"></i> Default Delivery Location
+                                    </label>
+                                    {{ profile_form.default_delivery_location }}
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle"></i>
+                                        e.g., Nairobi, Mombasa, Kisumu, Rongai
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ profile_form.delivery_address.id_for_label }}">
+                                    <i class="fas fa-address-card"></i> Delivery Address <span class="required">*</span>
+                                </label>
+                                {{ profile_form.delivery_address }}
+                                <div class="help-text">
+                                    <i class="fas fa-info-circle"></i>
+                                    Your full delivery address including building, street, estate
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment & Profile Preferences Section -->
+                        <div class="form-section">
+                            <h5>
+                                <i class="fas fa-credit-card"></i>
+                                Payment & Profile Preferences
+                            </h5>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="{{ profile_form.preferred_payment_method.id_for_label }}">
+                                        <i class="fas fa-coins"></i> Preferred Payment Method
+                                    </label>
+                                    {{ profile_form.preferred_payment_method }}
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="{{ profile_form.profile_picture.id_for_label }}">
+                                        <i class="fas fa-camera"></i> Profile Picture
+                                    </label>
+                                    {{ profile_form.profile_picture }}
+                                    <div class="help-text">
+                                        <i class="fas fa-info-circle"></i>
+                                        Optional: Upload a profile picture (JPG, PNG)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <a href="{% url 'profile' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Current Profile Picture -->
+            {% if request.user.profile.profile_picture %}
+            <div class="profile-picture-card">
+                <div class="profile-picture">
+                    <img src="{{ request.user.profile.profile_picture.url }}" alt="Current Profile Picture">
+                </div>
+                <div class="profile-picture-info">
+                    <h6>
+                        <i class="fas fa-image"></i>
+                        Current Profile Picture
+                    </h6>
+                    <small>
+                        <i class="fas fa-upload"></i>
+                        Upload a new image to replace it
+                    </small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
