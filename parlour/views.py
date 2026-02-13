@@ -1063,4 +1063,21 @@ def welcome(request):
     """welcome page"""
     return render(request, 'details/welcome.html')
 
+def google_v(request):
+    """welcome page"""
+    return render(request, 'details/googleb193ab12b0274614.html')
 
+
+
+from django.http import HttpResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "",
+        f"Sitemap: https://{request.get_host()}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")

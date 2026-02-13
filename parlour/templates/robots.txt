@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /accounts/
+Allow: /
+
+Sitemap: https://hokasparlour.adcent.online/sitemap.xml
+Host: https://hokasparlour.adcent.online

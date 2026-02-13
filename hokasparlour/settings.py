@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'parlour',
     'hokaadmin',
+    
 ]
 
 MIDDLEWARE = [
@@ -181,8 +182,8 @@ MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
 MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
 MPESA_SIMULATE = os.getenv('MPESA_SIMULATE', 'True') == 'True'
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'envyingly-deskbound-lisabeth.ngrok-free.dev'
+# Near the bottom
+ROBOTS_USE_SITEMAP = True
+ROBOTS_SITEMAP_URLS = [
+    'https://hokasparlour.adcent.online/sitemap.xml',
 ]
