@@ -1076,8 +1076,23 @@ from django.views.decorators.http import require_GET
 def robots_txt(request):
     lines = [
         "User-agent: *",
+        "",
+        "# Block admin areas from all crawlers",
+        "Disallow: /admin/",
+        "Disallow: /admin-dashboard/",
+        "",
+        "# Block user-specific and sensitive pages",
+        "Disallow: /cart/",
+        "Disallow: /checkout/",
+        "Disallow: /profile/",
+        "Disallow: /mpesa-payment/",
+        "Disallow: /mpesa-callback/",
+        "Disallow: /confirm-mpesa-payment/",
+        "Disallow: /verify-otp/",
+        "",
+        "# Allow everything else",
         "Allow: /",
         "",
-        f"Sitemap: https://{request.get_host()}/sitemap.xml",
+        f"Sitemap: https://hokasparlour.adcent.online/sitemap.xml",
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")

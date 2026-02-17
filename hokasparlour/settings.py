@@ -190,10 +190,8 @@ MPESA_PASSKEY = os.getenv('MPESA_PASSKEY')
 MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL')
 MPESA_SIMULATE = os.getenv('MPESA_SIMULATE', 'True') == 'True'
 
-
 # Near the bottom
 ROBOTS_USE_SITEMAP = True
 ROBOTS_SITEMAP_URLS = [
     'https://hokasparlour.adcent.online/sitemap.xml',
 ]
-
