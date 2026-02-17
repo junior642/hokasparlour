@@ -10,7 +10,17 @@ sitemaps = {
     'static': StaticViewSitemap,
 }
 
+# Add this at the top with your other imports
+def google_verification(request):
+    return HttpResponse(
+        'google-site-verification: googleb193ab12b0274614.html',
+        content_type='text/plain'
+    )
+
+
 urlpatterns = [
+  path('googleb193ab12b0274614.html', google_verification),
+
     path('admin/', admin.site.urls),
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),

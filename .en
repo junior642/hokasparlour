@@ -1,0 +1,4 @@
+DEBUG=False
+SECRET_KEY==*rzbile+t2v_@%z5m=ry!6b1-#w%_+$i$&56@@otsq6x6)kn-
+ALLOWED_HOSTS=hokasparlour.adcent.online,www.hokasparlour.adcent.online,localhost,127.0.0.1
+DATABASE_URL=sqlite:///db.sqlite3
