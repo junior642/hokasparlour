@@ -1,0 +1,718 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Orders Dashboard - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-shopping-bag{% endblock %}
+{% block page_title %}Orders Dashboard{% endblock %}
+{% block page_subtitle %}Manage and track customer orders{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Stats Tabs - Matching admin base */
+    .stats-tabs {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-tabs {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-tabs {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-tab {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.25rem;
+        text-decoration: none;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: block;
+    }
+
+    .stat-tab:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .stat-tab.active {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .stat-tab::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--status-color, var(--accent));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-tab:hover::before,
+    .stat-tab.active::before {
+        transform: scaleX(1);
+    }
+
+    .stat-tab-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .stat-tab-label {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-tab.active .stat-tab-label {
+        color: var(--accent);
+    }
+
+    /* Status-specific colors */
+    .tab-all { --status-color: var(--accent); }
+    .tab-pending { --status-color: var(--warning); }
+    .tab-processing { --status-color: var(--info); }
+    .tab-dispatched { --status-color: #a78bfa; }
+    .tab-delivered { --status-color: var(--success); }
+
+    /* Filter Bar */
+    .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .search-wrapper {
+        flex: 1;
+        min-width: 280px;
+        position: relative;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-soft);
+        font-size: 0.9rem;
+    }
+
+    .search-wrapper input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.8rem;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.95rem;
+        transition: var(--transition);
+    }
+
+    .search-wrapper input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .search-wrapper input::placeholder {
+        color: var(--text-soft);
+        font-style: italic;
+    }
+
+    .btn-search {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    .btn-search:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-clear {
+        background: var(--surface);
+        color: var(--text);
+        border: 1.5px solid var(--border);
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-clear:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    /* Active Filter Pill */
+    .active-filter {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+        color: var(--text-soft);
+        flex-wrap: wrap;
+    }
+
+    .filter-pill {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-pill i {
+        font-size: 0.8rem;
+    }
+
+    .results-count {
+        margin-left: auto;
+        background: var(--surface);
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: var(--text-soft);
+        border: 1px solid var(--border);
+    }
+
+    /* Orders Table */
+    .orders-table-container {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 2rem;
+    }
+
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table th {
+        background: var(--surface);
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-soft);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .orders-table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        vertical-align: middle;
+    }
+
+    .orders-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .orders-table tbody tr:hover {
+        background: var(--accent-soft);
+    }
+
+    .orders-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Order ID */
+    .order-id {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        display: inline-block;
+    }
+
+    /* Customer Info */
+    .customer-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+    }
+
+    .customer-contact {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .customer-contact i {
+        color: var(--accent);
+        font-size: 0.7rem;
+        margin-right: 4px;
+    }
+
+    /* Status Badges - Using admin base status colors */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-badge i {
+        font-size: 0.7rem;
+    }
+
+    .status-badge.pending {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .status-badge.processing {
+        background: var(--info-soft);
+        color: var(--info);
+    }
+
+    .status-badge.dispatched {
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+    }
+
+    .status-badge.delivered {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    /* Total Amount */
+    .order-total {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text);
+    }
+
+    .order-total small {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+        font-weight: normal;
+    }
+
+    /* Date */
+    .order-date {
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 2px;
+    }
+
+    .order-time {
+        font-size: 0.75rem;
+        color: var(--text-soft);
+    }
+
+    /* Quick Status Update */
+    .quick-update {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .quick-update select {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem 0.5rem 0.75rem;
+        color: var(--text);
+        font-size: 0.8rem;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b2eda' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.3rem center;
+    }
+
+    .quick-update select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .quick-update button {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .quick-update button:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: var(--transition);
+        background: var(--surface);
+    }
+
+    .action-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .action-btn i {
+        font-size: 0.8rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--accent-light);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-soft);
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 2rem;
+    }
+
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-left: 4px solid;
+    }
+
+    .alert.success {
+        background: var(--success-soft);
+        border-color: var(--success);
+        color: var(--success);
+    }
+
+    .alert.error {
+        background: var(--danger-soft);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .alert i {
+        font-size: 1rem;
+    }
+
+    /* Responsive Table */
+    @media (max-width: 768px) {
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-wrapper {
+            width: 100%;
+        }
+
+        .btn-search, .btn-clear {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .active-filter {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .results-count {
+            margin-left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .orders-table th, 
+        .orders-table td {
+            white-space: nowrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Messages -->
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Stats Tabs -->
+<div class="stats-tabs">
+    <a href="?status=all" class="stat-tab tab-all {% if status_filter == 'all' or not status_filter %}active{% endif %}">
+        <div class="stat-tab-number">{{ counts.all|default:'0' }}</div>
+        <div class="stat-tab-label">All Orders</div>
+    </a>
+    <a href="?status=pending" class="stat-tab tab-pending {% if status_filter == 'pending' %}active{% endif %}">
+        <div class="stat-tab-number">{{ counts.pending|default:'0' }}</div>
+        <div class="stat-tab-label">Pending</div>
+    </a>
+    <a href="?status=processing" class="stat-tab tab-processing {% if status_filter == 'processing' %}active{% endif %}">
+        <div class="stat-tab-number">{{ counts.processing|default:'0' }}</div>
+        <div class="stat-tab-label">Processing</div>
+    </a>
+    <a href="?status=dispatched" class="stat-tab tab-dispatched {% if status_filter == 'dispatched' %}active{% endif %}">
+        <div class="stat-tab-number">{{ counts.dispatched|default:'0' }}</div>
+        <div class="stat-tab-label">Dispatched</div>
+    </a>
+    <a href="?status=delivered" class="stat-tab tab-delivered {% if status_filter == 'delivered' %}active{% endif %}">
+        <div class="stat-tab-number">{{ counts.delivered|default:'0' }}</div>
+        <div class="stat-tab-label">Delivered</div>
+    </a>
+</div>
+
+<!-- Search Bar -->
+<form method="get" class="filter-bar">
+    <input type="hidden" name="status" value="{{ status_filter }}">
+    
+    <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" 
+               name="search" 
+               placeholder="Search by order ID, customer name, phone or email..."
+               value="{{ search_query }}">
+    </div>
+    
+    <button type="submit" class="btn-search">
+        <i class="fas fa-search"></i> Search
+    </button>
+    
+    {% if search_query %}
+        <a href="?status={{ status_filter }}" class="btn-clear">
+            <i class="fas fa-times"></i> Clear
+        </a>
+    {% endif %}
+</form>
+
+<!-- Active Filters -->
+<div class="active-filter">
+    <span>Showing:</span>
+    <span class="filter-pill">
+        {% if status_filter == 'all' or not status_filter %}
+            All Orders
+        {% elif status_filter == 'pending' %}
+            Pending
+        {% elif status_filter == 'processing' %}
+            Processing
+        {% elif status_filter == 'dispatched' %}
+            Dispatched
+        {% elif status_filter == 'delivered' %}
+            Delivered
+        {% endif %}
+    </span>
+    
+    {% if search_query %}
+        <span class="filter-pill">
+            <i class="fas fa-search"></i> "{{ search_query }}"
+        </span>
+    {% endif %}
+    
+    <span class="results-count">
+        <i class="fas fa-clipboard-list"></i> 
+        {{ page_obj.paginator.count }} order{{ page_obj.paginator.count|pluralize }}
+    </span>
+</div>
+
+<!-- Orders Table -->
+<div class="orders-table-container">
+    {% if page_obj %}
+    <table class="orders-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Update</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in page_obj %}
+            <tr>
+                <td>
+                    <span class="order-id">#{{ order.id }}</span>
+                </td>
+                <td>
+                    <div class="customer-name">{{ order.customer_name }}</div>
+                    <div class="customer-contact">
+                        <i class="fas fa-phone"></i> {{ order.phone_number }}<br>
+                        <i class="fas fa-envelope"></i> {{ order.email|truncatechars:20 }}
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge {{ order.order_status }}">
+                        <i class="fas fa-circle"></i>
+                        {{ order.get_order_status_display }}
+                    </span>
+                </td>
+                <td>
+                    <span class="order-total">
+                        KSH {{ order.get_total|floatformat:0 }}
+                    </span>
+                </td>
+                <td>
+                    <div class="order-date">{{ order.created_at|date:"M d, Y" }}</div>
+                    <div class="order-time">{{ order.created_at|date:"H:i" }}</div>
+                </td>
+                <td>
+                    <form method="post" action="{% url 'update_order_status' order.id %}" class="quick-update">
+                        {% csrf_token %}
+                        <select name="status">
+                            <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="processing" {% if order.order_status == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="dispatched" {% if order.order_status == 'dispatched' %}selected{% endif %}>Dispatched</option>
+                            <option value="delivered" {% if order.order_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        </select>
+                        <button type="submit"><i class="fas fa-save"></i></button>
+                    </form>
+                </td>
+                <td>
+                    <a href="{% url 'order_detail' order.id %}" class="action-btn">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-shopping-bag"></i>
+        <h3>No Orders Found</h3>
+        <p>{% if search_query %}No orders matching "{{ search_query }}" were found.{% else %}There are no orders to display.{% endif %}</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+    {% if page_obj.has_previous %}
+        <a href="?status={{ status_filter }}&search={{ search_query }}&page={{ page_obj.previous_page_number }}" class="page-link">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+            <span class="page-link active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?status={{ status_filter }}&search={{ search_query }}&page={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?status={{ status_filter }}&search={{ search_query }}&page={{ page_obj.next_page_number }}" class="page-link">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

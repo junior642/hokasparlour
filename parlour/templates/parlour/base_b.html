@@ -2,46 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Modern clothing store – fresh styles, purple accents, and dark mode comfort.">
-    <title>{% block title %}Purple Threads{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 
-    <!-- Google Fonts & Font Awesome (social icons) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- ---------- PRIMARY META TAGS ---------- -->
+    <title>{% block title %}Admin Dashboard - Hoka's Parlour{% endblock %}</title>
+    <meta name="description" content="{% block description %}Hoka's Parlour Admin Dashboard - Manage your fashion store{% endblock %}">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- ---------- FAVICON & APP ICONS ---------- -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <meta name="msapplication-TileColor" content="#7b2eda">
+    <meta name="theme-color" content="#7b2eda">
+    
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
-        /* ---------- LIGHT MODE (default) – white & purple accent ---------- */
+        /* -----------------------------------------------
+           ADMIN DASHBOARD STYLES - Matches Hoka's Parlour theme
+        ----------------------------------------------- */
+        
+        /* ---------- CSS VARIABLES – LIGHT MODE ---------- */
         :root {
             --bg: #ffffff;
-            --surface: #f9fafb;
+            --surface: #f8fafc;
             --card: #ffffff;
-            --text: #1e1e2f;
-            --text-soft: #3a3a4a;
-            --border: #eaeef2;
-            --accent: #7b2eda;        /* primary purple */
-            --accent-light: #a56eff;   /* hover / secondary */
-            --accent-soft: #f3e8ff;    /* backgrounds */
-            --shadow: 0 8px 20px rgba(0,0,0,0.02);
-            --footer-bg: #f5f7fb;
-            --footer-text: #2d2d3a;
-            --transition: 0.2s ease;
+            --text: #0a0a0a;
+            --text-soft: #334155;
+            --border: #e2e8f0;
+            --accent: #7b2eda;
+            --accent-light: #a78bfa;
+            --accent-soft: #f3e8ff;
+            --accent-rgb: 123, 46, 218;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
+            --shadow: 0 4px 6px -2px rgba(0,0,0,0.02);
+            --shadow-md: 0 10px 15px -3px rgba(123, 46, 218, 0.1);
+            --transition: all 0.2s ease;
+            
+            /* Status colors */
+            --success: #10b981;
+            --success-soft: #d1fae5;
+            --warning: #f59e0b;
+            --warning-soft: #fed7aa;
+            --danger: #ef4444;
+            --danger-soft: #fee2e2;
+            --info: #3b82f6;
+            --info-soft: #dbeafe;
         }
 
-        /* ---------- DARK MODE – purple remains, dark base ---------- */
+        /* ---------- DARK MODE ---------- */
         .dark-mode {
-            --bg: #121212;
-            --surface: #1e1e24;
-            --card: #25252b;
+            --bg: #0a0a0c;
+            --surface: #16161c;
+            --card: #1e1e24;
             --text: #f0f0fa;
-            --text-soft: #c2c2d6;
-            --border: #33333e;
-            --accent: #b287fd;         /* brighter purple for dark bg */
+            --text-soft: #b0b0c5;
+            --border: #2c2c35;
+            --accent: #b287fd;
             --accent-light: #d4adff;
-            --accent-soft: #2a1f3a;
-            --shadow: 0 8px 20px rgba(0,0,0,0.6);
-            --footer-bg: #1a1a20;
-            --footer-text: #ddddff;
+            --accent-soft: #281f3a;
+            --accent-rgb: 178, 135, 253;
+            --shadow-md: 0 10px 15px -3px rgba(178, 135, 253, 0.15);
+            
+            --success: #34d399;
+            --success-soft: #064e3b;
+            --warning: #fbbf24;
+            --warning-soft: #78350f;
+            --danger: #f87171;
+            --danger-soft: #7f1d1d;
+            --info: #60a5fa;
+            --info-soft: #1e3a8a;
         }
 
         * {
@@ -52,473 +93,1051 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
+            background-color: var(--surface);
             color: var(--text);
-            line-height: 1.6;
-            transition: background-color 0.25s, color 0.2s;
-            display: flex;
-            flex-direction: column;
+            line-height: 1.5;
+            transition: background-color 0.2s, color 0.2s;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* container – consistent width */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* ---------- HEADER – modern, sticky, glassy ---------- */
-        header {
-            background-color: var(--card);
-            border-bottom: 1px solid var(--border);
-            padding: 1.2rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-            background-color: rgba(var(--card-rgb), 0.85); /* fallback */
-            box-shadow: var(--shadow);
-        }
-
-        /* we need rgb vars for opacity – define them */
-        :root, .dark-mode {
-            --card-rgb: 255, 255, 255;
-            --bg-rgb: 255, 255, 255;
-        }
-        .dark-mode {
-            --card-rgb: 37, 37, 43;
-            --bg-rgb: 18, 18, 18;
-        }
-        header {
-            background-color: rgba(var(--card-rgb), 0.8);
-            backdrop-filter: blur(12px);
-        }
-
-        .header-content {
+        /* Admin Layout */
+        .admin-wrapper {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-
-        .logo a {
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            text-decoration: none;
-            color: var(--text);
-        }
-        .logo span {
-            color: var(--accent);
-        }
-
-        /* navigation */
-        .main-nav ul {
-            display: flex;
-            gap: 2.2rem;
-            list-style: none;
-            font-weight: 500;
-        }
-        .main-nav a {
-            text-decoration: none;
-            color: var(--text-soft);
-            transition: color 0.2s;
-            font-size: 1rem;
-        }
-        .main-nav a:hover {
-            color: var(--accent);
-        }
-
-        /* header actions: theme toggle + icons */
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-        .theme-toggle {
-            background: var(--accent-soft);
-            border: none;
-            color: var(--accent);
-            font-size: 1.2rem;
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            border: 1px solid transparent;
-        }
-        .theme-toggle:hover {
-            background: var(--accent-light);
-            color: white;
-            border-color: var(--accent);
-        }
-        .cart-icon, .user-icon {
-            color: var(--text-soft);
-            font-size: 1.2rem;
-            transition: color 0.2s;
+            min-height: 100vh;
             position: relative;
         }
-        .cart-icon:hover, .user-icon:hover {
+
+        /* ---------- SIDEBAR ---------- */
+        .admin-sidebar {
+            width: 280px;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: 'Playfair Display', serif;
+            color: var(--text);
+            text-decoration: none;
+            display: block;
+        }
+
+        .sidebar-logo span {
             color: var(--accent);
         }
-        .cart-count {
-            position: absolute;
-            top: -8px;
-            right: -10px;
-            background: var(--accent);
-            color: white;
+
+        .admin-badge {
+            background: var(--accent-soft);
+            color: var(--accent);
             font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.15rem 0.45rem;
-            border-radius: 20px;
-            border: 2px solid var(--card);
-        }
-
-        /* ---------- MAIN CONTENT – dynamic block ---------- */
-        main {
-            flex: 1;
-            padding: 3rem 0;
-        }
-
-        /* ---------- FOOTER – purple vibe, social links ---------- */
-        footer {
-            background-color: var(--footer-bg);
-            color: var(--footer-text);
-            border-top: 1px solid var(--border);
-            padding: 3rem 0 1.8rem;
-            margin-top: 2rem;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1.5fr;
-            gap: 2.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .footer-about p {
-            color: var(--text-soft);
-            margin: 1rem 0 0.5rem;
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .footer-links h4, .footer-social h4 {
-            font-size: 1.1rem;
-            margin-bottom: 1.2rem;
-            color: var(--text);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 0.5rem;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
-        .footer-links ul, .footer-social ul {
-            list-style: none;
-        }
-        .footer-links li {
-            margin-bottom: 0.7rem;
-        }
-        .footer-links a {
-            color: var(--text-soft);
-            text-decoration: none;
-            font-size: 0.95rem;
-            transition: color 0.2s;
-        }
-        .footer-links a:hover {
-            color: var(--accent);
-            padding-left: 4px;
+
+        .admin-user-info {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* social media icons – always purple touch */
-        .social-list {
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-soft);
+            border-radius: 12px;
             display: flex;
-            gap: 1.2rem;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 600;
+            border: 2px solid var(--accent-light);
         }
-        .social-list a {
+
+        .user-details h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            font-size: 0.8rem;
+            color: var(--text-soft);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .user-details p i {
+            color: var(--accent);
+            font-size: 0.7rem;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-soft);
+            margin-bottom: 1rem;
+            padding-left: 0.75rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--text-soft);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: var(--transition);
+            margin-bottom: 4px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item i {
+            width: 24px;
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .nav-item:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 600;
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50px;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .back-to-site {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-soft);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: var(--transition);
+            margin-bottom: 1rem;
+        }
+
+        .back-to-site:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .theme-toggle-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .theme-toggle-sidebar span {
+            color: var(--text-soft);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle-sidebar button {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--accent);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-sidebar button:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* ---------- MAIN CONTENT AREA ---------- */
+        .admin-main {
+            flex: 1;
+            margin-left: 280px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+        }
+
+        /* Top Navigation */
+        .admin-top-nav {
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            backdrop-filter: blur(12px);
+            background: rgba(var(--card-rgb), 0.9);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title i {
+            font-size: 1.5rem;
+            color: var(--accent);
+            background: var(--accent-soft);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .page-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .page-title .subtitle {
+            font-size: 0.85rem;
+            color: var(--text-soft);
+            margin-top: 2px;
+        }
+
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-soft);
+        }
+
+        .notification-btn {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-soft);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .notification-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* ---------- CONTENT AREA ---------- */
+        .admin-content {
+            padding: 2rem;
+            flex: 1;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-light);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--accent-soft);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.3rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: var(--text-soft);
+            font-size: 0.9rem;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header h3 i {
+            color: var(--accent);
+        }
+
+        .card-header .view-all {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .card-header .view-all:hover {
+            text-decoration: underline;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-soft);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table tbody tr:hover {
+            background: var(--accent-soft);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.paid {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .status-badge.pending {
+            background: var(--warning-soft);
+            color: var(--warning);
+        }
+
+        .status-badge.shipped {
+            background: var(--info-soft);
+            color: var(--info);
+        }
+
+        .status-badge.cancelled {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            color: var(--text-soft);
+            cursor: pointer;
+            transition: var(--transition);
+            margin: 0 2px;
+        }
+
+        .action-btn:hover {
             background: var(--accent-soft);
             color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--danger-soft);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        /* Activity List */
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        .social-list a:hover {
-            background: var(--accent);
-            color: white;
-            transform: translateY(-3px);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
-            font-size: 0.9rem;
-            color: var(--text-soft);
+            background: var(--accent-soft);
+            border-radius: 10px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-        }
-        .footer-bottom .purple-heart {
+            justify-content: center;
             color: var(--accent);
-            font-weight: 600;
-        }
-        .payment-icons i {
-            font-size: 1.5rem;
-            margin-left: 0.6rem;
-            color: var(--text-soft);
-            opacity: 0.7;
+            flex-shrink: 0;
         }
 
-        /* responsive */
-        @media (max-width: 900px) {
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .header-content {
-                flex-direction: column;
-                gap: 0.8rem;
-            }
+        .activity-details {
+            flex: 1;
         }
-        @media (max-width: 600px) {
-            .footer-grid {
-                grid-template-columns: 1fr;
+
+        .activity-text {
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            color: var(--text-soft);
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                box-shadow: none;
             }
-            .main-nav ul {
-                gap: 1rem;
-                flex-wrap: wrap;
+            
+            .admin-sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .admin-main {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: flex;
+                align-items: center;
                 justify-content: center;
             }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                width: 200px;
+            }
         }
 
-        /* placeholder content style */
-        .demo-content {
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 3rem 2rem;
-            text-align: center;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+        @media (max-width: 768px) {
+            .admin-top-nav {
+                padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            
+            .page-title h1 {
+                font-size: 1.25rem;
+            }
+            
+            .top-nav-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .admin-content {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
-        .demo-content h1 {
-            font-size: 2.2rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.8rem;
+
+        /* Custom Utilities */
+        .hidden {
+            display: none !important;
         }
-        .demo-content .purple-badge {
-            background: var(--accent-soft);
-            color: var(--accent);
-            padding: 0.4rem 1.2rem;
-            border-radius: 40px;
-            font-weight: 500;
-            display: inline-block;
-            margin-bottom: 1.2rem;
+        
+        /* Add RGB variables for card */
+        :root {
+            --card-rgb: 255, 255, 255;
         }
-        .btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn:hover {
-            background: var(--accent-light);
-            transform: scale(1.02);
+        
+        .dark-mode {
+            --card-rgb: 30, 30, 36;
         }
     </style>
+    
+    {% block extra_style %}{% endblock %}
 </head>
 <body>
-    <!-- HEADER – with logo, nav, theme toggler, cart -->
-    <header>
-        <div class="container header-content">
-            <div class="logo">
-                <a href="/">PURPLE<span>THREADS</span></a>
+    <!-- ADMIN WRAPPER -->
+    <div class="admin-wrapper">
+        
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-logo">HOKA'S<span> PARLOUR</span></a>
+                <span class="admin-badge"><i class="fas fa-shield-alt"></i> ADMIN PANEL</span>
             </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/shop/">Shop</a></li>
-                    <li><a href="/new/">New arrivals</a></li>
-                    <li><a href="/sale/">Sale</a></li>
-                    <li><a href="/about/">About</a></li>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <button class="theme-toggle" id="themeToggle" aria-label="Switch between dark and light mode">
-                    <i class="fas fa-moon"></i> <!-- moon for dark mode activation, toggled via js -->
+
+            <!-- User Info -->
+            <div class="admin-user-info">
+                <div class="user-avatar">
+                    {% if user.first_name %}
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    {% else %}
+                        {{ user.username|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p><i class="fas fa-circle"></i> {{ user.is_superuser|yesno:"Super Admin,Administrator" }}</p>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">MAIN</div>
+                    <a href="/admin-dashboard" class="nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/admin-dashboard/analytics/" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">STORE</div>
+                    <a href="/manage-products" class="nav-item">
+                        <i class="fas fa-tshirt"></i>
+                        <span>Products</span>
+                        <span class="badge">24</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-tags"></i>
+                        <span>Categories</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-boxes"></i>
+                        <span>Inventory</span>
+                        <span class="badge">3 low</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">ORDERS</div>
+                    <a href="/orders" class="nav-item">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>All Orders</span>
+                        <span class="badge">12</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Pending</span>
+                        <span class="badge">5</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Processing</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-truck"></i>
+                        <span>Shipped</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Delivered</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">CUSTOMERS</div>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>All Customers</span>
+                        <span class="badge">156</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-star"></i>
+                        <span>Reviews</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-headset"></i>
+                        <span>Support</span>
+                        <span class="badge">2</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">MARKETING</div>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Discounts</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-megaphone"></i>
+                        <span>Campaigns</span>
+                    </a>
+                    <a href="/ads" class="nav-item">
+                        <i class="fas fa-ad"></i>
+                        <span>Advertisements</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">SETTINGS</div>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Store Settings</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>Shipping</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Payment</span>
+                    </a>
+                    <a href="#" class="nav-item">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Staff</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a href="#" class="back-to-site">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Site</span>
+                </a>
+                
+                <div class="theme-toggle-sidebar">
+                    <span><i class="fas fa-palette"></i> Dark Mode</span>
+                    <button id="sidebarThemeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="admin-main">
+            
+            <!-- Top Navigation -->
+            <div class="admin-top-nav">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
                 </button>
-                <a href="/cart/" class="cart-icon" aria-label="Shopping cart">
-                    <i class="fas fa-bag-shopping"></i>
-                    <span class="cart-count">3</span>
-                </a>
-                <a href="/account/" class="user-icon" aria-label="User account">
-                    <i class="far fa-user"></i>
-                </a>
-            </div>
-        </div>
-    </header>
 
-    <!-- MAIN BLOCK – child templates insert content here -->
-    <main>
-        <div class="container">
-            {% block content %}
-            <!-- demo preview content – light/dark friendly, purple accents -->
-            <div class="demo-content">
-                <span class="purple-badge"><i class="fas fa-tag"></i> fresh summer drop</span>
-                <h1>vintage purple,<br>redefined.</h1>
-                <p style="color: var(--text-soft); max-width: 600px; margin: 0.8rem auto 2rem;">Premium essentials with a signature purple soul. Light mode, dark mode – always iconic.</p>
-                <button class="btn" onclick="alert('✨ welcome to purple threads – your style, your shade.')">shop the collection →</button>
-            </div>
-            {% endblock %}
-        </div>
-    </main>
-
-    <!-- FOOTER – with social links, clothing store info, dummy payment icons -->
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-about">
-                    <h3 style="color: var(--text); font-weight: 700; margin-bottom: 0.5rem;">PURPLE<span style="color: var(--accent);">THREADS</span></h3>
-                    <p>Where comfort meets purple edge. We design clothing that moves with you – sustainable, soft, and always with a pop of violet. </p>
-                    <div style="margin-top: 1.2rem;">
-                        <i class="fas fa-tshirt" style="color: var(--accent); margin-right: 0.8rem;"></i>
-                        <i class="fas fa-vest" style="color: var(--accent-light);"></i>
+                <div class="page-title">
+                    <i class="{% block page_icon %}fas fa-dashboard{% endblock %}"></i>
+                    <div>
+                        <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                        <div class="subtitle">{% block page_subtitle %}Welcome back, {{ user.get_short_name|default:user.username }}{% endblock %}</div>
                     </div>
                 </div>
-                <div class="footer-links">
-                    <h4>EXPLORE</h4>
-                    <ul>
-                        <li><a href="/new/">New arrivals</a></li>
-                        <li><a href="/best-sellers/">Best sellers</a></li>
-                        <li><a href="/sustainable/">Sustainable</a></li>
-                        <li><a href="/lookbook/">Lookbook</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>SUPPORT</h4>
-                    <ul>
-                        <li><a href="/faq/">FAQ</a></li>
-                        <li><a href="/shipping/">Shipping</a></li>
-                        <li><a href="/returns/">Returns</a></li>
-                        <li><a href="/contact/">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-social">
-                    <h4>PURPLE HOURS</h4>
-                    <!-- SOCIAL MEDIA LINKS – all present for later updates -->
-                    <div class="social-list">
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Twitter / X"><i class="fab fa-x-twitter"></i></a>
-                        <a href="#" aria-label="Pinterest"><i class="fab fa-pinterest-p"></i></a>
-                        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+
+                <div class="top-nav-actions">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search in admin..." id="adminSearch">
+                        <i class="fas fa-search"></i>
                     </div>
-                    <p style="margin-top: 1.5rem; color: var(--text-soft); font-size: 0.9rem;">
-                        <i class="fas fa-envelope" style="color: var(--accent);"></i> hello@purplethreads.com
-                    </p>
+
+                    <button class="notification-btn" id="notificationBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <span>© 2025 PURPLE THREADS – violet mode since forever.</span>
-                <span style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="purple-heart">made with <i class="fas fa-heart" style="color: var(--accent);"></i> for dark & light</span>
-                    <span class="payment-icons">
-                        <i class="fab fa-cc-visa"></i>
-                        <i class="fab fa-cc-mastercard"></i>
-                        <i class="fab fa-cc-paypal"></i>
-                        <i class="fab fa-cc-apple-pay"></i>
-                    </span>
-                </span>
+
+            <!-- Main Content Area -->
+            <div class="admin-content">
+                <!-- Messages -->
+                {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-lg border mb-2 {% if message.tags == 'success' %}bg-success-soft border-success text-success{% elif message.tags == 'error' %}bg-danger-soft border-danger text-danger{% else %}bg-accent-soft border-accent-light text-accent{% endif %}">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Child template content -->
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Panel (hidden by default) -->
+    <div id="notificationPanel" class="hidden fixed right-4 top-20 w-96 bg-card border border-border rounded-2xl shadow-xl z-50">
+        <div class="p-4 border-b border-border">
+            <h3 class="font-bold">Notifications</h3>
+        </div>
+        <div class="max-h-96 overflow-y-auto">
+            <div class="p-4 hover:bg-accent-soft">
+                <p class="text-sm"><span class="font-bold">New order #1234</span> - KSh 3,500</p>
+                <p class="text-xs text-soft mt-1">2 minutes ago</p>
+            </div>
+            <div class="p-4 hover:bg-accent-soft">
+                <p class="text-sm"><span class="font-bold">Product low stock</span> - "Classic Tee" (3 left)</p>
+                <p class="text-xs text-soft mt-1">15 minutes ago</p>
+            </div>
+            <div class="p-4 hover:bg-accent-soft">
+                <p class="text-sm"><span class="font-bold">New customer review</span> - 5 stars</p>
+                <p class="text-xs text-soft mt-1">1 hour ago</p>
             </div>
         </div>
-    </footer>
+        <div class="p-4 border-t border-border">
+            <a href="#" class="text-accent text-sm font-semibold">View all</a>
+        </div>
+    </div>
 
-    <!-- DARK MODE TOGGLE SCRIPT – sets/removes .dark-mode, remembers preference -->
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/50 z-40"></div>
+
+    <!-- Scripts -->
     <script>
         (function() {
-            // get from localStorage or system preference
+            // Theme Toggle
             const root = document.documentElement;
-            const themeToggle = document.getElementById('themeToggle');
-            const icon = themeToggle.querySelector('i');
-
+            const sidebarToggle = document.getElementById('sidebarThemeToggle');
+            
             function setDarkMode(isDark) {
                 if (isDark) {
                     root.classList.add('dark-mode');
-                    icon.className = 'fas fa-sun';   // sun for light mode availability
+                    document.querySelectorAll('.theme-toggle-sidebar i:last-child, #sidebarThemeToggle i').forEach(icon => {
+                        icon.className = 'fas fa-sun';
+                    });
                 } else {
                     root.classList.remove('dark-mode');
-                    icon.className = 'fas fa-moon';   // moon for dark mode availability
+                    document.querySelectorAll('.theme-toggle-sidebar i:last-child, #sidebarThemeToggle i').forEach(icon => {
+                        icon.className = 'fas fa-moon';
+                    });
                 }
-                // store preference
-                localStorage.setItem('purpleTheme', isDark ? 'dark' : 'light');
+                localStorage.setItem('hokasparlour_theme', isDark ? 'dark' : 'light');
             }
 
-            // initial theme: check localStorage or prefers-color-scheme
-            const stored = localStorage.getItem('purpleTheme');
+            const stored = localStorage.getItem('hokasparlour_theme');
             if (stored === 'dark') {
                 setDarkMode(true);
             } else if (stored === 'light') {
                 setDarkMode(false);
             } else {
-                // if no stored, check system preference
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 setDarkMode(prefersDark);
             }
 
-            // toggle on button click
-            themeToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                const isDark = !root.classList.contains('dark-mode');
-                setDarkMode(isDark);
-            });
-
-            // update card rgb vars to support backdrop blur – we used style var but keep consistency
-            // adjust header background based on computed style – just fine.
-        })();
-    </script>
-
-    <!-- extra small script to sync rgb custom props (for backdrop) -->
-    <script>
-        (function updateRgbVars() {
-            // ensure rgb values for card and bg are set – since we hardcoded them in :root we are safe.
-            // but we can recompute on dark mode toggle for absolute correctness (optional)
-            const root = document.documentElement;
-            function setRgb() {
-                const isDark = root.classList.contains('dark-mode');
-                if (isDark) {
-                    root.style.setProperty('--card-rgb', '37, 37, 43');
-                    root.style.setProperty('--bg-rgb', '18, 18, 18');
-                } else {
-                    root.style.setProperty('--card-rgb', '255, 255, 255');
-                    root.style.setProperty('--bg-rgb', '255, 255, 255');
-                }
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    setDarkMode(!root.classList.contains('dark-mode'));
+                });
             }
-            setRgb();
-            // observer if class changes
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.attributeName === 'class') {
-                        setRgb();
+
+            // Mobile Menu Toggle
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function openSidebar() {
+                sidebar.classList.add('active');
+                overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('active');
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+
+            if (menuToggle) {
+                menuToggle.addEventListener('click', openSidebar);
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+
+            // Notification Panel
+            const notificationBtn = document.getElementById('notificationBtn');
+            const notificationPanel = document.getElementById('notificationPanel');
+
+            if (notificationBtn) {
+                notificationBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notificationPanel.classList.toggle('hidden');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                        notificationPanel.classList.add('hidden');
                     }
                 });
-            });
-            observer.observe(root, { attributes: true });
+            }
+
+            // Admin Search (basic implementation)
+            const adminSearch = document.getElementById('adminSearch');
+            if (adminSearch) {
+                adminSearch.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase();
+                    // You can implement search functionality here
+                    console.log('Searching:', query);
+                });
+            }
         })();
     </script>
 
-    <!-- django block for extra scripts -->
-    {% block extra_js %}{% endblock %}
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

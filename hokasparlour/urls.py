@@ -29,7 +29,7 @@ urlpatterns = [
     path('admin-dashboard/', include('hokaadmin.urls')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('robots.txt', robots_txt),
-    path('googleb193ab12b0274614.html', google_verify),
+    
 ]
 
 if settings.DEBUG:

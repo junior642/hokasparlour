@@ -1,0 +1,832 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-shopping-bag{% endblock %}
+{% block page_title %}Order #{{ order.id }}{% endblock %}
+{% block page_subtitle %}View and manage order details{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Back Link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        padding: 0.5rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateX(-4px);
+    }
+
+    /* Order Header */
+    .order-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .order-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .order-id {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .order-id span {
+        color: var(--accent);
+    }
+
+    .order-date {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+    }
+
+    .order-date i {
+        color: var(--accent);
+    }
+
+    /* Status Badge */
+    .status-badge-large {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border: 1px solid;
+    }
+
+    .status-badge-large i {
+        font-size: 1rem;
+    }
+
+    .status-badge-large.pending {
+        background: var(--warning-soft);
+        color: var(--warning);
+        border-color: var(--warning);
+    }
+
+    .status-badge-large.processing {
+        background: var(--info-soft);
+        color: var(--info);
+        border-color: var(--info);
+    }
+
+    .status-badge-large.dispatched {
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+        border-color: #a78bfa;
+    }
+
+    .status-badge-large.delivered {
+        background: var(--success-soft);
+        color: var(--success);
+        border-color: var(--success);
+    }
+
+    /* Timeline */
+    .timeline-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    .timeline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        margin: 1.5rem 0;
+    }
+
+    .timeline-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        text-align: center;
+        z-index: 1;
+    }
+
+    .timeline-step:not(:last-child)::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        width: 100%;
+        height: 2px;
+        background: var(--border);
+        z-index: -1;
+    }
+
+    .timeline-step.completed:not(:last-child)::before {
+        background: var(--accent);
+    }
+
+    .timeline-dot {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 2px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+        transition: var(--transition);
+    }
+
+    .timeline-step.completed .timeline-dot {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    .timeline-step.active .timeline-dot {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .timeline-label {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .timeline-date {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    /* Grid Layout */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        animation: fadeIn 0.4s 0.2s ease both;
+    }
+
+    @media (max-width: 1024px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cards */
+    .detail-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface);
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--accent);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Items Table */
+    .items-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .items-table th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .items-table td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.95rem;
+    }
+
+    .items-table tbody tr:hover {
+        background: var(--accent-soft);
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .product-meta {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .product-size {
+        display: inline-block;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+        color: var(--text-soft);
+        margin-left: 0.5rem;
+    }
+
+    .item-price {
+        color: var(--text-soft);
+    }
+
+    .item-subtotal {
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .order-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+
+    .total-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .total-amount {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--accent);
+        font-family: 'Playfair Display', serif;
+    }
+
+    /* Info Rows */
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label i {
+        color: var(--accent);
+        width: 18px;
+    }
+
+    .info-value {
+        font-weight: 500;
+        color: var(--text);
+        text-align: right;
+    }
+
+    .info-value.highlight {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    /* Status Update Form */
+    .status-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .status-form select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237b2eda' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+    }
+
+    .status-form select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .btn-update {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.875rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-update:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Pickup Info */
+    .pickup-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .pickup-item:last-child {
+        border-bottom: none;
+    }
+
+    .pickup-icon {
+        width: 36px;
+        height: 36px;
+        background: var(--accent-soft);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-size: 1rem;
+    }
+
+    .pickup-content {
+        flex: 1;
+    }
+
+    .pickup-label {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+    }
+
+    .pickup-value {
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 2rem;
+    }
+
+    .alert {
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-left: 4px solid;
+    }
+
+    .alert.success {
+        background: var(--success-soft);
+        border-color: var(--success);
+        color: var(--success);
+    }
+
+    .alert.error {
+        background: var(--danger-soft);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .timeline {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .timeline-step {
+            width: 100%;
+            flex-direction: row;
+            gap: 1rem;
+        }
+
+        .timeline-step:not(:last-child)::before {
+            display: none;
+        }
+
+        .items-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .items-table th,
+        .items-table td {
+            white-space: nowrap;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<a href="{% url 'orders_dashboard' %}" class="back-link">
+    <i class="fas fa-arrow-left"></i>
+    Back to Orders Dashboard
+</a>
+
+<!-- Messages -->
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Order Header -->
+<div class="order-header">
+    <div class="order-title">
+        <div>
+            <h1 class="order-id">Order <span>#{{ order.id }}</span></h1>
+            <div class="order-date">
+                <i class="fas fa-calendar-alt"></i>
+                Placed on {{ order.created_at|date:"F j, Y" }} at {{ order.created_at|date:"g:i A" }}
+            </div>
+        </div>
+    </div>
+    <div class="status-badge-large {{ order.order_status }}">
+        <i class="fas 
+            {% if order.order_status == 'pending' %}fa-clock
+            {% elif order.order_status == 'processing' %}fa-cog fa-spin
+            {% elif order.order_status == 'dispatched' %}fa-truck
+            {% elif order.order_status == 'delivered' %}fa-check-circle
+            {% endif %}">
+        </i>
+        {{ order.get_order_status_display }}
+    </div>
+</div>
+
+<!-- Timeline Card -->
+<div class="timeline-card">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+        <i class="fas fa-chart-line" style="color: var(--accent);"></i>
+        <h3 style="font-weight: 700; color: var(--text);">Order Progress</h3>
+    </div>
+    <div class="timeline">
+        {% with status=order.order_status %}
+        <div class="timeline-step {% if status == 'pending' %}active{% endif %} {% if status == 'processing' or status == 'dispatched' or status == 'delivered' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div>
+                <div class="timeline-label">Pending</div>
+                <div class="timeline-date">Order placed</div>
+            </div>
+        </div>
+        
+        <div class="timeline-step {% if status == 'processing' %}active{% endif %} {% if status == 'dispatched' or status == 'delivered' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div>
+                <div class="timeline-label">Processing</div>
+                <div class="timeline-date">Preparing order</div>
+            </div>
+        </div>
+        
+        <div class="timeline-step {% if status == 'dispatched' %}active{% endif %} {% if status == 'delivered' %}completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-truck"></i>
+            </div>
+            <div>
+                <div class="timeline-label">Dispatched</div>
+                <div class="timeline-date">On the way</div>
+            </div>
+        </div>
+        
+        <div class="timeline-step {% if status == 'delivered' %}active completed{% endif %}">
+            <div class="timeline-dot">
+                <i class="fas fa-check"></i>
+            </div>
+            <div>
+                <div class="timeline-label">Delivered</div>
+                <div class="timeline-date">Order complete</div>
+            </div>
+        </div>
+        {% endwith %}
+    </div>
+</div>
+
+<!-- Main Grid -->
+<div class="detail-grid">
+    <!-- Left Column -->
+    <div>
+        <!-- Order Items -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-shopping-bag"></i>
+                    Order Items
+                </h3>
+                <span style="color: var(--text-soft); font-size: 0.9rem;">
+                    {{ items|length }} item{{ items|length|pluralize }}
+                </span>
+            </div>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Price</th>
+                        <th style="text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <div class="product-name">{{ item.product.name }}</div>
+                            <div class="product-meta">
+                                {{ item.product.get_category_display }}
+                                {% if item.size %}
+                                <span class="product-size">{{ item.size }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td style="text-align: center;">{{ item.quantity }}</td>
+                        <td class="item-price" style="text-align: right;">KSH {{ item.price|floatformat:0 }}</td>
+                        <td class="item-subtotal" style="text-align: right;">KSH {{ item.get_subtotal|floatformat:0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="order-total-row">
+                <span class="total-label">Total Amount</span>
+                <span class="total-amount">KSH {{ total|floatformat:0 }}</span>
+            </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-user"></i>
+                    Customer Information
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-user"></i> Name</span>
+                    <span class="info-value">{{ order.customer_name }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-phone"></i> Phone</span>
+                    <span class="info-value">{{ order.phone_number }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-envelope"></i> Email</span>
+                    <span class="info-value">{{ order.email }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-map-marker-alt"></i> Delivery Address</span>
+                    <span class="info-value">{{ order.delivery_address }}</span>
+                </div>
+                {% if order.delivery_location %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-location-dot"></i> Location</span>
+                    <span class="info-value">{{ order.delivery_location }}</span>
+                </div>
+                {% endif %}
+                {% if order.expected_delivery_date %}
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar-check"></i> Expected Delivery</span>
+                    <span class="info-value highlight">{{ order.expected_delivery_date|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div>
+        <!-- Update Status -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-edit"></i>
+                    Update Status
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'update_order_status' order.id %}" class="status-form">
+                    {% csrf_token %}
+                    <select name="status">
+                        <option value="pending" {% if order.order_status == 'pending' %}selected{% endif %}>
+                            ⏳ Pending
+                        </option>
+                        <option value="processing" {% if order.order_status == 'processing' %}selected{% endif %}>
+                            ⚙️ Processing
+                        </option>
+                        <option value="dispatched" {% if order.order_status == 'dispatched' %}selected{% endif %}>
+                            🚚 Dispatched
+                        </option>
+                        <option value="delivered" {% if order.order_status == 'delivered' %}selected{% endif %}>
+                            ✅ Delivered
+                        </option>
+                    </select>
+                    <button type="submit" class="btn-update">
+                        <i class="fas fa-save"></i>
+                        Update Order Status
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pickup Information -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-store"></i>
+                    Pickup Information
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="pickup-item">
+                    <div class="pickup-icon">
+                        <i class="fas fa-map-pin"></i>
+                    </div>
+                    <div class="pickup-content">
+                        <div class="pickup-label">Location</div>
+                        <div class="pickup-value">{{ pickup_info.location }}</div>
+                    </div>
+                </div>
+                <div class="pickup-item">
+                    <div class="pickup-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="pickup-content">
+                        <div class="pickup-label">Date</div>
+                        <div class="pickup-value">{{ pickup_info.date }}</div>
+                    </div>
+                </div>
+                <div class="pickup-item">
+                    <div class="pickup-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="pickup-content">
+                        <div class="pickup-label">Time</div>
+                        <div class="pickup-value">{{ pickup_info.time }}</div>
+                    </div>
+                </div>
+                <div class="pickup-item">
+                    <div class="pickup-icon">
+                        <i class="fas fa-calendar-week"></i>
+                    </div>
+                    <div class="pickup-content">
+                        <div class="pickup-label">Available Days</div>
+                        <div class="pickup-value">{{ pickup_info.days }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="detail-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-chart-pie"></i>
+                    Order Summary
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-hashtag"></i> Order ID</span>
+                    <span class="info-value highlight">#{{ order.id }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar"></i> Placed On</span>
+                    <span class="info-value">{{ order.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-box"></i> Total Items</span>
+                    <span class="info-value">{{ items|length }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-tag"></i> Order Total</span>
+                    <span class="info-value highlight">KSH {{ total|floatformat:0 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

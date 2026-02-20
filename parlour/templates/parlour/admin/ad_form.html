@@ -1,0 +1,1180 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}{% if ad %}Edit{% else %}Create{% endif %} Advertisement - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}{% if ad %}fas fa-edit{% else %}fas fa-plus-circle{% endif %}{% endblock %}
+{% block page_title %}{% if ad %}Edit{% else %}Create{% endif %} Advertisement{% endblock %}
+{% block page_subtitle %}{% if ad %}Update your advertisement details{% else %}Add a new advertisement to your store{% endif %}{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Form Container */
+    .form-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Form Card */
+    .form-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Form Header Actions */
+    .form-actions-header {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-back {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .btn-back:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateY(-2px);
+    }
+
+    .btn-save {
+        background: var(--accent);
+        color: white;
+        margin-left: auto;
+    }
+
+    .btn-save:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Form Sections - Compact */
+    .form-section {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-number {
+        width: 28px;
+        height: 28px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .section-header i {
+        color: var(--accent);
+        font-size: 1.2rem;
+    }
+
+    .section-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .form-group label i {
+        color: var(--accent);
+        width: 16px;
+        font-size: 0.9rem;
+    }
+
+    .form-group label .required {
+        color: var(--danger);
+        font-size: 1rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.6rem 0.75rem;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.85rem;
+        transition: var(--transition);
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .form-group input[type="color"] {
+        height: 38px;
+        padding: 0.25rem;
+        cursor: pointer;
+    }
+
+    .form-group small {
+        color: var(--text-soft);
+        font-size: 0.7rem;
+        margin-top: 0.15rem;
+    }
+
+    /* Checkbox Group - Compact */
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 0.25rem 0;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: var(--accent);
+        margin: 0;
+    }
+
+    .checkbox-item label {
+        font-weight: 500;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+
+    /* File Upload - Compact */
+    .file-upload {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: center;
+        background: var(--surface);
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+    }
+
+    .file-upload:hover {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .file-upload i {
+        font-size: 2rem;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+    }
+
+    .file-upload p {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .file-upload small {
+        color: var(--text-soft);
+        font-size: 0.7rem;
+    }
+
+    .file-upload input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .file-name {
+        margin-top: 0.5rem;
+        padding: 0.35rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--accent);
+        font-size: 0.75rem;
+        word-break: break-all;
+    }
+
+    /* Current File Display */
+    .current-file {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--surface);
+        border-radius: 10px;
+        margin-top: 0.75rem;
+        border: 1px solid var(--border);
+    }
+
+    .current-file img {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .current-file .file-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .current-file .file-info strong {
+        display: block;
+        color: var(--text);
+        font-size: 0.85rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .current-file .file-info span {
+        color: var(--text-soft);
+        font-size: 0.7rem;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .btn-remove {
+        color: var(--danger);
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0.35rem;
+        border-radius: 6px;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-remove:hover {
+        background: var(--danger-soft);
+    }
+
+    /* Image Gallery - Compact */
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .gallery-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 2px solid var(--border);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .gallery-item .item-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .gallery-item:hover .item-overlay {
+        opacity: 1;
+    }
+
+    .btn-delete-image {
+        color: white;
+        background: var(--danger);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.8rem;
+    }
+
+    .btn-delete-image:hover {
+        transform: scale(1.1);
+        background: var(--danger);
+    }
+
+    .caption-input {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.25rem;
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        color: white;
+        font-size: 0.65rem;
+        width: 100%;
+    }
+
+    /* Preview Section - Compact */
+    .preview-section {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .preview-title {
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        opacity: 0.9;
+    }
+
+    .preview-title i {
+        font-size: 1rem;
+    }
+
+    .ad-preview {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .preview-content {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        color: white;
+    }
+
+    .preview-media {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .preview-media i {
+        font-size: 2rem;
+        opacity: 0.8;
+        color: white;
+    }
+
+    .preview-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .preview-text h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .preview-text p {
+        opacity: 0.9;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .preview-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 1rem;
+        background: white;
+        color: var(--accent);
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-actions-header {
+            flex-direction: column;
+        }
+
+        .btn-save {
+            margin-left: 0;
+        }
+
+        .preview-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .preview-media {
+            width: 60px;
+            height: 60px;
+        }
+
+        .preview-text h3 {
+            font-size: 1rem;
+        }
+
+        .preview-text p {
+            font-size: 0.75rem;
+        }
+    }
+
+    /* Ad Type Sections */
+    .ad-type-section {
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Header Actions -->
+    <div class="form-actions-header">
+        <a href="{% url 'ad_list' %}" class="btn-action btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Back to List
+        </a>
+        <button type="submit" form="adForm" class="btn-action btn-save">
+            <i class="fas fa-save"></i>
+            {% if ad %}Update{% else %}Create{% endif %} Advertisement
+        </button>
+    </div>
+
+    <!-- Main Form -->
+    <form method="post" enctype="multipart/form-data" id="adForm">
+        {% csrf_token %}
+        
+        <!-- Basic Information -->
+        <div class="form-card">
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="section-number">1</span>
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Basic Information</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>
+                            <i class="fas fa-tag"></i>
+                            Title <span class="required">*</span>
+                        </label>
+                        <input type="text" 
+                               name="title" 
+                               id="title"
+                               value="{{ ad.title|default:'' }}"
+                               placeholder="e.g., Summer Sale Banner"
+                               required>
+                        <small>Internal name for the advertisement</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-ad"></i>
+                            Ad Type <span class="required">*</span>
+                        </label>
+                        <select name="ad_type" id="adType" required>
+                            <option value="">Select Type</option>
+                            {% for value, label in ad_types %}
+                                <option value="{{ value }}" {% if ad.ad_type == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-users"></i>
+                            Target Audience
+                        </label>
+                        <select name="target_audience">
+                            {% for value, label in target_audiences %}
+                                <option value="{{ value }}" {% if ad.target_audience == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-sort-numeric-up"></i>
+                            Display Order
+                        </label>
+                        <input type="number" 
+                               name="order" 
+                               id="order"
+                               value="{{ ad.order|default:'0' }}"
+                               min="0">
+                        <small>Lower numbers appear first</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-toggle-on"></i>
+                            Status
+                        </label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="is_active" 
+                                       id="is_active"
+                                       {% if ad.is_active or not ad %}checked{% endif %}>
+                                <label for="is_active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="section-number">2</span>
+                    <i class="fas fa-pencil-alt"></i>
+                    <h3>Ad Content</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>
+                            <i class="fas fa-heading"></i>
+                            Headline
+                        </label>
+                        <input type="text" 
+                               name="headline" 
+                               id="headline"
+                               value="{{ ad.headline|default:'' }}"
+                               placeholder="e.g., Summer Sale - 50% Off">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>
+                            <i class="fas fa-subscript"></i>
+                            Subheadline
+                        </label>
+                        <textarea name="subheadline" 
+                                  id="subheadline" 
+                                  rows="2"
+                                  placeholder="e.g., Limited time offer on selected items">{{ ad.subheadline|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-link"></i>
+                            Button Text
+                        </label>
+                        <input type="text" 
+                               name="button_text" 
+                               id="button_text"
+                               value="{{ ad.button_text|default:'Shop Now' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-external-link-alt"></i>
+                            Button URL
+                        </label>
+                        <input type="url" 
+                               name="button_url" 
+                               id="button_url"
+                               value="{{ ad.button_url|default:'' }}"
+                               placeholder="https://example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-palette"></i>
+                            Button Color
+                        </label>
+                        <input type="color" 
+                               name="button_color" 
+                               id="button_color"
+                               value="{{ ad.button_color|default:'#7b2eda' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Media Upload Section -->
+            <div class="form-section" id="singleImageSection" style="display: none;">
+                <div class="section-header">
+                    <span class="section-number">3</span>
+                    <i class="fas fa-image"></i>
+                    <h3>Single Image</h3>
+                </div>
+                
+                <div class="file-upload" id="singleImageUpload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload image</p>
+                    <small>Recommended: 1200x400px</small>
+                    <input type="file" 
+                           name="single_image" 
+                           id="single_image" 
+                           accept="image/*">
+                </div>
+                
+                {% if ad and ad.single_image %}
+                <div class="current-file" id="currentSingleImage">
+                    <img src="{{ ad.single_image.url }}" alt="Current">
+                    <div class="file-info">
+                        <strong>Current Image</strong>
+                        <span>{{ ad.single_image.name|truncatechars:30 }}</span>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeCurrentImage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-section" id="multiImageSection" style="display: none;">
+                <div class="section-header">
+                    <span class="section-number">3</span>
+                    <i class="fas fa-images"></i>
+                    <h3>Multiple Images</h3>
+                </div>
+                
+                {% if ad and ad.ad_images.exists %}
+                <div class="image-gallery" id="imageGallery">
+                    {% for image in ad.ad_images.all %}
+                    <div class="gallery-item" id="image-{{ image.id }}">
+                        <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                        <input type="text" 
+                               class="caption-input" 
+                               placeholder="Caption"
+                               value="{{ image.caption }}"
+                               onchange="updateImageCaption({{ image.id }}, this.value)">
+                        <div class="item-overlay">
+                            <a href="{% url 'ad_image_delete' image.id %}" 
+                               class="btn-delete-image"
+                               onclick="return confirm('Delete this image?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="file-upload" id="multiImageUpload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload multiple images</p>
+                    <small>Select multiple images at once</small>
+                    <input type="file" 
+                           name="multi_images" 
+                           id="multi_images" 
+                           accept="image/*" 
+                           multiple>
+                </div>
+            </div>
+
+            <div class="form-section" id="videoSection" style="display: none;">
+                <div class="section-header">
+                    <span class="section-number">3</span>
+                    <i class="fas fa-video"></i>
+                    <h3>Video</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>
+                            <i class="fas fa-video"></i>
+                            Video File
+                        </label>
+                        <div class="file-upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload video</p>
+                            <small>MP4, WebM, OGG (Max: 50MB)</small>
+                            <input type="file" 
+                                   name="video" 
+                                   id="video" 
+                                   accept="video/mp4,video/webm,video/ogg">
+                        </div>
+                        
+                        {% if ad and ad.video %}
+                        <div class="current-file">
+                            <i class="fas fa-video" style="font-size: 1.5rem; color: var(--accent);"></i>
+                            <div class="file-info">
+                                <strong>Current Video</strong>
+                                <span>{{ ad.video.name|truncatechars:30 }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>
+                            <i class="fas fa-camera"></i>
+                            Video Poster
+                        </label>
+                        <div class="file-upload">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Upload poster image</p>
+                            <input type="file" 
+                                   name="video_poster" 
+                                   id="video_poster" 
+                                   accept="image/*">
+                        </div>
+                        
+                        {% if ad and ad.video_poster %}
+                        <div class="current-file">
+                            <img src="{{ ad.video_poster.url }}" alt="Poster">
+                            <div class="file-info">
+                                <strong>Current Poster</strong>
+                                <span>{{ ad.video_poster.name|truncatechars:30 }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="autoplay" 
+                                       id="autoplay"
+                                       {% if ad.autoplay %}checked{% endif %}>
+                                <label for="autoplay">Autoplay (muted)</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="loop" 
+                                       id="loop"
+                                       {% if ad.loop %}checked{% endif %}>
+                                <label for="loop">Loop video</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Settings -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="section-number">4</span>
+                    <i class="fas fa-tv"></i>
+                    <h3>Display Settings</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-mobile-alt"></i>
+                            Show on Devices
+                        </label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="show_on_mobile" 
+                                       id="show_on_mobile"
+                                       {% if ad.show_on_mobile or not ad %}checked{% endif %}>
+                                <label for="show_on_mobile">Mobile</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="show_on_tablet" 
+                                       id="show_on_tablet"
+                                       {% if ad.show_on_tablet or not ad %}checked{% endif %}>
+                                <label for="show_on_tablet">Tablet</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" 
+                                       name="show_on_desktop" 
+                                       id="show_on_desktop"
+                                       {% if ad.show_on_desktop or not ad %}checked{% endif %}>
+                                <label for="show_on_desktop">Desktop</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-paint-bucket"></i>
+                            Background Color
+                        </label>
+                        <input type="color" 
+                               name="background_color" 
+                               id="background_color"
+                               value="{{ ad.background_color|default:'#7b2eda' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-font"></i>
+                            Text Color
+                        </label>
+                        <input type="color" 
+                               name="text_color" 
+                               id="text_color"
+                               value="{{ ad.text_color|default:'#ffffff' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-layer-group"></i>
+                            Overlay Opacity
+                        </label>
+                        <input type="number" 
+                               name="overlay_opacity" 
+                               id="overlay_opacity"
+                               value="{{ ad.overlay_opacity|default:'0.3' }}"
+                               min="0" 
+                               max="1" 
+                               step="0.1">
+                        <small>0 = transparent, 1 = solid</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduling -->
+            <div class="form-section">
+                <div class="section-header">
+                    <span class="section-number">5</span>
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Scheduling (Optional)</h3>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-calendar-plus"></i>
+                            Start Date
+                        </label>
+                        <input type="datetime-local" 
+                               name="start_date" 
+                               id="start_date"
+                               value="{{ ad.start_date|date:'Y-m-d\TH:i'|default:'' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-calendar-times"></i>
+                            End Date
+                        </label>
+                        <input type="datetime-local" 
+                               name="end_date" 
+                               id="end_date"
+                               value="{{ ad.end_date|date:'Y-m-d\TH:i'|default:'' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Live Preview -->
+    <div class="preview-section">
+        <div class="preview-title">
+            <i class="fas fa-eye"></i>
+            Live Preview
+        </div>
+        <div class="ad-preview" id="livePreview">
+            <div class="preview-content">
+                <div class="preview-media" id="previewMedia">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="preview-text">
+                    <h3 id="previewHeadline">Your Headline Here</h3>
+                    <p id="previewSubheadline">Your subheadline will appear here</p>
+                    <span class="preview-button" id="previewButton">
+                        Shop Now <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const adType = document.getElementById('adType');
+    const singleImageSection = document.getElementById('singleImageSection');
+    const multiImageSection = document.getElementById('multiImageSection');
+    const videoSection = document.getElementById('videoSection');
+    
+    // Form input elements for preview
+    const headlineInput = document.getElementById('headline');
+    const subheadlineInput = document.getElementById('subheadline');
+    const buttonTextInput = document.getElementById('button_text');
+    const buttonColorInput = document.getElementById('button_color');
+    const backgroundColorInput = document.getElementById('background_color');
+    const overlayOpacityInput = document.getElementById('overlay_opacity');
+    
+    // Preview elements
+    const previewHeadline = document.getElementById('previewHeadline');
+    const previewSubheadline = document.getElementById('previewSubheadline');
+    const previewButton = document.getElementById('previewButton');
+    const previewMedia = document.getElementById('previewMedia');
+    const previewContainer = document.getElementById('livePreview');
+    
+    // File upload handlers
+    const singleImageUpload = document.getElementById('single_image');
+    const multiImageUpload = document.getElementById('multi_images');
+    const videoUpload = document.getElementById('video');
+    const videoPosterUpload = document.getElementById('video_poster');
+    
+    // Toggle sections based on ad type
+    function toggleSections() {
+        const selectedType = adType.value;
+        
+        singleImageSection.style.display = 'none';
+        multiImageSection.style.display = 'none';
+        videoSection.style.display = 'none';
+        
+        if (selectedType === 'single_image') {
+            singleImageSection.style.display = 'block';
+        } else if (selectedType === 'multi_image') {
+            multiImageSection.style.display = 'block';
+        } else if (selectedType === 'video') {
+            videoSection.style.display = 'block';
+        }
+    }
+    
+    // Update preview
+    function updatePreview() {
+        previewHeadline.textContent = headlineInput.value || 'Your Headline Here';
+        previewSubheadline.textContent = subheadlineInput.value || 'Your subheadline will appear here';
+        previewButton.innerHTML = (buttonTextInput.value || 'Shop Now') + ' <i class="fas fa-arrow-right"></i>';
+        
+        previewButton.style.backgroundColor = buttonColorInput.value || '#7b2eda';
+        previewContainer.style.background = `linear-gradient(135deg, ${backgroundColorInput.value || '#7b2eda'} 0%, ${adjustBrightness(backgroundColorInput.value || '#7b2eda', 20)} 100%)`;
+    }
+    
+    function adjustBrightness(hex, percent) {
+        // Simple brightness adjustment for preview
+        return hex;
+    }
+    
+    // File name display
+    function handleFileUpload(input) {
+        if (input.files.length > 0) {
+            const fileNames = Array.from(input.files).map(f => f.name).join(', ');
+            const fileNameDisplay = document.createElement('div');
+            fileNameDisplay.className = 'file-name';
+            fileNameDisplay.textContent = fileNames;
+            
+            const existing = input.parentElement.querySelector('.file-name');
+            if (existing) existing.remove();
+            
+            input.parentElement.appendChild(fileNameDisplay);
+        }
+    }
+    
+    // Event listeners
+    adType.addEventListener('change', toggleSections);
+    
+    [headlineInput, subheadlineInput, buttonTextInput, buttonColorInput, 
+     backgroundColorInput, overlayOpacityInput].forEach(input => {
+        if (input) {
+            input.addEventListener('input', updatePreview);
+        }
+    });
+    
+    singleImageUpload?.addEventListener('change', function() {
+        handleFileUpload(this);
+        if (this.files.length > 0) {
+            const file = this.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewMedia.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    multiImageUpload?.addEventListener('change', function() {
+        handleFileUpload(this);
+    });
+    
+    videoUpload?.addEventListener('change', function() {
+        handleFileUpload(this);
+        previewMedia.innerHTML = '<i class="fas fa-video"></i>';
+    });
+    
+    videoPosterUpload?.addEventListener('change', function() {
+        handleFileUpload(this);
+    });
+    
+    // Initialize
+    toggleSections();
+    updatePreview();
+    
+    {% if ad and ad.ad_type %}
+        adType.value = '{{ ad.ad_type }}';
+        toggleSections();
+    {% endif %}
+});
+
+function removeCurrentImage() {
+    if (confirm('Are you sure you want to remove the current image?')) {
+        const currentImage = document.getElementById('currentSingleImage');
+        if (currentImage) {
+            currentImage.remove();
+            
+            const form = document.getElementById('adForm');
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'remove_current_image';
+            input.value = 'true';
+            form.appendChild(input);
+        }
+    }
+}
+
+function updateImageCaption(imageId, caption) {
+    console.log('Update caption for image', imageId, 'to', caption);
+}
+
+// Form validation
+document.getElementById('adForm').addEventListener('submit', function(e) {
+    const adType = document.getElementById('adType').value;
+    
+    if (!adType) {
+        e.preventDefault();
+        alert('Please select an ad type');
+        return;
+    }
+    
+    if (adType === 'single_image') {
+        const singleImage = document.getElementById('single_image');
+        const hasCurrentImage = document.getElementById('currentSingleImage');
+        
+        {% if not ad %}
+        if (!singleImage.files.length && !hasCurrentImage) {
+            e.preventDefault();
+            alert('Please upload an image for single image ad');
+            return;
+        }
+        {% endif %}
+    }
+    
+    if (adType === 'video') {
+        const video = document.getElementById('video');
+        {% if not ad %}
+        if (!video.files.length) {
+            e.preventDefault();
+            alert('Please upload a video file');
+            return;
+        }
+        {% endif %}
+    }
+});
+</script>
+{% endblock %}

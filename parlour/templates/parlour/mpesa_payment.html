@@ -759,4 +759,147 @@
         </div>
     </div>
 </div>
+
+
+<script>
+let paymentCheckInterval;
+let checkCount = 0;
+const maxChecks = 60; // Check for 2 minutes (60 checks * 2 seconds)
+
+function startPaymentPolling() {
+    // Only start if STK push was sent
+    {% if stk_result %}
+    console.log('Starting payment status polling...');
+    
+    paymentCheckInterval = setInterval(checkPaymentStatus, 2000); // Check every 2 seconds
+    
+    // Show loading indicator
+    showLoadingIndicator();
+    {% endif %}
+}
+
+function checkPaymentStatus() {
+    checkCount++;
+    
+    fetch('{% url "check_payment_status" %}', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Payment status:', data.status);
+        
+        if (data.status === 'success') {
+            clearInterval(paymentCheckInterval);
+            showSuccessMessage();
+            
+            // Auto-redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 2000);
+        }
+        else if (data.status === 'failed') {
+            clearInterval(paymentCheckInterval);
+            showErrorMessage(data.message);
+        }
+        else if (data.status === 'cancelled') {
+            clearInterval(paymentCheckInterval);
+            showCancelledMessage();
+        }
+        else if (checkCount >= maxChecks) {
+            // Timeout after max checks
+            clearInterval(paymentCheckInterval);
+            showTimeoutMessage();
+        }
+    })
+    .catch(error => {
+        console.error('Error checking payment:', error);
+    });
+}
+
+function showLoadingIndicator() {
+    const sttkSection = document.querySelector('.stk-section');
+    if (stkSection) {
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'payment-loading';
+        loadingDiv.className = 'alert alert-warning';
+        loadingDiv.innerHTML = `
+            <i class="fas fa-spinner fa-spin"></i>
+            <div class="alert-content">
+                <strong>Processing Payment...</strong>
+                <p>Please enter your M-Pesa PIN on your phone. This page will automatically update when payment is confirmed.</p>
+            </div>
+        `;
+        stkSection.insertAdjacentElement('afterend', loadingDiv);
+    }
+}
+
+function showSuccessMessage() {
+    const loading = document.getElementById('payment-loading');
+    if (loading) {
+        loading.className = 'alert alert-success';
+        loading.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <div class="alert-content">
+                <strong>✓ Payment Successful!</strong>
+                <p>Your order has been confirmed. Redirecting to order confirmation...</p>
+            </div>
+        `;
+    }
+}
+
+function showErrorMessage(message) {
+    const loading = document.getElementById('payment-loading');
+    if (loading) {
+        loading.className = 'alert alert-error';
+        loading.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <div class="alert-content">
+                <strong>Payment Failed</strong>
+                <p>${message}. Please try again or use manual payment method below.</p>
+            </div>
+        `;
+    }
+}
+
+function showCancelledMessage() {
+    const loading = document.getElementById('payment-loading');
+    if (loading) {
+        loading.className = 'alert alert-warning';
+        loading.innerHTML = `
+            <i class="fas fa-times-circle"></i>
+            <div class="alert-content">
+                <strong>Payment Cancelled</strong>
+                <p>You cancelled the payment. You can try again or use manual payment method below.</p>
+            </div>
+        `;
+    }
+}
+
+function showTimeoutMessage() {
+    const loading = document.getElementById('payment-loading');
+    if (loading) {
+        loading.className = 'alert alert-warning';
+        loading.innerHTML = `
+            <i class="fas fa-clock"></i>
+            <div class="alert-content">
+                <strong>Payment Pending</strong>
+                <p>We're still waiting for payment confirmation. If you've completed payment, click "I Have Paid" below. Otherwise, please try again.</p>
+            </div>
+        `;
+    }
+}
+
+// Start polling when page loads (if STK push was sent)
+window.addEventListener('load', startPaymentPolling);
+
+// Clean up interval when leaving page
+window.addEventListener('beforeunload', () => {
+    if (paymentCheckInterval) {
+        clearInterval(paymentCheckInterval);
+    }
+});
+</script>
 {% endblock %}

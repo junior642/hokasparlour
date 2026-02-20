@@ -1,0 +1,587 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Stock Report - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-boxes{% endblock %}
+{% block page_title %}Stock Report{% endblock %}
+{% block page_subtitle %}Inventory Overview - Track your stock levels{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Summary Cards */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @media (max-width: 1024px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .summary-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: var(--transition);
+        border-top: 4px solid var(--card-color, var(--accent));
+    }
+
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .summary-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--card-color, var(--accent));
+    }
+
+    .summary-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+    }
+
+    .summary-label {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .summary-card.gold { --card-color: var(--accent); }
+    .summary-card.blue { --card-color: var(--info); }
+    .summary-card.red { --card-color: var(--danger); }
+    .summary-card.orange { --card-color: var(--warning); }
+
+    /* Alert Banners */
+    .alert-banner {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border-left: 4px solid;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    .alert-banner i {
+        font-size: 1.2rem;
+    }
+
+    .alert-banner.danger {
+        background: var(--danger-soft);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .alert-banner.warning {
+        background: var(--warning-soft);
+        border-color: var(--warning);
+        color: var(--warning);
+    }
+
+    /* Section Headers */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+        animation: fadeIn 0.4s 0.15s ease both;
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: 'Playfair Display', serif;
+    }
+
+    .section-title i {
+        color: var(--accent);
+    }
+
+    .section-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .badge-ready {
+        background: rgba(123, 46, 218, 0.15);
+        color: var(--accent);
+        border: 1px solid rgba(123, 46, 218, 0.3);
+    }
+
+    .badge-warehouse {
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--info);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    /* Stock Tables */
+    .stock-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        animation: fadeIn 0.4s 0.2s ease both;
+    }
+
+    .stock-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .stock-table th {
+        background: var(--surface);
+        padding: 1rem 1.25rem;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .stock-table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    .stock-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .stock-table tbody tr:hover {
+        background: var(--accent-soft);
+    }
+
+    .stock-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .product-category {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .price-value {
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .cost-value {
+        color: var(--danger);
+        font-weight: 600;
+    }
+
+    .profit-value {
+        color: var(--success);
+        font-weight: 700;
+    }
+
+    .no-cost {
+        color: var(--text-soft);
+        font-style: italic;
+        font-size: 0.85rem;
+    }
+
+    /* Quantity Bar */
+    .qty-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .qty-bar-bg {
+        width: 80px;
+        height: 6px;
+        background: var(--surface);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .qty-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+
+    .qty-number {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+        min-width: 2rem;
+    }
+
+    /* Stock Tags */
+    .stock-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .stock-tag i {
+        font-size: 0.7rem;
+    }
+
+    .tag-ok {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .tag-low {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .tag-out {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .tag-unlimited {
+        background: var(--info-soft);
+        color: var(--info);
+    }
+
+    /* Margin Chip */
+    .margin-chip {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-soft);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--accent-light);
+        margin-bottom: 1rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive Table */
+    @media (max-width: 768px) {
+        .stock-table thead {
+            display: none;
+        }
+
+        .stock-table tbody tr {
+            display: block;
+            padding: 1rem 0;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .stock-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border: none;
+        }
+
+        .stock-table td::before {
+            content: attr(data-label);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 1rem;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<a href="{% url 'hokaadmin:dashboard' %}" class="back-link" style="margin-bottom: 1.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    Back to Dashboard
+</a>
+
+<!-- Summary Cards -->
+<div class="summary-grid">
+    <div class="summary-card gold">
+        <div class="summary-icon">📦</div>
+        <div class="summary-value">{{ ready_stock.total }}</div>
+        <div class="summary-label">Ready Stock Products</div>
+    </div>
+
+    <div class="summary-card blue">
+        <div class="summary-icon">🏭</div>
+        <div class="summary-value">{{ warehouse_stock.total }}</div>
+        <div class="summary-label">Warehouse Products</div>
+    </div>
+
+    <div class="summary-card red">
+        <div class="summary-icon">🚨</div>
+        <div class="summary-value">{{ ready_stock.out_of_stock }}</div>
+        <div class="summary-label">Out of Stock</div>
+    </div>
+
+    <div class="summary-card orange">
+        <div class="summary-icon">⚠️</div>
+        <div class="summary-value">{{ ready_stock.low_stock }}</div>
+        <div class="summary-label">Low Stock (≤3)</div>
+    </div>
+</div>
+
+<!-- Alerts -->
+{% if ready_stock.out_of_stock > 0 %}
+<div class="alert-banner danger">
+    <i class="fas fa-exclamation-circle"></i>
+    <strong>{{ ready_stock.out_of_stock }}</strong> product{{ ready_stock.out_of_stock|pluralize }} are completely out of stock — restock immediately.
+</div>
+{% endif %}
+
+{% if ready_stock.low_stock > 0 %}
+<div class="alert-banner warning">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>{{ ready_stock.low_stock }}</strong> product{{ ready_stock.low_stock|pluralize }} have 3 or fewer items left — consider restocking soon.
+</div>
+{% endif %}
+
+<!-- Ready Stock Section -->
+<div class="section-header">
+    <h2 class="section-title">
+        <i class="fas fa-box"></i>
+        Ready Stock
+    </h2>
+    <span class="section-badge badge-ready">
+        <i class="fas fa-check-circle"></i>
+        Items You Own
+    </span>
+</div>
+
+<div class="stock-card">
+    {% if ready_stock.products %}
+    <table class="stock-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Sell Price</th>
+                <th>Purchase Cost</th>
+                <th>Profit/Item</th>
+                <th>Margin</th>
+                <th>Stock Level</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in ready_stock.products %}
+            <tr>
+                <td data-label="Product">
+                    <div class="product-name">{{ p.name }}</div>
+                    <div class="product-category">{{ p.category }}</div>
+                </td>
+                <td data-label="Sell Price">
+                    <span class="price-value">KSH {{ p.price|floatformat:0 }}</span>
+                </td>
+                <td data-label="Purchase Cost">
+                    {% if p.purchase_cost %}
+                        <span class="cost-value">KSH {{ p.purchase_cost|floatformat:0 }}</span>
+                    {% else %}
+                        <span class="no-cost">Not set</span>
+                    {% endif %}
+                </td>
+                <td data-label="Profit/Item">
+                    {% if p.profit_per_item %}
+                        <span class="profit-value">KSH {{ p.profit_per_item|floatformat:0 }}</span>
+                    {% else %}
+                        <span class="no-cost">N/A</span>
+                    {% endif %}
+                </td>
+                <td data-label="Margin">
+                    {% if p.margin_pct %}
+                        <span class="margin-chip">{{ p.margin_pct }}%</span>
+                    {% else %}
+                        <span class="no-cost">N/A</span>
+                    {% endif %}
+                </td>
+                <td data-label="Stock Level">
+                    <div class="qty-wrapper">
+                        <div class="qty-bar-bg">
+                            <div class="qty-bar-fill" style="
+                                width: {% if p.stock_quantity >= 10 %}100{% else %}{{ p.stock_quantity }}0{% endif %}%;
+                                background: {% if p.status == 'out' %}var(--danger){% elif p.status == 'low' %}var(--warning){% else %}var(--success){% endif %};
+                            "></div>
+                        </div>
+                        <span class="qty-number" style="color: {% if p.status == 'out' %}var(--danger){% elif p.status == 'low' %}var(--warning){% else %}var(--success){% endif %};">
+                            {{ p.stock_quantity }}
+                        </span>
+                    </div>
+                </td>
+                <td data-label="Status">
+                    {% if p.status == 'out' %}
+                        <span class="stock-tag tag-out">
+                            <i class="fas fa-times-circle"></i> Out of Stock
+                        </span>
+                    {% elif p.status == 'low' %}
+                        <span class="stock-tag tag-low">
+                            <i class="fas fa-exclamation-triangle"></i> Low Stock
+                        </span>
+                    {% else %}
+                        <span class="stock-tag tag-ok">
+                            <i class="fas fa-check-circle"></i> In Stock
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <p>No ready stock products found.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Warehouse Stock Section -->
+<div class="section-header">
+    <h2 class="section-title">
+        <i class="fas fa-warehouse"></i>
+        Warehouse Stock
+    </h2>
+    <span class="section-badge badge-warehouse">
+        <i class="fas fa-clock"></i>
+        Sourced on Order
+    </span>
+</div>
+
+<div class="stock-card">
+    {% if warehouse_stock.products %}
+    <table class="stock-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Sell Price</th>
+                <th>Supplier Cost</th>
+                <th>Profit/Item</th>
+                <th>Margin</th>
+                <th>Availability</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in warehouse_stock.products %}
+            <tr>
+                <td data-label="Product">
+                    <div class="product-name">{{ p.name }}</div>
+                    <div class="product-category">{{ p.category }}</div>
+                </td>
+                <td data-label="Sell Price">
+                    <span class="price-value">KSH {{ p.price|floatformat:0 }}</span>
+                </td>
+                <td data-label="Supplier Cost">
+                    {% if p.supplier_cost %}
+                        <span class="cost-value">KSH {{ p.supplier_cost|floatformat:0 }}</span>
+                    {% else %}
+                        <span class="no-cost">Not set</span>
+                    {% endif %}
+                </td>
+                <td data-label="Profit/Item">
+                    {% if p.profit_per_item %}
+                        <span class="profit-value">KSH {{ p.profit_per_item|floatformat:0 }}</span>
+                    {% else %}
+                        <span class="no-cost">N/A</span>
+                    {% endif %}
+                </td>
+                <td data-label="Margin">
+                    {% if p.margin_pct %}
+                        <span class="margin-chip">{{ p.margin_pct }}%</span>
+                    {% else %}
+                        <span class="no-cost">N/A</span>
+                    {% endif %}
+                </td>
+                <td data-label="Availability">
+                    <span class="stock-tag tag-unlimited">
+                        <i class="fas fa-infinity"></i> Always Available
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-warehouse"></i>
+        <p>No warehouse stock products found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

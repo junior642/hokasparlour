@@ -1,0 +1,937 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Analytics - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-chart-line{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block page_subtitle %}Data Overview & Business Insights{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Navigation Pills */
+    .nav-pills {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .nav-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .nav-pill:hover, .nav-pill.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateY(-2px);
+    }
+
+    .nav-pill i {
+        font-size: 1rem;
+    }
+
+    /* Chart Grid */
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    @media (max-width: 1024px) {
+        .chart-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chart-card:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .chart-card.wide {
+        grid-column: span 2;
+    }
+
+    @media (max-width: 1024px) {
+        .chart-card.wide {
+            grid-column: span 1;
+        }
+    }
+
+    .chart-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: var(--surface);
+    }
+
+    .chart-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .chart-title i {
+        color: var(--accent);
+        font-size: 1.2rem;
+    }
+
+    .chart-title h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .chart-description {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        margin-top: 0.25rem;
+    }
+
+    .chart-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid var(--accent-light);
+    }
+
+    .chart-body {
+        padding: 1.5rem;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 260px;
+    }
+
+    /* Top Products List */
+    .products-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        text-decoration: none;
+        color: inherit;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .product-item:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent-light);
+    }
+
+    .product-rank {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-soft);
+        min-width: 2rem;
+        text-align: center;
+    }
+
+    .product-rank.top {
+        color: var(--accent);
+    }
+
+    .product-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-meta {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-soft);
+    }
+
+    .product-tag.margin {
+        color: var(--success);
+        border-color: var(--success);
+    }
+
+    .product-bar {
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .product-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        border-radius: 2px;
+        transition: width 0.5s ease;
+    }
+
+    .product-stats {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .product-revenue {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--accent);
+    }
+
+    .product-sold {
+        font-size: 0.75rem;
+        color: var(--text-soft);
+        margin-top: 0.25rem;
+    }
+
+    .product-profit {
+        font-size: 0.75rem;
+        color: var(--success);
+    }
+
+    .product-link-icon {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        transition: var(--transition);
+    }
+
+    .product-item:hover .product-link-icon {
+        color: var(--accent);
+        transform: translateX(2px);
+    }
+
+    /* Stock List */
+    .stock-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .stock-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        color: inherit;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .stock-item:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent-light);
+    }
+
+    .stock-name {
+        flex: 1;
+        font-weight: 500;
+        color: var(--text);
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stock-bar-wrapper {
+        width: 100px;
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .stock-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    .stock-quantity {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1rem;
+        min-width: 2rem;
+        text-align: right;
+    }
+
+    .stock-tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-weight: 600;
+        min-width: 3rem;
+        text-align: center;
+    }
+
+    .stock-tag.ok {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .stock-tag.low {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .stock-tag.out {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Chart animation delays */
+    .chart-card:nth-child(1) { animation-delay: 0.05s; }
+    .chart-card:nth-child(2) { animation-delay: 0.10s; }
+    .chart-card:nth-child(3) { animation-delay: 0.15s; }
+    .chart-card:nth-child(4) { animation-delay: 0.20s; }
+    .chart-card:nth-child(5) { animation-delay: 0.25s; }
+    .chart-card:nth-child(6) { animation-delay: 0.30s; }
+    .chart-card:nth-child(7) { animation-delay: 0.35s; }
+    .chart-card:nth-child(8) { animation-delay: 0.40s; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .chart-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .product-item {
+            flex-wrap: wrap;
+        }
+
+        .product-stats {
+            width: 100%;
+            text-align: left;
+            margin-left: 3rem;
+        }
+
+        .stock-item {
+            flex-wrap: wrap;
+        }
+
+        .stock-bar-wrapper {
+            width: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navigation Pills -->
+<div class="nav-pills">
+    <a href="{% url 'hokaadmin:dashboard' %}" class="nav-pill">
+        <i class="fas fa-home"></i> Dashboard
+    </a>
+    <a href="{% url 'hokaadmin:profit_report' %}" class="nav-pill">
+        <i class="fas fa-chart-line"></i> Profit
+    </a>
+    <a href="{% url 'hokaadmin:stock_report' %}" class="nav-pill">
+        <i class="fas fa-boxes"></i> Stock
+    </a>
+    <a href="{% url 'orders_dashboard' %}" class="nav-pill">
+        <i class="fas fa-shopping-bag"></i> Orders
+    </a>
+</div>
+
+<!-- Chart Grid -->
+<div class="chart-grid">
+    <!-- 1. Daily Revenue & Orders -->
+    <div class="chart-card wide">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-chart-bar"></i>
+                <div>
+                    <h3>Daily Revenue & Orders</h3>
+                    <div class="chart-description">Last 30 days — revenue line + order count bars</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-calendar"></i> 30 Days
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrapper">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Orders by Status -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-chart-pie"></i>
+                <div>
+                    <h3>Orders by Status</h3>
+                    <div class="chart-description">Current breakdown of all orders</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-circle"></i> Live
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrapper" style="height: 240px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Revenue by Category -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-tags"></i>
+                <div>
+                    <h3>Revenue by Category</h3>
+                    <div class="chart-description">Delivered orders only</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-tag"></i> Category
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrapper" style="height: 240px;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Top Products -->
+    <div class="chart-card wide">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-trophy"></i>
+                <div>
+                    <h3>Top Products by Revenue</h3>
+                    <div class="chart-description">Click any product to manage it</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-crown"></i> Top 8
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="products-list">
+                {% for p in top_products %}
+                <a href="{{ p.url }}" class="product-item" target="_blank">
+                    <div class="product-rank {% if forloop.counter <= 3 %}top{% endif %}">
+                        {{ forloop.counter }}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">{{ p.name }}</div>
+                        <div class="product-meta">
+                            <span class="product-tag">{{ p.category }}</span>
+                            <span class="product-tag">{{ p.stock_type }}</span>
+                            {% if p.margin_pct %}
+                                <span class="product-tag margin">{{ p.margin_pct }}% margin</span>
+                            {% endif %}
+                        </div>
+                        <div class="product-bar">
+                            <div class="product-bar-fill" style="width:{% widthratio p.revenue top_products.0.revenue 100 %}%;"></div>
+                        </div>
+                    </div>
+                    <div class="product-stats">
+                        <div class="product-revenue">KSH {{ p.revenue|floatformat:0 }}</div>
+                        <div class="product-sold">{{ p.sold }} sold</div>
+                        {% if p.profit_item %}
+                            <div class="product-profit">+KSH {{ p.profit_item|floatformat:0 }}/item</div>
+                        {% endif %}
+                    </div>
+                    <i class="fas fa-arrow-right product-link-icon"></i>
+                </a>
+                {% empty %}
+                <div style="text-align: center; padding: 3rem; color: var(--text-soft);">
+                    <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <p>No product data yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Ready vs Warehouse Split -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-warehouse"></i>
+                <div>
+                    <h3>Ready vs Warehouse</h3>
+                    <div class="chart-description">Revenue split by stock type</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-chart-pie"></i> Split
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrapper" style="height: 240px;">
+                <canvas id="splitChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Revenue vs Cost vs Profit -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-chart-simple"></i>
+                <div>
+                    <h3>Revenue vs Cost vs Profit</h3>
+                    <div class="chart-description">Ready & Warehouse comparison</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-calculator"></i> Grouped
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrapper" style="height: 240px;">
+                <canvas id="groupedChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Stock Levels -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-boxes"></i>
+                <div>
+                    <h3>Stock Levels</h3>
+                    <div class="chart-description">Click a product to manage stock</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-check-circle"></i> Ready Stock
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="stock-list">
+                {% for p in stock_data %}
+                <a href="{{ p.url }}" class="stock-item" target="_blank">
+                    <span class="stock-name">{{ p.name }}</span>
+                    <div class="stock-bar-wrapper">
+                        <div class="stock-bar-fill" style="
+                            width: {% if p.qty >= 10 %}100{% else %}{{ p.qty }}0{% endif %}%;
+                            background: {% if p.status == 'out' %}var(--danger){% elif p.status == 'low' %}var(--warning){% else %}var(--success){% endif %};
+                        "></div>
+                    </div>
+                    <span class="stock-quantity" style="color:{% if p.status == 'out' %}var(--danger){% elif p.status == 'low' %}var(--warning){% else %}var(--success){% endif %};">
+                        {{ p.qty }}
+                    </span>
+                    <span class="stock-tag {% if p.status == 'out' %}out{% elif p.status == 'low' %}low{% else %}ok{% endif %}">
+                        {% if p.status == 'out' %}Out{% elif p.status == 'low' %}Low{% else %}OK{% endif %}
+                    </span>
+                </a>
+                {% empty %}
+                <div style="text-align: center; padding: 2rem; color: var(--text-soft);">
+                    <i class="fas fa-box-open"></i>
+                    <p>No stock data available</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Monthly Revenue Trend -->
+    <div class="chart-card wide">
+        <div class="chart-header">
+            <div class="chart-title">
+                <i class="fas fa-chart-line"></i>
+                <div>
+                    <h3>Monthly Revenue Trend</h3>
+                    <div class="chart-description">Last 12 months — sales performance over time</div>
+                </div>
+            </div>
+            <span class="chart-badge">
+                <i class="fas fa-calendar-alt"></i> 12 Months
+            </span>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrapper">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<script>
+const DATA = {{ chart_data|safe }};
+
+// Theme colors
+const ACCENT = '#7b2eda';
+const ACCENT_LIGHT = '#a78bfa';
+const ACCENT_SOFT = '#f3e8ff';
+const SUCCESS = '#10b981';
+const SUCCESS_SOFT = '#d1fae5';
+const WARNING = '#f59e0b';
+const WARNING_SOFT = '#fed7aa';
+const DANGER = '#ef4444';
+const DANGER_SOFT = '#fee2e2';
+const INFO = '#3b82f6';
+const INFO_SOFT = '#dbeafe';
+
+function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Chart defaults
+Chart.defaults.color = '#666';
+Chart.defaults.borderColor = '#2c2c2c';
+Chart.defaults.font.family = "'Inter', sans-serif";
+
+// 1. Daily Revenue Chart
+new Chart(document.getElementById('dailyChart'), {
+    type: 'bar',
+    data: {
+        labels: DATA.daily.labels,
+        datasets: [
+            {
+                label: 'Revenue (KSH)',
+                data: DATA.daily.revenue,
+                backgroundColor: hexToRgba(ACCENT, 0.25),
+                borderColor: ACCENT,
+                borderWidth: 2,
+                borderRadius: 6,
+                yAxisID: 'y',
+            },
+            {
+                label: 'Orders',
+                data: DATA.daily.orders,
+                type: 'line',
+                borderColor: INFO,
+                backgroundColor: hexToRgba(INFO, 0.1),
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: INFO,
+                tension: 0.4,
+                fill: true,
+                yAxisID: 'y1',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { labels: { color: '#999', font: { size: 11 } } },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                borderColor: '#2c2c2c',
+                borderWidth: 1,
+                callbacks: {
+                    label: ctx => ctx.datasetIndex === 0
+                        ? ` KSH ${ctx.parsed.y.toLocaleString()}`
+                        : ` ${ctx.parsed.y} orders`
+                }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#555', font: { size: 10 } }, grid: { display: false } },
+            y: { 
+                position: 'left', 
+                ticks: { color: '#555', callback: v => 'KSH ' + v.toLocaleString() }, 
+                grid: { color: '#1e1e1e' } 
+            },
+            y1: { 
+                position: 'right', 
+                ticks: { color: '#555' }, 
+                grid: { display: false } 
+            },
+        }
+    }
+});
+
+// 2. Orders by Status Chart
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: DATA.status.labels,
+        datasets: [{
+            data: DATA.status.counts,
+            backgroundColor: [
+                hexToRgba(WARNING, 0.7),
+                hexToRgba(INFO, 0.7),
+                hexToRgba(ACCENT_LIGHT, 0.7),
+                hexToRgba(SUCCESS, 0.7)
+            ],
+            borderColor: [WARNING, INFO, ACCENT_LIGHT, SUCCESS],
+            borderWidth: 2,
+            hoverOffset: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+            legend: { 
+                position: 'bottom', 
+                labels: { color: '#999', padding: 16, font: { size: 11 } } 
+            },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                borderColor: '#2c2c2c',
+                borderWidth: 1,
+            }
+        }
+    }
+});
+
+// 3. Revenue by Category Chart
+new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+        labels: DATA.category.labels,
+        datasets: [{
+            label: 'Revenue (KSH)',
+            data: DATA.category.revenue,
+            backgroundColor: [
+                hexToRgba(ACCENT, 0.6),
+                hexToRgba(INFO, 0.6),
+                hexToRgba(SUCCESS, 0.6),
+                hexToRgba(ACCENT_LIGHT, 0.6),
+                hexToRgba(WARNING, 0.6)
+            ],
+            borderColor: [ACCENT, INFO, SUCCESS, ACCENT_LIGHT, WARNING],
+            borderWidth: 2,
+            borderRadius: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                borderColor: '#2c2c2c',
+                borderWidth: 1,
+                callbacks: { label: ctx => ` KSH ${ctx.parsed.y.toLocaleString()}` }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#666' }, grid: { display: false } },
+            y: { 
+                ticks: { color: '#555', callback: v => 'KSH ' + v.toLocaleString() }, 
+                grid: { color: '#1e1e1e' } 
+            },
+        }
+    }
+});
+
+// 5. Ready vs Warehouse Split Chart
+new Chart(document.getElementById('splitChart'), {
+    type: 'pie',
+    data: {
+        labels: DATA.stock_split.labels,
+        datasets: [{
+            data: DATA.stock_split.revenue,
+            backgroundColor: [hexToRgba(ACCENT, 0.7), hexToRgba(INFO, 0.7)],
+            borderColor: [ACCENT, INFO],
+            borderWidth: 2,
+            hoverOffset: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { 
+                position: 'bottom', 
+                labels: { color: '#999', padding: 16, font: { size: 11 } } 
+            },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                borderColor: '#2c2c2c',
+                borderWidth: 1,
+                callbacks: { label: ctx => ` KSH ${ctx.parsed.toLocaleString()}` }
+            }
+        }
+    }
+});
+
+// 6. Grouped Chart
+new Chart(document.getElementById('groupedChart'), {
+    type: 'bar',
+    data: {
+        labels: DATA.grouped.labels,
+        datasets: [
+            {
+                label: 'Revenue',
+                data: DATA.grouped.revenue,
+                backgroundColor: hexToRgba(ACCENT, 0.6),
+                borderColor: ACCENT,
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+            {
+                label: 'Cost',
+                data: DATA.grouped.cost,
+                backgroundColor: hexToRgba(DANGER, 0.5),
+                borderColor: DANGER,
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+            {
+                label: 'Profit',
+                data: DATA.grouped.profit,
+                backgroundColor: hexToRgba(SUCCESS, 0.5),
+                borderColor: SUCCESS,
+                borderWidth: 2,
+                borderRadius: 6,
+            },
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: '#999', font: { size: 11 } } },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                borderColor: '#2c2c2c',
+                borderWidth: 1,
+                callbacks: { label: ctx => ` KSH ${ctx.parsed.y.toLocaleString()}` }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#666' }, grid: { display: false } },
+            y: { 
+                ticks: { color: '#555', callback: v => 'KSH ' + v.toLocaleString() }, 
+                grid: { color: '#1e1e1e' } 
+            },
+        }
+    }
+});
+
+// 8. Monthly Revenue Trend Chart
+new Chart(document.getElementById('monthlyChart'), {
+    type: 'line',
+    data: {
+        labels: DATA.monthly.labels,
+        datasets: [{
+            label: 'Monthly Revenue (KSH)',
+            data: DATA.monthly.revenue,
+            borderColor: ACCENT,
+            backgroundColor: ctx => {
+                const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 240);
+                g.addColorStop(0, hexToRgba(ACCENT, 0.3));
+                g.addColorStop(1, hexToRgba(ACCENT, 0));
+                return g;
+            },
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointBackgroundColor: ACCENT,
+            pointBorderColor: '#0d0d0d',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1a1a1a',
+                borderColor: '#2c2c2c',
+                borderWidth: 1,
+                callbacks: { label: ctx => ` KSH ${ctx.parsed.y.toLocaleString()}` }
+            }
+        },
+        scales: {
+            x: { ticks: { color: '#666' }, grid: { display: false } },
+            y: { 
+                ticks: { color: '#555', callback: v => 'KSH ' + v.toLocaleString() }, 
+                grid: { color: '#1e1e1e' } 
+            },
+        }
+    }
+});
+</script>
+{% endblock %}

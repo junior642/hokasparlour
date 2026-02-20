@@ -1,0 +1,1231 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}{{ ad.title }} - Ad Details{% endblock %}
+
+{% block page_icon %}fas fa-ad{% endblock %}
+{% block page_title %}{{ ad.title }}{% endblock %}
+{% block page_subtitle %}Advertisement Details & Performance{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Header Actions */
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-action i {
+        font-size: 1rem;
+    }
+
+    .btn-back {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .btn-back:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-delete {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: var(--danger);
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--accent);
+    }
+
+    .stat-icon {
+        width: 54px;
+        height: 54px;
+        background: var(--accent-soft);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-size: 1.6rem;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .stat-label {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-trend {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    /* Preview Card */
+    .preview-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    .preview-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .preview-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .preview-title i {
+        color: var(--accent);
+        font-size: 1.2rem;
+    }
+
+    .preview-title h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .ad-preview-container {
+        padding: 3rem 2rem;
+        background: {% if ad.background_color %}{{ ad.background_color }}{% else %}linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%){% endif %};
+        min-height: 350px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .ad-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, {{ ad.overlay_opacity }});
+        pointer-events: none;
+    }
+
+    .ad-preview {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 700px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        z-index: 2;
+    }
+
+    .preview-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        color: {{ ad.text_color }};
+    }
+
+    .preview-media {
+        width: 150px;
+        height: 150px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .preview-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-media i {
+        font-size: 3rem;
+        color: white;
+        opacity: 0.8;
+    }
+
+    .preview-text {
+        flex: 1;
+    }
+
+    .preview-text h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .preview-text p {
+        opacity: 0.9;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .preview-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 2rem;
+        background: {{ ad.button_color }};
+        color: white;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .preview-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Gallery Section */
+    .gallery-section {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .gallery-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 1rem;
+    }
+
+    .gallery-title i {
+        color: var(--accent);
+    }
+
+    .image-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+    }
+
+    .gallery-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .gallery-item:hover {
+        border-color: var(--accent);
+        transform: scale(1.05);
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .gallery-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.25rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        font-size: 0.65rem;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s 0.15s ease both;
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .info-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .info-header {
+        padding: 1rem 1.5rem;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-header i {
+        color: var(--accent);
+    }
+
+    .info-body {
+        padding: 1.5rem;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-row:first-child {
+        padding-top: 0;
+    }
+
+    .info-label {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label i {
+        color: var(--accent);
+        width: 18px;
+    }
+
+    .info-value {
+        color: var(--text);
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-badge i {
+        font-size: 0.7rem;
+    }
+
+    .status-badge.active {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .status-badge.inactive {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .status-badge.scheduled {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .device-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 50px;
+        font-size: 0.75rem;
+        color: var(--text);
+    }
+
+    .color-preview {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+        border: 2px solid var(--border);
+        vertical-align: middle;
+        margin-right: 0.5rem;
+    }
+
+    /* Chart Container - REDUCED SIZE */
+    .chart-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+        animation: fadeIn 0.4s 0.2s ease both;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .chart-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chart-header h3 i {
+        color: var(--accent);
+    }
+
+    .chart-legend {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .legend-color {
+        width: 10px;
+        height: 10px;
+        border-radius: 4px;
+    }
+
+    .legend-color.views {
+        background: var(--accent);
+    }
+
+    .legend-color.clicks {
+        background: var(--success);
+    }
+
+    #impressionChart {
+        width: 100%;
+        height: 180px !important; /* REDUCED HEIGHT */
+    }
+
+    /* Recent Impressions Table */
+    .impressions-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        animation: fadeIn 0.4s 0.25s ease both;
+    }
+
+    .impressions-header {
+        padding: 1.25rem 1.5rem;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .impressions-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .impressions-header h3 i {
+        color: var(--accent);
+    }
+
+    .impressions-count {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+    }
+
+    .impressions-table {
+        overflow-x: auto;
+    }
+
+    .impressions-table table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+    .impressions-table th {
+        background: var(--surface);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-soft);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .impressions-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.85rem;
+    }
+
+    .impressions-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .impressions-table tbody tr:hover {
+        background: var(--accent-soft);
+    }
+
+    .impressions-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .click-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .click-badge.clicked {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .click-badge.not-clicked {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .session-id {
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: var(--text-soft);
+        background: var(--surface);
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1.5rem;
+        color: var(--text-soft);
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        color: var(--accent-light);
+        margin-bottom: 0.75rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .preview-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .preview-media {
+            width: 100px;
+            height: 100px;
+        }
+
+        .preview-text h3 {
+            font-size: 1.3rem;
+        }
+
+        .preview-text p {
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .btn-action {
+            flex: 1;
+            justify-content: center;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .chart-legend {
+            flex-direction: row;
+            gap: 1rem;
+        }
+        
+        #impressionChart {
+            height: 150px !important; /* EVEN SMALLER ON MOBILE */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Actions -->
+<div class="header-actions">
+    <a href="{% url 'ad_list' %}" class="btn-action btn-back">
+        <i class="fas fa-arrow-left"></i>
+        Back to List
+    </a>
+    <a href="{% url 'ad_edit' ad.id %}" class="btn-action btn-edit">
+        <i class="fas fa-edit"></i>
+        Edit Ad
+    </a>
+    <a href="{% url 'ad_delete' ad.id %}" class="btn-action btn-delete" onclick="return confirm('Are you sure you want to delete this advertisement?')">
+        <i class="fas fa-trash"></i>
+        Delete
+    </a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_impressions }}</div>
+            <div class="stat-label">Total Views</div>
+        </div>
+        <div class="stat-trend">
+            <i class="fas fa-chart-line"></i> Lifetime
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-mouse-pointer"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ ad.clicks }}</div>
+            <div class="stat-label">Total Clicks</div>
+        </div>
+        <div class="stat-trend">
+            <i class="fas fa-percentage"></i> {{ click_through_rate|floatformat:1 }}% CTR
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ ad.created_at|date:"M d, Y" }}</div>
+            <div class="stat-label">Created</div>
+        </div>
+        <div class="stat-trend">
+            <i class="far fa-clock"></i> {{ ad.created_at|timesince }} ago
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-sort-numeric-up"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ ad.order }}</div>
+            <div class="stat-label">Display Order</div>
+        </div>
+        <div class="stat-trend">
+            <i class="fas fa-layer-group"></i> Priority
+        </div>
+    </div>
+</div>
+
+<!-- Ad Preview -->
+<div class="preview-card">
+    <div class="preview-header">
+        <div class="preview-title">
+            <i class="fas fa-eye"></i>
+            <h3>Ad Preview</h3>
+        </div>
+        <span class="type-badge">
+            {% if ad.ad_type == 'single_image' %}
+                <i class="fas fa-image"></i>
+            {% elif ad.ad_type == 'multi_image' %}
+                <i class="fas fa-images"></i>
+            {% elif ad.ad_type == 'video' %}
+                <i class="fas fa-video"></i>
+            {% endif %}
+            {{ ad.get_ad_type_display }}
+        </span>
+    </div>
+    
+    <div class="ad-preview-container">
+        <div class="ad-overlay"></div>
+        <div class="ad-preview">
+            <div class="preview-content">
+                <div class="preview-media">
+                    {% if ad.ad_type == 'single_image' and ad.single_image %}
+                        <img src="{{ ad.single_image.url }}" alt="{{ ad.title }}">
+                    {% elif ad.ad_type == 'video' %}
+                        <i class="fas fa-video"></i>
+                    {% elif ad.ad_type == 'multi_image' %}
+                        {% if ad.ad_images.first %}
+                            <img src="{{ ad.ad_images.first.image.url }}" alt="{{ ad.title }}">
+                        {% else %}
+                            <i class="fas fa-images"></i>
+                        {% endif %}
+                    {% else %}
+                        <i class="fas fa-image"></i>
+                    {% endif %}
+                </div>
+                <div class="preview-text">
+                    <h3>{{ ad.headline|default:"Your Headline Here" }}</h3>
+                    <p>{{ ad.subheadline|default:"Your subheadline will appear here" }}</p>
+                    <span class="preview-button">
+                        {{ ad.button_text|default:"Shop Now" }} <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if ad.ad_type == 'multi_image' and ad.ad_images.exists %}
+    <div class="gallery-section">
+        <div class="gallery-title">
+            <i class="fas fa-images"></i>
+            Image Gallery ({{ ad.ad_images.count }} images)
+        </div>
+        <div class="image-gallery">
+            {% for image in ad.ad_images.all %}
+            <div class="gallery-item">
+                <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                {% if image.caption %}
+                <div class="gallery-caption">{{ image.caption|truncatechars:20 }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Information Grid -->
+<div class="info-grid">
+    <!-- Basic Info -->
+    <div class="info-card">
+        <div class="info-header">
+            <i class="fas fa-info-circle"></i>
+            Basic Information
+        </div>
+        <div class="info-body">
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-circle"></i> Status</span>
+                <span class="info-value">
+                    <span class="status-badge {% if ad.is_active %}active{% else %}inactive{% endif %}">
+                        <i class="fas fa-circle"></i>
+                        {% if ad.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-users"></i> Target Audience</span>
+                <span class="info-value">{{ ad.get_target_audience_display }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-sort"></i> Display Order</span>
+                <span class="info-value">#{{ ad.order }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-clock"></i> Last Updated</span>
+                <span class="info-value">{{ ad.updated_at|date:"M d, Y H:i" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Settings -->
+    <div class="info-card">
+        <div class="info-header">
+            <i class="fas fa-tv"></i>
+            Display Settings
+        </div>
+        <div class="info-body">
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-device"></i> Show on</span>
+                <span class="info-value">
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end; flex-wrap: wrap;">
+                        {% if ad.show_on_mobile %}
+                        <span class="device-badge">
+                            <i class="fas fa-mobile-alt"></i> Mobile
+                        </span>
+                        {% endif %}
+                        {% if ad.show_on_tablet %}
+                        <span class="device-badge">
+                            <i class="fas fa-tablet-alt"></i> Tablet
+                        </span>
+                        {% endif %}
+                        {% if ad.show_on_desktop %}
+                        <span class="device-badge">
+                            <i class="fas fa-desktop"></i> Desktop
+                        </span>
+                        {% endif %}
+                    </div>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-palette"></i> Background</span>
+                <span class="info-value">
+                    <span class="color-preview" style="background: {{ ad.background_color|default:'var(--accent)' }};"></span>
+                    {{ ad.background_color|default:'Gradient' }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-font"></i> Text Color</span>
+                <span class="info-value">
+                    <span class="color-preview" style="background: {{ ad.text_color }};"></span>
+                    {{ ad.text_color }}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-layer-group"></i> Overlay Opacity</span>
+                <span class="info-value">{{ ad.overlay_opacity }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduling -->
+    <div class="info-card">
+        <div class="info-header">
+            <i class="fas fa-calendar-alt"></i>
+            Scheduling
+        </div>
+        <div class="info-body">
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-play"></i> Start Date</span>
+                <span class="info-value">
+                    {% if ad.start_date %}
+                        {{ ad.start_date|date:"M d, Y H:i" }}
+                    {% else %}
+                        <span style="color: var(--text-soft);">Not set</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-stop"></i> End Date</span>
+                <span class="info-value">
+                    {% if ad.end_date %}
+                        {{ ad.end_date|date:"M d, Y H:i" }}
+                    {% else %}
+                        <span style="color: var(--text-soft);">Not set</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-clock"></i> Schedule Status</span>
+                <span class="info-value">
+                    {% if ad.start_date and ad.start_date > now %}
+                        <span class="status-badge scheduled">
+                            <i class="fas fa-clock"></i> Scheduled
+                        </span>
+                    {% elif ad.end_date and ad.end_date < now %}
+                        <span class="status-badge inactive">
+                            <i class="fas fa-times-circle"></i> Expired
+                        </span>
+                    {% else %}
+                        <span class="status-badge active">
+                            <i class="fas fa-check-circle"></i> Active
+                        </span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Button Settings -->
+    <div class="info-card">
+        <div class="info-header">
+            <i class="fas fa-link"></i>
+            Button Settings
+        </div>
+        <div class="info-body">
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-tag"></i> Button Text</span>
+                <span class="info-value">{{ ad.button_text|default:"Shop Now" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-link"></i> Button URL</span>
+                <span class="info-value">
+                    {% if ad.button_url %}
+                        <a href="{{ ad.button_url }}" target="_blank" style="color: var(--accent); text-decoration: none;">
+                            {{ ad.button_url|truncatechars:30 }} <i class="fas fa-external-link-alt" style="font-size: 0.7rem;"></i>
+                        </a>
+                    {% else %}
+                        <span style="color: var(--text-soft);">No URL</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fas fa-paint-brush"></i> Button Color</span>
+                <span class="info-value">
+                    <span class="color-preview" style="background: {{ ad.button_color }};"></span>
+                    {{ ad.button_color }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Chart - REDUCED SIZE -->
+<div class="chart-card">
+    <div class="chart-header">
+        <h3>
+            <i class="fas fa-chart-bar"></i>
+            Performance (Last 30 Days)
+        </h3>
+        <div class="chart-legend">
+            <div class="legend-item">
+                <span class="legend-color views"></span>
+                Views
+            </div>
+            <div class="legend-item">
+                <span class="legend-color clicks"></span>
+                Clicks
+            </div>
+        </div>
+    </div>
+    <canvas id="impressionChart"></canvas>
+</div>
+
+<!-- Recent Impressions -->
+<div class="impressions-card">
+    <div class="impressions-header">
+        <h3>
+            <i class="fas fa-history"></i>
+            Recent Impressions
+        </h3>
+        <span class="impressions-count">
+            Showing last 20 impressions
+        </span>
+    </div>
+    <div class="impressions-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Session</th>
+                    <th>IP Address</th>
+                    <th>Clicked</th>
+                    <th>User Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for impression in recent_impressions %}
+                <tr>
+                    <td>{{ impression.viewed_at|date:"M d, Y H:i:s" }}</td>
+                    <td><span class="session-id">{{ impression.session_key|truncatechars:12 }}</span></td>
+                    <td>{{ impression.ip_address|default:"N/A" }}</td>
+                    <td>
+                        <span class="click-badge {% if impression.clicked %}clicked{% else %}not-clicked{% endif %}">
+                            <i class="fas fa-circle"></i>
+                            {% if impression.clicked %}Clicked{% else %}Not Clicked{% endif %}
+                        </span>
+                    </td>
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {{ impression.user_agent|truncatechars:50 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-eye-slash"></i>
+                        <p>No impressions recorded yet</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartData = {{ chart_data|safe }};
+    
+    if (chartData && chartData.dates && chartData.dates.length > 0) {
+        const ctx = document.getElementById('impressionChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.dates,
+                datasets: [{
+                    label: 'Views',
+                    data: chartData.views,
+                    borderColor: '#7b2eda',
+                    backgroundColor: 'rgba(123, 46, 218, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#7b2eda',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3, // SMALLER POINTS
+                    pointHoverRadius: 4
+                }, {
+                    label: 'Clicks',
+                    data: chartData.clicks,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3, // SMALLER POINTS
+                    pointHoverRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: '#1a1a1a',
+                        borderColor: '#2c2c2c',
+                        borderWidth: 1,
+                        padding: 8, // SMALLER TOOLTIP
+                        bodyFont: { size: 11 },
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y;
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            stepSize: 1,
+                            font: { size: 9 } // SMALLER TICKS
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: { size: 8 }, // SMALLER TICKS
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    } else {
+        const chartContainer = document.getElementById('impressionChart').parentNode;
+        chartContainer.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><p>Not enough data to display chart</p></div>';
+    }
+});
+</script>
+{% endblock %}

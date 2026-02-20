@@ -2,68 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 
-<!-- ---------- PRIMARY META TAGS (MOST IMPORTANT) ---------- -->
-<title>{% block title %}Hoka's Parlour – Modern Fusion Fashion for MMU Students, Rongai Nairobi{% endblock %}</title>
-<meta name="description" content="{% block description %}Hoka's Parlour: Trendy, affordable fusion fashion located in Rongai, Nairobi. Official MMU student partner. Shop modern streetwear, campus styles & accessories.{% endblock %}">
-<meta name="keywords" content="{% block keywords %}Hoka's Parlour, MMU fashion, Rongai Nairobi, campus wear, student fashion, Kenyan streetwear, affordable clothes Nairobi, university fashion, fusion fashion{% endblock %}">
-<meta name="author" content="Hoka's Parlour">
-<meta name="robots" content="index, follow">
-<meta name="revisit-after" content="7 days">
-<meta name="language" content="English">
-<meta name="distribution" content="global">
-<meta name="rating" content="general">
+    <!-- ---------- PRIMARY META TAGS ---------- -->
+    <title>{% block title %}Hoka's Parlour – Modern Fusion Fashion for MMU Students, Rongai Nairobi{% endblock %}</title>
+    <meta name="description" content="{% block description %}Hoka's Parlour: Trendy, affordable fusion fashion located in Rongai, Nairobi. Official MMU student partner. Shop modern streetwear, campus styles & accessories.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}Hoka's Parlour, MMU fashion, Rongai Nairobi, campus wear, student fashion, Kenyan streetwear, affordable clothes Nairobi, university fashion, fusion fashion{% endblock %}">
+    <meta name="author" content="Hoka's Parlour">
+    <meta name="robots" content="index, follow">
+    <meta name="revisit-after" content="7 days">
+    <meta name="language" content="English">
+    <meta name="distribution" content="global">
+    <meta name="rating" content="general">
 
-<!-- ---------- OPEN GRAPH / FACEBOOK ---------- -->
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Hoka's Parlour">
-<meta property="og:title" content="{% block og_title %}Hoka's Parlour – MMU's Premier Fashion Destination{% endblock %}">
-<meta property="og:description" content="{% block og_description %}Shop the latest fusion fashion in Rongai, Nairobi. Official MMU student partner. Quality streetwear & campus style.{% endblock %}">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
-<meta property="og:image" content="{% block og_image %}https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=630&fit=crop{% endblock %}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:locale" content="en_KE">
+    <!-- ---------- OPEN GRAPH / FACEBOOK ---------- -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Hoka's Parlour">
+    <meta property="og:title" content="{% block og_title %}Hoka's Parlour – MMU's Premier Fashion Destination{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Shop the latest fusion fashion in Rongai, Nairobi. Official MMU student partner. Quality streetwear & campus style.{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{% block og_image %}https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=630&fit=crop{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_KE">
 
-<!-- ---------- TWITTER CARDS ---------- -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@hokasparlour">
-<meta name="twitter:creator" content="@hokasparlour">
-<meta name="twitter:title" content="{% block twitter_title %}Hoka's Parlour – Fashion for MMU Students{% endblock %}">
-<meta name="twitter:description" content="{% block twitter_description %}Trendy fusion fashion in Rongai. Shop campus wear, streetwear & accessories. 🇰🇪{% endblock %}">
-<meta name="twitter:image" content="{% block twitter_image %}https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=675&fit=crop{% endblock %}">
+    <!-- ---------- TWITTER CARDS ---------- -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@hokasparlour">
+    <meta name="twitter:creator" content="@hokasparlour">
+    <meta name="twitter:title" content="{% block twitter_title %}Hoka's Parlour – Fashion for MMU Students{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Trendy fusion fashion in Rongai. Shop campus wear, streetwear & accessories. 🇰🇪{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1200&h=675&fit=crop{% endblock %}">
 
-<!-- ---------- GEO TAGS (LOCATION BASED) ---------- -->
-<meta name="geo.region" content="KE-19">
-<meta name="geo.placename" content="Rongai, Kajiado County">
-<meta name="geo.position" content="-1.3869;36.7439">
-<meta name="ICBM" content="-1.3869, 36.7439">
+    <!-- ---------- GEO TAGS ---------- -->
+    <meta name="geo.region" content="KE-19">
+    <meta name="geo.placename" content="Rongai, Kajiado County">
+    <meta name="geo.position" content="-1.3869;36.7439">
+    <meta name="ICBM" content="-1.3869, 36.7439">
 
-<!-- ---------- CANONICAL URL (PREVENTS DUPLICATE CONTENT) ---------- -->
-<link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+    <!-- ---------- CANONICAL URL ---------- -->
+    <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
 
-<!-- ---------- FAVICON & APP ICONS (Using RealFaviconGenerator CDN) ---------- -->
-<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
-<link rel="icon" type="image/png" sizes="16x16" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
-<link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
-<link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
-<meta name="msapplication-TileColor" content="#7b2eda">
-<meta name="theme-color" content="#7b2eda">
+    <!-- ---------- FAVICON & APP ICONS ---------- -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f455.png">
+    <meta name="msapplication-TileColor" content="#7b2eda">
+    <meta name="theme-color" content="#7b2eda">
     
-    <!-- Google Fonts: Playfair Display for headings, Inter for body -->
+    <!-- Tailwind CSS via CDN (optional but available) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome 6 (free icons) -->
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
         /* -----------------------------------------------
-           BASE.HTML – PURPLE THEME, DARK MODE READY
-           MOBILE-FIRST, ZERO WASTED SPACE, HAMBURGER MENU
+           CUSTOM CSS VARIABLES (works alongside Tailwind)
+           Can be used with or without Tailwind classes
         ----------------------------------------------- */
         
-        /* ---------- CSS VARIABLES – LIGHT MODE (default) ---------- */
+        /* ---------- CSS VARIABLES – LIGHT MODE ---------- */
         :root {
             --bg: #ffffff;
             --surface: #f8fafc;
@@ -71,7 +74,7 @@
             --text: #0a0a0a;
             --text-soft: #334155;
             --border: #e2e8f0;
-            --accent: #7b2eda;        /* signature purple */
+            --accent: #7b2eda;
             --accent-light: #a78bfa;
             --accent-soft: #f3e8ff;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
@@ -80,9 +83,14 @@
             --header-border: #e2e8f0;
             --transition: all 0.2s ease;
             --header-padding: 0.75rem 1rem;
+            
+            /* Tailwind-compatible custom colors */
+            --color-primary: #7b2eda;
+            --color-primary-light: #a78bfa;
+            --color-primary-soft: #f3e8ff;
         }
 
-        /* ---------- DARK MODE – purple remains accent ---------- */
+        /* ---------- DARK MODE ---------- */
         .dark-mode {
             --bg: #0a0a0c;
             --surface: #16161c;
@@ -97,6 +105,7 @@
             --header-border: #2c2c35;
         }
 
+        /* Base styles (can be used alongside Tailwind) */
         * {
             margin: 0;
             padding: 0;
@@ -114,13 +123,28 @@
             min-height: 100vh;
         }
 
-        /* ---------- HEADER – SCROLLABLE, NO WASTED SPACE ---------- */
+        /* Custom utility classes (works with or without Tailwind) */
+        .bg-surface { background-color: var(--surface); }
+        .bg-card { background-color: var(--card); }
+        .text-soft { color: var(--text-soft); }
+        .text-accent { color: var(--accent); }
+        .border-custom { border-color: var(--border); }
+        .bg-accent-soft { background-color: var(--accent-soft); }
+        
+        /* Container utilities */
+        .container-custom {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* ---------- HEADER STYLES ---------- */
         header {
             background-color: var(--header-bg);
             border-bottom: 1px solid var(--header-border);
-            padding: 0;  /* Remove padding, container handles it */
             width: 100%;
-            position: relative;  /* Not sticky, scrolls away */
+            position: relative;
             z-index: 100;
         }
 
@@ -134,7 +158,7 @@
             width: 100%;
         }
 
-        /* Logo – slightly smaller on mobile */
+        /* Logo */
         .logo a {
             font-size: 1.5rem;
             font-weight: 800;
@@ -149,7 +173,7 @@
             color: var(--accent);
         }
 
-        /* ---------- HAMBURGER MENU BUTTON ---------- */
+        /* Hamburger Menu */
         .hamburger-btn {
             background: transparent;
             border: none;
@@ -171,7 +195,7 @@
             color: var(--accent);
         }
 
-        /* ---------- MOBILE NAVIGATION – SLIDE OVERLAY ---------- */
+        /* Mobile Navigation */
         .mobile-nav {
             position: fixed;
             top: 0;
@@ -181,7 +205,7 @@
             height: 100vh;
             background: var(--card);
             border-left: 1px solid var(--border);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 40px -15px rgba(123, 46, 218, 0.25);
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
             display: flex;
@@ -194,7 +218,6 @@
             right: 0;
         }
 
-        /* Overlay when menu is open */
         .nav-overlay {
             position: fixed;
             top: 0;
@@ -211,7 +234,7 @@
             display: block;
         }
 
-        /* Mobile nav header */
+        /* Mobile Nav Components */
         .mobile-nav-header {
             display: flex;
             align-items: center;
@@ -251,7 +274,6 @@
             color: var(--accent);
         }
 
-        /* Mobile navigation links */
         .mobile-nav-links {
             display: flex;
             flex-direction: column;
@@ -283,7 +305,6 @@
             background: var(--accent-soft);
         }
 
-        /* Cart count in mobile menu */
         .mobile-cart-count {
             background: var(--accent);
             color: white;
@@ -294,12 +315,11 @@
             margin-left: auto;
         }
 
-        /* Desktop nav – hidden on mobile */
+        /* Desktop Navigation */
         .desktop-nav {
             display: none;
         }
 
-        /* Theme toggle in mobile menu */
         .mobile-theme-toggle {
             display: flex;
             align-items: center;
@@ -324,7 +344,7 @@
             font-size: 1.2rem;
         }
 
-        /* ---------- MESSAGES – COMPACT ---------- */
+        /* Messages */
         .messages-container {
             padding: 0.5rem 1rem 0;
             margin: 0;
@@ -345,15 +365,18 @@
             gap: 8px;
         }
 
-        /* ---------- MAIN CONTENT – ZERO WASTED SPACE ---------- */
+        /* Main Content */
         .container {
             width: 100%;
             flex: 1;
             padding: 1rem;
             margin: 0;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* ---------- FOOTER – COMPACT ---------- */
+        /* Footer */
         footer {
             background: var(--surface);
             border-top: 1px solid var(--border);
@@ -366,7 +389,6 @@
             margin: 0 auto;
         }
 
-        /* Mobile-optimized footer */
         .footer-grid {
             display: flex;
             flex-direction: column;
@@ -465,7 +487,7 @@
             color: var(--accent);
         }
 
-        /* ---------- TABLET AND DESKTOP ---------- */
+        /* ---------- MEDIA QUERIES ---------- */
         @media (min-width: 768px) {
             .header-container {
                 padding: 1rem 2rem;
@@ -551,13 +573,11 @@
             }
         }
 
-        /* Remove all unnecessary margins/padding for mobile */
         @media (max-width: 767px) {
             .desktop-nav {
                 display: none;
             }
             
-            /* Zero wasted space - remove all side padding on mobile */
             body {
                 overflow-x: hidden;
             }
@@ -566,37 +586,40 @@
                 padding: 0.75rem;
             }
             
-            /* Make images fluid */
             img {
                 max-width: 100%;
                 height: auto;
             }
-            
-            /* Compact utility classes */
-            .compact-mobile {
-                margin: 0 !important;
-                padding: 0 !important;
-            }
+        }
+
+        /* Tailwind-compatible animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease;
         }
 
         /* Block for child template extra styles */
         {% block extra_style %}{% endblock %}
     </style>
 </head>
-<body>
-    <!-- HEADER – SCROLLABLE, NO WASTED SPACE -->
+<body class="font-sans antialiased">
+    <!-- HEADER -->
     <header>
         <div class="header-container">
             <div class="logo">
                 <a href="{% url 'home' %}">HOKA'S<span> PARLOUR</span></a>
             </div>
             
-            <!-- Hamburger Button (mobile only) -->
+            <!-- Hamburger Button -->
             <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
                 <i class="fas fa-bars"></i>
             </button>
             
-            <!-- Desktop Navigation (hidden on mobile) -->
+            <!-- Desktop Navigation -->
             <nav class="desktop-nav">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
                 <a href="{% url 'cart' %}" class="cart-link">
@@ -615,9 +638,9 @@
                     <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
                 {% endif %}
 
-                 <a href="{% url 'profile' %}" class="profile-link">
-    <i class="fas fa-user"></i> Profile
-</a>
+                <a href="{% url 'profile' %}" class="profile-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
                 
                 <!-- Theme Toggle Button (desktop) -->
                 <button class="theme-toggle" id="themeToggleDesktop" aria-label="Switch between dark and light mode">
@@ -638,7 +661,13 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
+        {% if user.is_authenticated %}
+        <div class="px-4 py-2 text-sm" style="color: var(--text-soft);">
+            <i class="fas fa-user" style="color: var(--accent);"></i> {{ user.username }}
+        </div>
+        {% endif %}        
+
         <div class="mobile-nav-links">
             <a href="{% url 'home' %}">
                 <i class="fas fa-home"></i> Home
@@ -655,9 +684,10 @@
                 <a href="{% url 'logout' %}">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
-                <div style="margin: 0.5rem 1rem; font-size: 0.9rem; color: var(--text-soft);">
-                    <i class="fas fa-user" style="color: var(--accent);"></i> {{ user.username }}
-                </div>
+                
+                <a href="{% url 'profile' %}" class="profile-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
                 {% if user.is_staff %}
                     <a href="/admin/">
                         <i class="fas fa-shield"></i> Admin
@@ -682,7 +712,7 @@
         </div>
     </div>
 
-    <!-- MESSAGES / ALERTS – COMPACT -->
+    <!-- MESSAGES -->
     {% if messages %}
     <div class="messages-container">
         <div class="messages">
@@ -701,7 +731,7 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- COMPACT MOBILE FOOTER -->
+    <!-- FOOTER -->
     <footer>
         <div class="footer-container">
             <div class="footer-grid">
@@ -729,22 +759,22 @@
                     <h4>SUPPORT</h4>
                     <ul>
                         <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Shipping</a></li>
-                        <li><a href="#"><i class="fas fa-chevron-right"></i> Returns</a></li>
+                        <li><a href="/shipping"><i class="fas fa-chevron-right"></i> Shipping</a></li>
+                        <li><a href="/returns"><i class="fas fa-chevron-right"></i> Returns</a></li>
                         <li><a href="#"><i class="fas fa-chevron-right"></i> Size Guide</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 style="font-size: 1rem; margin-bottom: 0.75rem;">FOLLOW US</h4>
+                    <h4 class="text-base mb-3 font-bold" style="color: var(--text);">FOLLOW US</h4>
                     <div class="social-list">
                         <a href="https://www.instagram.com/hokasparlour/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="https://www.tiktok.com/@hokasparlour?is_from_webapp=1&sender_device=pc" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
                         <a href="https://x.com/hokasparlour" aria-label="X"><i class="fab fa-x-twitter"></i></a>
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.facebook.com/people/Hokas-Parlour/61587286749833/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="https://wa.me/254783072098" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
-                    <p style="margin-top: 1rem; color: var(--text-soft); font-size: 0.8rem;">
+                    <p class="mt-4 text-xs" style="color: var(--text-soft);">
                         <i class="fas fa-graduation-cap" style="color: var(--accent);"></i> MMU Student Partner
                     </p>
                 </div>
@@ -757,7 +787,7 @@
         </div>
     </footer>
 
-    <!-- DARK MODE TOGGLE SCRIPT – unified for both buttons -->
+    <!-- DARK MODE TOGGLE SCRIPT -->
     <script>
         (function() {
             const root = document.documentElement;
@@ -767,7 +797,6 @@
             function setDarkMode(isDark) {
                 if (isDark) {
                     root.classList.add('dark-mode');
-                    // Update all theme toggle icons
                     document.querySelectorAll('.theme-toggle i, .mobile-theme-btn i').forEach(icon => {
                         icon.className = 'fas fa-sun';
                     });
@@ -780,7 +809,6 @@
                 localStorage.setItem('hokasparlour_theme', isDark ? 'dark' : 'light');
             }
 
-            // Check localStorage or system preference
             const stored = localStorage.getItem('hokasparlour_theme');
             if (stored === 'dark') {
                 setDarkMode(true);
@@ -791,20 +819,17 @@
                 setDarkMode(prefersDark);
             }
 
-            // Add event listeners to both toggles
             if (desktopToggle) {
                 desktopToggle.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const isDark = !root.classList.contains('dark-mode');
-                    setDarkMode(isDark);
+                    setDarkMode(!root.classList.contains('dark-mode'));
                 });
             }
             
             if (mobileToggle) {
                 mobileToggle.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const isDark = !root.classList.contains('dark-mode');
-                    setDarkMode(isDark);
+                    setDarkMode(!root.classList.contains('dark-mode'));
                 });
             }
         })();
@@ -821,13 +846,13 @@
             function openMenu() {
                 mobileNav.classList.add('active');
                 navOverlay.classList.add('active');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling
+                document.body.style.overflow = 'hidden';
             }
             
             function closeMenu() {
                 mobileNav.classList.remove('active');
                 navOverlay.classList.remove('active');
-                document.body.style.overflow = ''; // Restore scrolling
+                document.body.style.overflow = '';
             }
             
             if (hamburgerBtn) {
@@ -842,21 +867,12 @@
                 navOverlay.addEventListener('click', closeMenu);
             }
             
-            // Close menu when clicking a link (for single page apps, but good practice)
             document.querySelectorAll('.mobile-nav-links a').forEach(link => {
                 link.addEventListener('click', function() {
-                    // Don't close if it's the theme toggle button
                     if (!this.closest('.mobile-theme-toggle')) {
                         closeMenu();
                     }
                 });
-            });
-            
-            // Update cart count placeholder
-            const cartCounts = document.querySelectorAll('.cart-count, .mobile-cart-count');
-            cartCounts.forEach(el => {
-                // Placeholder - replace with actual cart count from Django
-                // el.textContent = '{{ cart_items|length }}';
             });
         });
     </script>

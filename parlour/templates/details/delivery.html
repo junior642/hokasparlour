@@ -1,0 +1,402 @@
+<!-- ==================== DELIVERY POLICY PAGE ==================== -->
+{% extends "parlour/base.html" %}
+{% load static %}
+
+{% block title %}Delivery Policy - Hoka's Parlour{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Delivery Policy specific styles - using base.html variables */
+    .delivery-policy {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .policy-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .policy-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        font-family: 'Playfair Display', serif;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .policy-header h1 i {
+        color: var(--accent);
+        font-size: 2.8rem;
+    }
+
+    .policy-subhead {
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: inline-block;
+        padding: 0.5rem 2rem;
+        border-radius: 40px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+    }
+
+    .policy-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    .policy-section:hover {
+        box-shadow: 0 10px 25px -10px var(--accent-light);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        font-family: 'Playfair Display', serif;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px dashed var(--border);
+        color: var(--text);
+    }
+
+    .section-title i {
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 0.75rem;
+        border-radius: 16px;
+        font-size: 1.8rem;
+        width: 3.5rem;
+        text-align: center;
+    }
+
+    .badge-stock {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.25rem 1rem;
+        border-radius: 40px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-left: 1rem;
+        display: inline-block;
+        border: 1px solid var(--accent-light);
+    }
+
+    .badge-warehouse {
+        background: #fef3c7;
+        color: #b45309;
+        border-color: #fbbf24;
+    }
+
+    .timeline-highlight {
+        background: var(--accent-soft);
+        border-left: 6px solid var(--accent);
+        padding: 1.5rem;
+        border-radius: 18px;
+        margin: 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .timeline-highlight i {
+        font-size: 2.5rem;
+        color: var(--accent);
+    }
+
+    .delivery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .stock-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.8rem;
+    }
+
+    .stock-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+        color: var(--text);
+    }
+
+    .stock-card h3 i {
+        color: var(--accent);
+    }
+
+    .rule-list, .example-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .rule-list li, .example-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        color: var(--text-soft);
+    }
+
+    .rule-list li i, .example-list li i {
+        color: var(--accent);
+        font-size: 1.2rem;
+        min-width: 1.5rem;
+        margin-top: 0.2rem;
+    }
+
+    .example-list {
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+    }
+
+    .summary-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        margin: 2rem 0;
+    }
+
+    .summary-table th {
+        background: var(--accent);
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .summary-table th:first-child {
+        border-radius: 16px 0 0 16px;
+    }
+
+    .summary-table th:last-child {
+        border-radius: 0 16px 16px 0;
+    }
+
+    .summary-table td {
+        background: var(--surface);
+        padding: 1rem 1.5rem;
+        border: 1px solid var(--border);
+        border-width: 1px 0;
+        color: var(--text-soft);
+    }
+
+    .summary-table td:first-child {
+        border-left-width: 1px;
+        border-radius: 16px 0 0 16px;
+    }
+
+    .summary-table td:last-child {
+        border-right-width: 1px;
+        border-radius: 0 16px 16px 0;
+    }
+
+    .note-box {
+        background: var(--accent-soft);
+        border: 1px solid var(--accent-light);
+        border-radius: 18px;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+    }
+
+    .note-box i {
+        font-size: 2rem;
+        color: var(--accent);
+    }
+
+    .confirmation-steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.2rem;
+        margin: 2rem 0;
+    }
+
+    .step {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .step i {
+        font-size: 2rem;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 1rem;
+        border-radius: 60%;
+        margin-bottom: 1rem;
+    }
+
+    hr.divider {
+        border: none;
+        border-top: 2px dotted var(--border);
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 640px) {
+        .policy-header h1 { font-size: 2rem; }
+        .section-title { font-size: 1.5rem; }
+        .policy-section { padding: 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delivery-policy">
+    <div class="policy-header">
+        <h1>
+            <i class="fas fa-truck"></i> Delivery Policy
+        </h1>
+        <div class="policy-subhead">
+            <i class="fas fa-location-dot"></i> Hoka's Parlour – Rongai & MMU Community
+        </div>
+    </div>
+
+    <div class="policy-section">
+        <p class="text-soft" style="font-size: 1.1rem; display: flex; gap: 1rem; align-items: center;">
+            <i class="fas fa-store" style="color: var(--accent); font-size: 2rem;"></i>
+            At Hoka's Parlour, we operate a structured and reliable delivery system to ensure that all customers — especially our MMU and Rongai community — clearly understand when to expect their orders. We currently classify products into two categories: <strong>Ready Stock</strong> and <strong>Warehouse Stock</strong>.
+        </p>
+    </div>
+
+    <!-- Ready Stock -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-box-open"></i> 1. Ready Stock
+            <span class="badge-stock"><i class="far fa-clock"></i> Next-Day Delivery</span>
+        </div>
+        <p><i class="fas fa-shop"></i> <strong>Available at our Rongai store</strong> – physically in stock.</p>
+
+        <div class="timeline-highlight">
+            <i class="fas fa-calendar-check"></i>
+            <div><strong>Delivery Timeline:</strong> Orders placed today → Delivered the next working day.</div>
+        </div>
+
+        <p><i class="fas fa-bicycle"></i> Handled directly by Hoka's Parlour delivery team.</p>
+
+        <div class="note-box">
+            <i class="fas fa-clipboard-list"></i>
+            <div>
+                <strong>Important Requirements:</strong>
+                <ul style="margin-top: 0.5rem; padding-left: 1.2rem;">
+                    <li>Provide your <strong>Product Number / Order Number</strong> during delivery</li>
+                    <li>Required to confirm and release your item</li>
+                    <li>Failure may delay confirmation</li>
+                </ul>
+                <span class="text-accent" style="display: block; margin-top: 0.5rem;">✅ Ensures accuracy, prevents errors</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warehouse Stock -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-warehouse"></i> 2. Warehouse Stock
+            <span class="badge-stock badge-warehouse"><i class="fas fa-calendar-alt"></i> Friday Delivery</span>
+        </div>
+        <p><i class="fas fa-building"></i> <strong>Main Store inventory</strong> – delivered weekly.</p>
+
+        <div class="delivery-grid">
+            <div class="stock-card">
+                <h3><i class="fas fa-clock"></i> Delivery Rule</h3>
+                <p class="bg-accent-soft p-3 rounded-xl font-semibold">All Warehouse Stock orders delivered on <i class="fas fa-calendar-week"></i> <strong>Friday</strong>.</p>
+            </div>
+            <div class="stock-card">
+                <h3><i class="fas fa-sync-alt"></i> Weekly System</h3>
+                <ul class="rule-list">
+                    <li><i class="fas fa-arrow-right"></i> Order Sat–Thu → Delivered <strong>same week Friday</strong></li>
+                    <li><i class="fas fa-arrow-right"></i> Order Friday → Delivered <strong>next week Friday</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <h3 class="text-lg font-semibold mb-3" style="color: var(--text);"><i class="fas fa-lightbulb text-accent mr-2"></i> Examples</h3>
+        <ul class="example-list">
+            <li><i class="fas fa-calendar-day"></i> Tuesday order → Friday same week</li>
+            <li><i class="fas fa-calendar-day"></i> Sunday order → Friday same week</li>
+            <li><i class="fas fa-calendar-day"></i> Friday order → Next Friday</li>
+            <li><i class="fas fa-calendar-day"></i> Saturday order → Coming Friday</li>
+        </ul>
+
+        <hr class="divider">
+
+        <h3 class="section-title" style="font-size: 1.5rem;"><i class="fas fa-question-circle"></i> 3. Why Friday?</h3>
+        <p>Warehouse Stock must be transported from Main Store to Rongai. Consolidating deliveries on Friday ensures efficiency and reduces delays.</p>
+
+        <div class="confirmation-steps">
+            <div class="step"><i class="fas fa-boxes"></i> <strong>Bulk Dispatch</strong></div>
+            <div class="step"><i class="fas fa-van-shuttle"></i> <strong>Consolidated</strong></div>
+            <div class="step"><i class="fas fa-check-circle"></i> <strong>Predictable</strong></div>
+        </div>
+    </div>
+
+    <!-- Important Notes & Confirmation -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-clipboard-list"></i> 4. Important Notes
+        </div>
+
+        <div class="note-box" style="background: #fef3c7;">
+            <i class="fas fa-bell" style="color: #b45309;"></i>
+            <ul style="flex:1;">
+                <li><i class="fas fa-times-circle" style="color: #c44536;"></i> Friday orders never delivered same day</li>
+                <li><i class="fas fa-weekend"></i> Weekend orders grouped into Friday</li>
+                <li><i class="fas fa-envelope"></i> Notification before delivery</li>
+                <li><i class="fas fa-qrcode"></i> Keep order number ready</li>
+            </ul>
+        </div>
+
+        <h3 class="section-title" style="font-size: 1.5rem; margin-top: 2rem;"><i class="fas fa-user-shield"></i> 5. Delivery Confirmation</h3>
+        <ul class="rule-list">
+            <li><i class="fas fa-check-circle" style="color: #10b981;"></i> Confirm <strong>Order Number</strong> before release</li>
+            <li><i class="fas fa-check-circle" style="color: #10b981;"></i> Team verifies details</li>
+        </ul>
+        <p><i class="fas fa-shield-alt text-accent"></i> Protects both customer and Hoka's Parlour.</p>
+    </div>
+
+    <!-- Summary Table -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-table"></i> Summary
+        </div>
+        <table class="summary-table">
+            <thead><tr><th>Stock Type</th><th>Storage</th><th>Delivery</th></tr></thead>
+            <tbody>
+                <tr><td><i class="fas fa-check-circle" style="color: var(--accent);"></i> Ready Stock</td><td>Rongai Store</td><td>Next Day</td></tr>
+                <tr><td><i class="fas fa-check-circle" style="color: var(--accent);"></i> Warehouse Stock</td><td>Main Store</td><td>Friday</td></tr>
+            </tbody>
+        </table>
+        <p class="text-center mt-4 text-accent font-semibold">
+            <i class="fas fa-heart"></i> Predictable, organized, transparent delivery scheduling
+        </p>
+    </div>
+</div>
+{% endblock %}

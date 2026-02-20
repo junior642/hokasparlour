@@ -1,0 +1,81 @@
+{% extends 'parlour/base.html' %}
+
+{% block title %}Delete Product - Hoka's Parlour{% endblock %}
+
+{% block extra_style %}
+.delete-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.warning-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.delete-container h2 {
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.product-info {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-secondary {
+    background: white;
+    color: #333;
+    border: 2px solid #ddd;
+}
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="warning-icon">⚠️</div>
+    <h2>Delete Product?</h2>
+    <p>Are you sure you want to delete this product? This action cannot be undone.</p>
+    
+    <div class="product-info">
+        <strong>{{ product.name }}</strong><br>
+        Category: {{ product.get_category_display }}<br>
+        Price: KSH {{ product.price }}
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-actions">
+            <a href="{% url 'manage_products' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

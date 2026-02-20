@@ -1,0 +1,662 @@
+{% extends 'parlour/base.html' %}
+
+{% block title %}Delete Advertisement - {{ ad.title }}{% endblock %}
+
+{% block extra_style %}
+<style>
+    :root {
+        --admin-primary: #667eea;
+        --admin-secondary: #764ba2;
+        --admin-danger: #ef4444;
+        --admin-warning: #f59e0b;
+        --admin-success: #10b981;
+    }
+
+    .delete-container {
+        max-width: 700px;
+        margin: 3rem auto;
+        padding: 0 2rem;
+    }
+
+    .delete-card {
+        background: var(--card);
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Warning Header */
+    .warning-header {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        padding: 2.5rem 2rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .dark-mode .warning-header {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--admin-danger);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+    }
+
+    .warning-icon i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .warning-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #991b1b;
+        margin-bottom: 0.5rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .dark-mode .warning-header h1 {
+        color: #fecaca;
+    }
+
+    .warning-header p {
+        color: #b91c1c;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .dark-mode .warning-header p {
+        color: #fecaca;
+    }
+
+    /* Ad Preview */
+    .ad-preview-section {
+        padding: 2rem;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .preview-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .preview-title i {
+        color: var(--admin-primary);
+    }
+
+    .ad-preview {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ad-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, {{ ad.overlay_opacity }});
+        pointer-events: none;
+    }
+
+    .preview-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        color: white;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .preview-media {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .preview-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-media i {
+        font-size: 2rem;
+        opacity: 0.7;
+    }
+
+    .preview-text {
+        flex: 1;
+    }
+
+    .preview-text h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .preview-text p {
+        opacity: 0.9;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .preview-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 1.2rem;
+        background: white;
+        color: var(--admin-primary);
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    /* Ad Details */
+    .details-section {
+        padding: 2rem;
+        background: var(--card);
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-item {
+        background: var(--bg);
+        border-radius: 16px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+    }
+
+    .detail-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-label i {
+        color: var(--admin-primary);
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 1.1rem;
+    }
+
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 1rem;
+        background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
+        color: white;
+        border-radius: 50px;
+        font-size: 0.85rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--admin-success);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--admin-danger);
+    }
+
+    /* Stats Preview */
+    .stats-preview {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--bg);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        margin-top: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Warning Message */
+    .warning-message {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 4px solid var(--admin-danger);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+    }
+
+    .warning-message p {
+        color: var(--text);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .warning-message i {
+        color: var(--admin-danger);
+        font-size: 1.2rem;
+    }
+
+    .warning-message strong {
+        color: var(--admin-danger);
+    }
+
+    .warning-message small {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        display: block;
+        margin-top: 0.5rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        padding: 2rem;
+        background: var(--bg);
+        border-top: 1px solid var(--border);
+    }
+
+    .btn-delete {
+        flex: 2;
+        background: var(--admin-danger);
+        color: white;
+        padding: 1rem;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        background: var(--bg);
+        color: var(--text);
+        padding: 1rem;
+        border: 1.5px solid var(--border);
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: var(--border);
+        color: var(--text);
+        transform: translateY(-2px);
+    }
+
+    /* Related Items Warning */
+    .related-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border-left: 4px solid var(--admin-warning);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .related-warning i {
+        color: var(--admin-warning);
+        font-size: 1.5rem;
+    }
+
+    .related-warning p {
+        color: var(--text);
+        font-size: 0.95rem;
+    }
+
+    .related-warning strong {
+        color: var(--admin-warning);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .delete-container {
+            margin: 1.5rem auto;
+            padding: 0 1rem;
+        }
+
+        .warning-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .warning-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .preview-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .stats-preview {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-delete,
+        .btn-cancel {
+            width: 100%;
+        }
+
+        .related-warning {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .warning-header {
+        background: linear-gradient(135deg, #2d1a1a 0%, #3b1e1e 100%);
+    }
+
+    .dark-mode .warning-message {
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .dark-mode .related-warning {
+        background: rgba(245, 158, 11, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <!-- Warning Header -->
+        <div class="warning-header">
+            <div class="warning-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1>Delete Advertisement?</h1>
+            <p>This action cannot be undone</p>
+        </div>
+
+        <!-- Ad Preview -->
+        <div class="ad-preview-section">
+            <div class="preview-title">
+                <i class="fas fa-eye"></i>
+                Ad Preview
+            </div>
+            <div class="ad-preview" style="background: {% if ad.background_color %}{{ ad.background_color }}{% else %}linear-gradient(135deg, #667eea 0%, #764ba2 100%){% endif %};">
+                <div class="ad-overlay"></div>
+                <div class="preview-content">
+                    <div class="preview-media">
+                        {% if ad.ad_type == 'single_image' and ad.single_image %}
+                            <img src="{{ ad.single_image.url }}" alt="{{ ad.title }}">
+                        {% elif ad.ad_type == 'video' %}
+                            <i class="fas fa-video"></i>
+                        {% elif ad.ad_type == 'multi_image' %}
+                            {% if ad.ad_images.first %}
+                                <img src="{{ ad.ad_images.first.image.url }}" alt="{{ ad.title }}">
+                            {% else %}
+                                <i class="fas fa-images"></i>
+                            {% endif %}
+                        {% else %}
+                            <i class="fas fa-image"></i>
+                        {% endif %}
+                    </div>
+                    <div class="preview-text">
+                        <h3>{{ ad.headline|default:ad.title }}</h3>
+                        {% if ad.subheadline %}
+                            <p>{{ ad.subheadline|truncatechars:50 }}</p>
+                        {% endif %}
+                        <span class="preview-button">
+                            {{ ad.button_text|default:"Shop Now" }} <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ad Details -->
+        <div class="details-section">
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-tag"></i>
+                        Title
+                    </div>
+                    <div class="detail-value">{{ ad.title }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-ad"></i>
+                        Type
+                    </div>
+                    <div class="detail-value">
+                        <span class="type-badge">
+                            {% if ad.ad_type == 'single_image' %}
+                                <i class="fas fa-image"></i>
+                            {% elif ad.ad_type == 'multi_image' %}
+                                <i class="fas fa-images"></i>
+                            {% elif ad.ad_type == 'video' %}
+                                <i class="fas fa-video"></i>
+                            {% endif %}
+                            {{ ad.get_ad_type_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Created
+                    </div>
+                    <div class="detail-value">{{ ad.created_at|date:"M d, Y" }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <i class="fas fa-toggle-on"></i>
+                        Status
+                    </div>
+                    <div class="detail-value">
+                        <span class="status-badge {% if ad.is_active %}active{% else %}inactive{% endif %}">
+                            {% if ad.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Preview -->
+            <div class="stats-preview">
+                <div class="stat-item">
+                    <div class="stat-number">{{ ad.views }}</div>
+                    <div class="stat-label">Total Views</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ ad.clicks }}</div>
+                    <div class="stat-label">Total Clicks</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">
+                        {% if ad.views > 0 %}
+                            {{ ad.clicks|divisibleby:ad.views|floatformat:1 }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="stat-label">Click Rate</div>
+                </div>
+            </div>
+
+            <!-- Related Items Warning -->
+            {% if ad.ad_images.exists %}
+            <div class="related-warning">
+                <i class="fas fa-images"></i>
+                <p>
+                    <strong>{{ ad.ad_images.count }} image{{ ad.ad_images.count|pluralize }}</strong> 
+                    will also be deleted. This action cannot be undone.
+                </p>
+            </div>
+            {% endif %}
+
+            {% if ad.impressions > 0 %}
+            <div class="related-warning">
+                <i class="fas fa-chart-bar"></i>
+                <p>
+                    <strong>{{ ad.impressions }} impression{{ ad.impressions|pluralize }}</strong> 
+                    will be permanently removed from analytics.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Warning Message -->
+            <div class="warning-message">
+                <p>
+                    <i class="fas fa-exclamation-circle"></i>
+                    You are about to permanently delete this advertisement.
+                </p>
+                <p>
+                    <strong>"{{ ad.title }}"</strong> will be removed from your site and all 
+                    associated data will be lost.
+                </p>
+                <small>
+                    This includes all images, statistics, and impression history.
+                </small>
+            </div>
+
+            <!-- Action Buttons -->
+            <form method="post" style="margin: 0;">
+                {% csrf_token %}
+                <div class="action-buttons">
+                    <a href="{% url 'ad_detail' ad.id %}" class="btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-delete">
+                        <i class="fas fa-trash-alt"></i>
+                        Permanently Delete Advertisement
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

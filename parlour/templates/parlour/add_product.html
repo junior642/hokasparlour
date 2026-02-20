@@ -1,0 +1,627 @@
+{% extends 'parlour/base_b.html' %}
+
+{% block title %}Add Product - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-plus-circle{% endblock %}
+{% block page_title %}Add New Product{% endblock %}
+{% block page_subtitle %}Create a new product for your store{% endblock %}
+
+{% block extra_style %}
+<style>
+    .form-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-title i {
+        color: var(--accent);
+        font-size: 1.2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+        grid-column: span 2;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+        font-size: 0.95rem;
+    }
+
+    .form-group label span.required {
+        color: var(--danger);
+        margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.95rem;
+        transition: var(--transition);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .form-group input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .form-group input[type="number"]::-webkit-outer-spin-button,
+    .form-group input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .form-group small {
+        display: block;
+        margin-top: 0.5rem;
+        color: var(--text-soft);
+        font-size: 0.8rem;
+    }
+
+    .input-hint {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 0.5rem;
+        color: var(--text-soft);
+        font-size: 0.8rem;
+    }
+
+    .input-hint i {
+        color: var(--accent);
+        font-size: 0.8rem;
+    }
+
+    /* File Upload Area */
+    .file-upload-area {
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        background: var(--surface);
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .file-upload-area.has-file {
+        border-color: var(--success);
+        background: var(--success-soft);
+    }
+
+    .file-upload-area input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--accent);
+        margin-bottom: 1rem;
+    }
+
+    .upload-label {
+        display: block;
+        color: var(--accent);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-hint {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+    }
+
+    .file-name {
+        margin-top: 1rem;
+        padding: 0.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.9rem;
+        word-break: break-all;
+    }
+
+    /* Preview Grid */
+    .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .preview-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid var(--border);
+        transition: var(--transition);
+    }
+
+    .preview-item:hover {
+        border-color: var(--accent);
+        transform: scale(1.05);
+    }
+
+    .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        background: var(--danger);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .preview-item:hover .preview-remove {
+        opacity: 1;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .form-group.full-width {
+            grid-column: auto;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .file-upload-area {
+        background: var(--surface);
+    }
+
+    .dark-mode .file-upload-area:hover {
+        background: var(--accent-soft);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <form method="post" enctype="multipart/form-data" id="productForm">
+        {% csrf_token %}
+        
+        <!-- Basic Information Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Basic Information
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="name">Product Name <span class="required">*</span></label>
+                    <input type="text" name="name" id="name" placeholder="e.g., Classic Hoodie" required>
+                    <div class="input-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        Choose a descriptive name for your product
+                    </div>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="description">Description <span class="required">*</span></label>
+                    <textarea name="description" id="description" rows="5" placeholder="Describe your product in detail..." required></textarea>
+                    <div class="input-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        Include materials, fit, care instructions, etc.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">Category <span class="required">*</span></label>
+                    <select name="category" id="category" required>
+                        <option value="">Select category</option>
+                        <option value="hoodies">Hoodies</option>
+                        <option value="sweatpants">Sweatpants</option>
+                        <option value="socks">Socks</option>
+                        <option value="shorts">Shorts</option>
+                        <option value="shirts">Shirts</option>
+                        <option value="accessories">Accessories</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sku">SKU (Optional)</label>
+                    <input type="text" name="sku" id="sku" placeholder="e.g., HD-BLK-S">
+                    <div class="input-hint">
+                        <i class="fas fa-barcode"></i>
+                        Stock Keeping Unit
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pricing & Stock Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-dollar-sign"></i>
+                Pricing & Stock
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="price">Price (KSH) <span class="required">*</span></label>
+                    <input type="number" name="price" id="price" step="0.01" min="0" placeholder="0.00" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="compare_price">Compare at Price (Optional)</label>
+                    <input type="number" name="compare_price" id="compare_price" step="0.01" min="0" placeholder="0.00">
+                    <div class="input-hint">
+                        <i class="fas fa-tag"></i>
+                        Original price for showing discounts
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
+                    <input type="number" name="stock_quantity" id="stock_quantity" min="0" placeholder="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="low_stock_threshold">Low Stock Threshold</label>
+                    <input type="number" name="low_stock_threshold" id="low_stock_threshold" min="1" value="5" placeholder="5">
+                    <div class="input-hint">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Alert when stock falls below this number
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Variants Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-tags"></i>
+                Product Variants
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="available_sizes">Available Sizes <span class="required">*</span></label>
+                    <input type="text" name="available_sizes" id="available_sizes" placeholder="S, M, L, XL" required>
+                    <div class="input-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Separate sizes with commas (e.g., S,M,L,XL)
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="available_colors">Available Colors</label>
+                    <input type="text" name="available_colors" id="available_colors" placeholder="Black, White, Red">
+                    <div class="input-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Separate colors with commas
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Images Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-images"></i>
+                Product Images
+            </div>
+            
+            <div class="form-group">
+                <label>Main Product Image <span class="required">*</span></label>
+                <div class="file-upload-area" id="mainImageArea">
+                    <div class="upload-icon">📷</div>
+                    <span class="upload-label">Click to upload main image</span>
+                    <span class="upload-hint">or drag and drop</span>
+                    <div class="file-name" id="mainImageName"></div>
+                    <input type="file" name="main_image" id="main_image" accept="image/*" required>
+                </div>
+                <div class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Recommended size: 1000x1000px or larger
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Additional Images (Optional)</label>
+                <div class="file-upload-area" id="additionalImagesArea">
+                    <div class="upload-icon">🖼️</div>
+                    <span class="upload-label">Click to upload additional images</span>
+                    <span class="upload-hint">You can select multiple images</span>
+                    <input type="file" name="additional_images" id="additional_images" accept="image/*" multiple>
+                </div>
+                <div class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    Upload up to 5 additional product photos
+                </div>
+                <div id="preview-grid" class="preview-grid"></div>
+            </div>
+        </div>
+        
+        <!-- SEO Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-search"></i>
+                SEO Settings (Optional)
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="meta_title">Meta Title</label>
+                    <input type="text" name="meta_title" id="meta_title" placeholder="SEO title for search engines">
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="meta_description">Meta Description</label>
+                    <textarea name="meta_description" id="meta_description" rows="3" placeholder="SEO description for search engines"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <a href="{% url 'manage_products' %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Add Product
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Main image upload handling
+    const mainImageInput = document.getElementById('main_image');
+    const mainImageArea = document.getElementById('mainImageArea');
+    const mainImageName = document.getElementById('mainImageName');
+    
+    if (mainImageInput) {
+        mainImageInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                mainImageName.textContent = file.name;
+                mainImageArea.classList.add('has-file');
+            } else {
+                mainImageName.textContent = '';
+                mainImageArea.classList.remove('has-file');
+            }
+        });
+    }
+    
+    // Additional images preview
+    const additionalImages = document.getElementById('additional_images');
+    const previewGrid = document.getElementById('preview-grid');
+    const additionalArea = document.getElementById('additionalImagesArea');
+    
+    if (additionalImages) {
+        additionalImages.addEventListener('change', function(e) {
+            previewGrid.innerHTML = '';
+            
+            if (this.files.length > 0) {
+                additionalArea.classList.add('has-file');
+                
+                Array.from(this.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${event.target.result}" alt="Preview ${index + 1}">
+                            <button type="button" class="preview-remove" data-index="${index}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        previewGrid.appendChild(previewItem);
+                        
+                        // Add remove functionality
+                        const removeBtn = previewItem.querySelector('.preview-remove');
+                        removeBtn.addEventListener('click', function() {
+                            previewItem.remove();
+                            // Note: This doesn't remove from FileList, would need more complex implementation
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                additionalArea.classList.remove('has-file');
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.getElementById('productForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const required = form.querySelectorAll('[required]');
+            let valid = true;
+            
+            required.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'var(--danger)';
+                    valid = false;
+                    
+                    // Add error message if not exists
+                    let errorMsg = field.parentNode.querySelector('.error-message');
+                    if (!errorMsg) {
+                        errorMsg = document.createElement('div');
+                        errorMsg.className = 'error-message';
+                        errorMsg.style.color = 'var(--danger)';
+                        errorMsg.style.fontSize = '0.8rem';
+                        errorMsg.style.marginTop = '0.25rem';
+                        errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> This field is required';
+                        field.parentNode.appendChild(errorMsg);
+                    }
+                } else {
+                    field.style.borderColor = '';
+                    const errorMsg = field.parentNode.querySelector('.error-message');
+                    if (errorMsg) errorMsg.remove();
+                }
+            });
+            
+            if (!valid) {
+                e.preventDefault();
+                
+                // Scroll to first error
+                const firstError = form.querySelector('[required]');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+    }
+    
+    // Input cleanup on focus
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.style.borderColor = '';
+            const errorMsg = this.parentNode.querySelector('.error-message');
+            if (errorMsg) errorMsg.remove();
+        });
+    });
+});
+</script>
+{% endblock %}

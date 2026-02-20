@@ -1,45 +1,753 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard - Hoka's Parlour</title>
-</head>
-<body>
-    <h1>Admin Dashboard</h1>
-    <nav>
-        <a href="{% url 'hokaadmin:dashboard' %}">Dashboard</a>
-        <a href="/admin/">Django Admin</a>
-    </nav>
-    
-    <h2>Summary</h2>
-    
-    <div>
-        <h3>Total Revenue</h3>
-        <p>${{ total_revenue }}</p>
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-chart-pie{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ user.get_short_name|default:user.username }}{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Stat Cards Row */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--stat-color, var(--accent));
+    }
+
+    .stat-icon {
+        width: 54px;
+        height: 54px;
+        background: var(--accent-soft);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-size: 1.8rem;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .stat-label {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    /* Status Tiles */
+    .status-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-header h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-header h3 i {
+        color: var(--accent);
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+        .status-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .status-tile {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        transition: var(--transition);
+        display: block;
+    }
+
+    .status-tile:hover {
+        transform: translateY(-2px);
+        border-color: var(--status-color, var(--accent));
+        box-shadow: var(--shadow-sm);
+    }
+
+    .status-tile-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--status-color, var(--text));
+        line-height: 1.2;
+        margin-bottom: 0.25rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .status-tile-label {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        animation: fadeIn 0.4s 0.2s ease both;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cards */
+    .dashboard-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface);
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--accent);
+    }
+
+    .card-header .view-link {
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: var(--transition);
+        padding: 0.35rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+
+    .card-header .view-link:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Recent Orders Table */
+    .orders-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table th {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .orders-table td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+    .orders-table tbody tr {
+        transition: var(--transition);
+    }
+
+    .orders-table tbody tr:hover {
+        background: var(--accent-soft);
+    }
+
+    .order-id {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .customer-name {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 2px;
+    }
+
+    .customer-phone {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-badge i {
+        font-size: 0.65rem;
+    }
+
+    .status-badge.pending {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .status-badge.processing {
+        background: var(--info-soft);
+        color: var(--info);
+    }
+
+    .status-badge.dispatched {
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+    }
+
+    .status-badge.delivered {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .order-total {
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0.35rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: var(--transition);
+    }
+
+    .action-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    /* Profit Summary */
+    .profit-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .profit-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .profit-label {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .profit-label i {
+        color: var(--accent);
+        width: 18px;
+    }
+
+    .profit-value {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text);
+    }
+
+    .profit-value.positive {
+        color: var(--success);
+    }
+
+    .profit-value.negative {
+        color: var(--danger);
+    }
+
+    .profit-value.warning {
+        color: var(--warning);
+    }
+
+    /* Stock Pills */
+    .stock-pills {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .stock-pill {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: var(--transition);
+    }
+
+    .stock-pill:hover {
+        border-color: var(--accent-light);
+        background: var(--accent-soft);
+    }
+
+    .pill-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .pill-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .pill-info h4 {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 2px;
+        font-size: 0.95rem;
+    }
+
+    .pill-info p {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .pill-count {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: var(--accent);
+    }
+
+    /* Alert Pills */
+    .alert-pill {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid;
+        font-size: 0.9rem;
+    }
+
+    .alert-pill.warning {
+        background: var(--warning-soft);
+        border-color: var(--warning);
+        color: var(--warning);
+    }
+
+    .alert-pill.danger {
+        background: var(--danger-soft);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .alert-pill i {
+        font-size: 1rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .orders-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            white-space: nowrap;
+        }
+
+        .status-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Actions -->
+<div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-bottom: 2rem; flex-wrap: wrap;">
+    <a href="{% url 'orders_dashboard' %}" class="btn-primary" style="background: var(--surface); color: var(--text); border: 1px solid var(--border);">
+        <i class="fas fa-shopping-bag"></i> Orders
+    </a>
+    <a href="#" class="btn-primary" style="background: var(--surface); color: var(--text); border: 1px solid var(--border);">
+        <i class="fas fa-tshirt"></i> Products
+    </a>
+    <a href="{% url 'ad_list' %}" class="btn-primary" style="background: var(--surface); color: var(--text); border: 1px solid var(--border);">
+        <i class="fas fa-ad"></i> Ads
+    </a>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card" style="--stat-color: var(--accent);">
+        <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">KSH {{ total_revenue|floatformat:0 }}</div>
+            <div class="stat-label">Total Revenue</div>
+        </div>
     </div>
-    
-    <div>
-        <h3>Total Orders</h3>
-        <p>{{ total_orders }}</p>
+
+    <div class="stat-card" style="--stat-color: var(--success);">
+        <div class="stat-icon">
+            <i class="fas fa-coins"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">KSH {{ total_profit|floatformat:0 }}</div>
+            <div class="stat-label">Net Profit</div>
+        </div>
     </div>
-    
-    <div>
-        <h3>Average Order Value</h3>
-        <p>${{ avg_order_value }}</p>
+
+    <div class="stat-card" style="--stat-color: var(--info);">
+        <div class="stat-icon">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
     </div>
-    
-    <div>
-        <h3>Total Products</h3>
-        <p>{{ total_products }}</p>
+
+    <div class="stat-card" style="--stat-color: var(--warning);">
+        <div class="stat-icon">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">KSH {{ avg_order_value|floatformat:0 }}</div>
+            <div class="stat-label">Avg Order Value</div>
+        </div>
     </div>
-    
-    <h2>Reports</h2>
-    <ul>
-        <li><a href="{% url 'hokaadmin:sales_summary' %}">Sales Summary</a></li>
-        <li><a href="{% url 'hokaadmin:daily_sales' %}">Daily Sales</a></li>
-        <li><a href="{% url 'hokaadmin:weekly_sales' %}">Weekly Sales</a></li>
-        <li><a href="{% url 'hokaadmin:monthly_sales' %}">Monthly Sales</a></li>
-        <li><a href="{% url 'hokaadmin:top_products' %}">Top Products</a></li>
-        <li><a href="{% url 'hokaadmin:revenue_trends' %}">Revenue Trends</a></li>
-    </ul>
-</body>
-</html>
+</div>
+
+<!-- Order Status Tiles -->
+<div class="status-section">
+    <div class="section-header">
+        <h3>
+            <i class="fas fa-chart-pie"></i>
+            Order Status Overview
+        </h3>
+        <a href="{% url 'orders_dashboard' %}" class="view-link">View All Orders <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="status-grid">
+        <a href="{% url 'orders_dashboard' %}?status=all" class="status-tile" style="--status-color: var(--accent);">
+            <div class="status-tile-value">{{ order_counts.all }}</div>
+            <div class="status-tile-label">All Orders</div>
+        </a>
+        <a href="{% url 'orders_dashboard' %}?status=pending" class="status-tile" style="--status-color: var(--warning);">
+            <div class="status-tile-value">{{ order_counts.pending }}</div>
+            <div class="status-tile-label">Pending</div>
+        </a>
+        <a href="{% url 'orders_dashboard' %}?status=processing" class="status-tile" style="--status-color: var(--info);">
+            <div class="status-tile-value">{{ order_counts.processing }}</div>
+            <div class="status-tile-label">Processing</div>
+        </a>
+        <a href="{% url 'orders_dashboard' %}?status=dispatched" class="status-tile" style="--status-color: #a78bfa;">
+            <div class="status-tile-value">{{ order_counts.dispatched }}</div>
+            <div class="status-tile-label">Dispatched</div>
+        </a>
+        <a href="{% url 'orders_dashboard' %}?status=delivered" class="status-tile" style="--status-color: var(--success);">
+            <div class="status-tile-value">{{ order_counts.delivered }}</div>
+            <div class="status-tile-label">Delivered</div>
+        </a>
+    </div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Left Column - Recent Orders -->
+    <div>
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-clock"></i>
+                    Recent Orders
+                </h3>
+                <a href="{% url 'orders_dashboard' %}" class="view-link">View All</a>
+            </div>
+            
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>
+                            <span class="order-id">#{{ order.id }}</span>
+                        </td>
+                        <td>
+                            <div class="customer-name">{{ order.customer_name }}</div>
+                            <div class="customer-phone">{{ order.phone_number }}</div>
+                        </td>
+                        <td>
+                            <span class="status-badge {{ order.order_status }}">
+                                <i class="fas fa-circle"></i>
+                                {{ order.get_order_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="order-total">KSH {{ order.get_total|floatformat:0 }}</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'order_detail' order.id %}" class="action-btn">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-soft);">
+                            <i class="fas fa-shopping-bag" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                            <p>No orders yet</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Column - Profit & Stock -->
+    <div>
+        <!-- Profit Summary -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-chart-line"></i>
+                    Profit Summary
+                </h3>
+                <a href="{% url 'hokaadmin:profit_report' %}" class="view-link">Full Report</a>
+            </div>
+            <div class="card-body">
+                <div class="profit-row">
+                    <span class="profit-label">
+                        <i class="fas fa-arrow-up"></i>
+                        Total Revenue
+                    </span>
+                    <span class="profit-value positive">KSH {{ total_revenue|floatformat:0 }}</span>
+                </div>
+                <div class="profit-row">
+                    <span class="profit-label">
+                        <i class="fas fa-arrow-down"></i>
+                        Total Cost
+                    </span>
+                    <span class="profit-value negative">KSH {{ total_cost|floatformat:0 }}</span>
+                </div>
+                <div class="profit-row">
+                    <span class="profit-label">
+                        <i class="fas fa-balance-scale"></i>
+                        Net Profit
+                    </span>
+                    <span class="profit-value positive" style="font-size: 1.3rem;">KSH {{ total_profit|floatformat:0 }}</span>
+                </div>
+                {% if uncosted_revenue > 0 %}
+                <div class="profit-row">
+                    <span class="profit-label">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                        Uncosted Revenue
+                    </span>
+                    <span class="profit-value warning">KSH {{ uncosted_revenue|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stock Overview -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-boxes"></i>
+                    Stock Overview
+                </h3>
+                <a href="{% url 'hokaadmin:stock_report' %}" class="view-link">Manage Stock</a>
+            </div>
+            <div class="card-body">
+                {% if out_of_stock > 0 %}
+                <div class="alert-pill danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ out_of_stock }} product{{ out_of_stock|pluralize }} out of stock
+                </div>
+                {% endif %}
+                
+                {% if low_stock > 0 %}
+                <div class="alert-pill warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ low_stock }} product{{ low_stock|pluralize }} low on stock (≤3 left)
+                </div>
+                {% endif %}
+
+                <div class="stock-pills">
+                    <div class="stock-pill">
+                        <div class="pill-left">
+                            <div class="pill-dot" style="background: var(--accent);"></div>
+                            <div class="pill-info">
+                                <h4>Ready Stock</h4>
+                                <p>Items you own & hold</p>
+                            </div>
+                        </div>
+                        <div class="pill-count">{{ ready_count }}</div>
+                    </div>
+
+                    <div class="stock-pill">
+                        <div class="pill-left">
+                            <div class="pill-dot" style="background: var(--info);"></div>
+                            <div class="pill-info">
+                                <h4>Warehouse Stock</h4>
+                                <p>Sourced on order</p>
+                            </div>
+                        </div>
+                        <div class="pill-count">{{ warehouse_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

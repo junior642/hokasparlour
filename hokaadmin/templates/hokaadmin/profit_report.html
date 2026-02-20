@@ -1,0 +1,505 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Profit Report - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-chart-line{% endblock %}
+{% block page_title %}Profit Report{% endblock %}
+{% block page_subtitle %}Delivered Orders Only - Financial Overview{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Period Filter */
+    .period-bar {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .period-btn {
+        padding: 0.6rem 1.5rem;
+        border-radius: 12px;
+        border: 1.5px solid var(--border);
+        background: var(--surface);
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+        cursor: pointer;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .period-btn:hover, .period-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Big Number Row */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .stat-card::after {
+        content: attr(data-label);
+        position: absolute;
+        bottom: -0.5rem;
+        right: 0.5rem;
+        font-family: 'Playfair Display', serif;
+        font-size: 5rem;
+        font-weight: 800;
+        color: var(--accent-soft);
+        opacity: 0.3;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--accent);
+    }
+
+    .stat-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+
+    .stat-card.revenue { --stat-color: var(--accent); }
+    .stat-card.cost { --stat-color: var(--danger); }
+    .stat-card.profit { --stat-color: var(--success); }
+
+    /* Margin Section */
+    .margin-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.4s 0.15s ease both;
+    }
+
+    .margin-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .margin-header i {
+        color: var(--accent);
+        font-size: 1.5rem;
+    }
+
+    .margin-header h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .margin-bar-wrapper {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 50px;
+        height: 16px;
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+    }
+
+    .margin-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--success), var(--accent));
+        border-radius: 50px;
+        transition: width 1s ease;
+    }
+
+    .margin-labels {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .margin-percentage {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--success);
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    /* Split Grid */
+    .split-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        animation: fadeIn 0.4s 0.2s ease both;
+    }
+
+    @media (max-width: 768px) {
+        .split-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stock-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .stock-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface);
+    }
+
+    .stock-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stock-header h3 i {
+        color: var(--accent);
+    }
+
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .stock-badge.ready {
+        background: rgba(201, 168, 76, 0.15);
+        color: #c9a84c;
+        border: 1px solid rgba(201, 168, 76, 0.3);
+    }
+
+    .stock-badge.warehouse {
+        background: rgba(29, 53, 87, 0.15);
+        color: #1d3557;
+        border: 1px solid rgba(29, 53, 87, 0.3);
+    }
+
+    .stock-body {
+        padding: 1.5rem;
+    }
+
+    .profit-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .profit-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .profit-row:first-child {
+        padding-top: 0;
+    }
+
+    .row-label {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .row-label i {
+        color: var(--accent);
+        width: 18px;
+    }
+
+    .row-value {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--text);
+    }
+
+    .row-value.revenue {
+        color: var(--accent);
+    }
+
+    .row-value.cost {
+        color: var(--danger);
+    }
+
+    .row-value.profit {
+        color: var(--success);
+        font-size: 1.2rem;
+    }
+
+    /* Warning Alert */
+    .warning-alert {
+        background: var(--warning-soft);
+        border: 1px solid var(--warning);
+        border-left: 4px solid var(--warning);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--warning);
+        animation: fadeIn 0.4s 0.05s ease both;
+    }
+
+    .warning-alert i {
+        font-size: 1.2rem;
+    }
+
+    .warning-alert strong {
+        font-weight: 700;
+    }
+
+    .warning-alert code {
+        background: rgba(0, 0, 0, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .period-bar {
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+        }
+
+        .margin-percentage {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<a href="{% url 'hokaadmin:dashboard' %}" class="back-link" style="margin-bottom: 1.5rem;">
+    <i class="fas fa-arrow-left"></i>
+    Back to Dashboard
+</a>
+
+<!-- Period Filter -->
+<div class="period-bar">
+    <a href="?period=today" class="period-btn {% if period == 'today' %}active{% endif %}">
+        <i class="fas fa-sun"></i> Today
+    </a>
+    <a href="?period=week" class="period-btn {% if period == 'week' %}active{% endif %}">
+        <i class="fas fa-calendar-week"></i> This Week
+    </a>
+    <a href="?period=month" class="period-btn {% if period == 'month' %}active{% endif %}">
+        <i class="fas fa-calendar-alt"></i> This Month
+    </a>
+    <a href="?period=all" class="period-btn {% if period == 'all' or not period %}active{% endif %}">
+        <i class="fas fa-infinity"></i> All Time
+    </a>
+</div>
+
+<!-- Uncosted Warning -->
+{% if totals.uncosted > 0 %}
+<div class="warning-alert">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div>
+        <strong>KSH {{ totals.uncosted|floatformat:0 }}</strong> in revenue has no cost set —
+        profit for those items cannot be calculated. Add <code>purchase_cost</code> or
+        <code>supplier_cost</code> to those products in the admin.
+    </div>
+</div>
+{% endif %}
+
+<!-- Big Stats -->
+<div class="stats-grid">
+    <div class="stat-card revenue" data-label="REV">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value">KSH {{ totals.revenue|floatformat:0 }}</div>
+        <div class="stat-label">Total Revenue</div>
+    </div>
+
+    <div class="stat-card cost" data-label="COST">
+        <div class="stat-icon">🧾</div>
+        <div class="stat-value">KSH {{ totals.cost|floatformat:0 }}</div>
+        <div class="stat-label">Total Cost</div>
+    </div>
+
+    <div class="stat-card profit" data-label="PROFIT">
+        <div class="stat-icon">📈</div>
+        <div class="stat-value">KSH {{ totals.profit|floatformat:0 }}</div>
+        <div class="stat-label">Net Profit</div>
+    </div>
+</div>
+
+<!-- Margin Section -->
+<div class="margin-card">
+    <div class="margin-header">
+        <i class="fas fa-chart-pie"></i>
+        <h3>Overall Profit Margin</h3>
+    </div>
+
+    <div class="margin-bar-wrapper">
+        <div class="margin-bar-fill" style="width: {{ totals.margin_percent }}%;"></div>
+    </div>
+
+    <div class="margin-labels">
+        <span>0%</span>
+        <span>{{ totals.margin_percent }}%</span>
+        <span>100%</span>
+    </div>
+
+    <div class="margin-percentage">
+        {{ totals.margin_percent }}%
+    </div>
+</div>
+
+<!-- Ready vs Warehouse Split -->
+<div class="split-grid">
+    <!-- Ready Stock Card -->
+    <div class="stock-card">
+        <div class="stock-header">
+            <h3>
+                <i class="fas fa-box"></i>
+                Ready Stock
+            </h3>
+            <span class="stock-badge ready">
+                <i class="fas fa-check-circle"></i> In-hand
+            </span>
+        </div>
+        <div class="stock-body">
+            <div class="profit-row">
+                <span class="row-label">
+                    <i class="fas fa-arrow-up"></i>
+                    Revenue
+                </span>
+                <span class="row-value revenue">KSH {{ ready_stock.revenue|floatformat:0 }}</span>
+            </div>
+            <div class="profit-row">
+                <span class="row-label">
+                    <i class="fas fa-arrow-down"></i>
+                    Purchase Cost
+                </span>
+                <span class="row-value cost">KSH {{ ready_stock.cost|floatformat:0 }}</span>
+            </div>
+            <div class="profit-row">
+                <span class="row-label">
+                    <i class="fas fa-chart-line"></i>
+                    Profit
+                </span>
+                <span class="row-value profit">KSH {{ ready_stock.profit|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Warehouse Stock Card -->
+    <div class="stock-card">
+        <div class="stock-header">
+            <h3>
+                <i class="fas fa-warehouse"></i>
+                Warehouse Stock
+            </h3>
+            <span class="stock-badge warehouse">
+                <i class="fas fa-clock"></i> On-demand
+            </span>
+        </div>
+        <div class="stock-body">
+            <div class="profit-row">
+                <span class="row-label">
+                    <i class="fas fa-arrow-up"></i>
+                    Revenue
+                </span>
+                <span class="row-value revenue">KSH {{ warehouse_stock.revenue|floatformat:0 }}</span>
+            </div>
+            <div class="profit-row">
+                <span class="row-label">
+                    <i class="fas fa-arrow-down"></i>
+                    Supplier Cost
+                </span>
+                <span class="row-value cost">KSH {{ warehouse_stock.cost|floatformat:0 }}</span>
+            </div>
+            <div class="profit-row">
+                <span class="row-label">
+                    <i class="fas fa-chart-line"></i>
+                    Profit
+                </span>
+                <span class="row-value profit">KSH {{ warehouse_stock.profit|floatformat:0 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

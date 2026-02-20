@@ -1,0 +1,589 @@
+<!-- Advertisement Section - Can be included in any page -->
+<style>
+    /* ---------- ADVERTISEMENT SECTION STYLES ---------- */
+    .ad-section {
+        width: 100%;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .ad-container {
+        position: relative;
+        width: 100%;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+    .ad-container:last-child {
+        margin-bottom: 0;
+    }
+
+    .ad-container:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+    }
+
+    .ad-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .ad-content {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 300px;
+        padding: 2rem;
+    }
+
+    .ad-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+        z-index: 1;
+        transition: opacity 0.3s ease;
+    }
+
+    .ad-media {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+    }
+
+    .ad-image,
+    .ad-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ad-text {
+        position: relative;
+        z-index: 2;
+        max-width: 50%;
+        animation: slideInLeft 0.6s ease;
+    }
+
+    .ad-headline {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        font-family: 'Playfair Display', serif;
+        line-height: 1.2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .ad-subheadline {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+
+    .ad-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0.875rem 2rem;
+        background: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .ad-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .ad-button i {
+        font-size: 0.9rem;
+        transition: transform 0.3s ease;
+    }
+
+    .ad-button:hover i {
+        transform: translateX(4px);
+    }
+
+    /* Carousel Styles */
+    .carousel-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+    }
+
+    .carousel-slides {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .carousel-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+
+    .carousel-slide.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .carousel-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .carousel-caption {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: white;
+        background: rgba(0,0,0,0.6);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    .carousel-prev,
+    .carousel-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(255,255,255,0.3);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        z-index: 5;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-prev:hover,
+    .carousel-next:hover {
+        background: rgba(255,255,255,0.5);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-prev {
+        left: 20px;
+    }
+
+    .carousel-next {
+        right: 20px;
+    }
+
+    .carousel-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 5;
+    }
+
+    .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.5);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dot.active {
+        background: white;
+        transform: scale(1.2);
+    }
+
+    /* Video Ad Styles */
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .video-play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: rgba(255,255,255,0.3);
+        backdrop-filter: blur(4px);
+        border: 2px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        z-index: 5;
+        transition: all 0.3s ease;
+    }
+
+    .video-play-btn:hover {
+        background: white;
+        color: #667eea;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    /* Animations */
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .ad-content {
+            min-height: 250px;
+            padding: 1.5rem;
+        }
+        
+        .ad-text {
+            max-width: 70%;
+        }
+        
+        .ad-headline {
+            font-size: 1.8rem;
+        }
+        
+        .ad-subheadline {
+            font-size: 1rem;
+        }
+        
+        .ad-button {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .ad-content {
+            min-height: 200px;
+            padding: 1rem;
+        }
+        
+        .ad-text {
+            max-width: 100%;
+        }
+        
+        .ad-headline {
+            font-size: 1.4rem;
+        }
+        
+        .ad-subheadline {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .ad-button {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+        }
+        
+        .carousel-prev,
+        .carousel-next {
+            width: 30px;
+            height: 30px;
+        }
+    }
+</style>
+
+{% if ads %}
+<div class="ad-section">
+    {% for ad in ads %}
+        {% if ad.ad_type == 'single_image' and ad.single_image %}
+            <!-- Single Image Ad -->
+            <div class="ad-container single-ad" 
+                 data-ad-id="{{ ad.id }}"
+                 style="{% if ad.background_color %}background-color: {{ ad.background_color }};{% endif %}">
+                
+                {% if ad.button_url %}
+                <a href="{% url 'ad_click' ad.id %}" class="ad-link" target="_blank" rel="noopener">
+                {% endif %}
+                
+                <div class="ad-content" style="color: {{ ad.text_color }};">
+                    <div class="ad-overlay" style="opacity: {{ ad.overlay_opacity }};"></div>
+                    
+                    <div class="ad-media">
+                        <img src="{{ ad.single_image.url }}" 
+                             alt="{{ ad.title }}"
+                             loading="eager"
+                             class="ad-image">
+                    </div>
+                    
+                    <div class="ad-text">
+                        {% if ad.headline %}
+                            <h2 class="ad-headline">{{ ad.headline }}</h2>
+                        {% endif %}
+                        
+                        {% if ad.subheadline %}
+                            <p class="ad-subheadline">{{ ad.subheadline }}</p>
+                        {% endif %}
+                        
+                        {% if ad.button_text and ad.button_url %}
+                            <span class="ad-button" style="background-color: {{ ad.button_color }};">
+                                {{ ad.button_text }}
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if ad.button_url %}
+                </a>
+                {% endif %}
+            </div>
+            
+        {% elif ad.ad_type == 'multi_image' %}
+            <!-- Multi-Image Carousel Ad -->
+            <div class="ad-container carousel-ad" 
+                 data-ad-id="{{ ad.id }}"
+                 style="{% if ad.background_color %}background-color: {{ ad.background_color }};{% endif %}">
+                
+                <div class="ad-content" style="color: {{ ad.text_color }};">
+                    <div class="ad-overlay" style="opacity: {{ ad.overlay_opacity }};"></div>
+                    
+                    <div class="carousel-container">
+                        <div class="carousel-slides">
+                            {% for image in ad.get_images %}
+                            <div class="carousel-slide {% if forloop.first %}active{% endif %}">
+                                <img src="{{ image.image.url }}" 
+                                     alt="{{ image.caption|default:ad.title }}"
+                                     loading="lazy">
+                                {% if image.caption %}
+                                <div class="carousel-caption">{{ image.caption }}</div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if ad.get_images.count > 1 %}
+                        <button class="carousel-prev" aria-label="Previous slide">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="carousel-next" aria-label="Next slide">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        
+                        <div class="carousel-dots">
+                            {% for image in ad.get_images %}
+                            <span class="dot {% if forloop.first %}active{% endif %}" 
+                                  data-index="{{ forloop.counter0 }}"></span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="ad-text">
+                        {% if ad.headline %}
+                            <h2 class="ad-headline">{{ ad.headline }}</h2>
+                        {% endif %}
+                        
+                        {% if ad.subheadline %}
+                            <p class="ad-subheadline">{{ ad.subheadline }}</p>
+                        {% endif %}
+                        
+                        {% if ad.button_text and ad.button_url %}
+                            <a href="{% url 'ad_click' ad.id %}" 
+                               class="ad-button" 
+                               style="background-color: {{ ad.button_color }};"
+                               target="_blank" rel="noopener">
+                                {{ ad.button_text }}
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+        {% elif ad.ad_type == 'video' and ad.video %}
+            <!-- Video Ad -->
+            <div class="ad-container video-ad" 
+                 data-ad-id="{{ ad.id }}"
+                 style="{% if ad.background_color %}background-color: {{ ad.background_color }};{% endif %}">
+                
+                <div class="ad-content" style="color: {{ ad.text_color }};">
+                    <div class="ad-overlay" style="opacity: {{ ad.overlay_opacity }};"></div>
+                    
+                    <div class="ad-media video-wrapper">
+                        <video {% if ad.autoplay %}autoplay muted{% endif %}
+                               {% if ad.loop %}loop{% endif %}
+                               {% if ad.video_poster %}poster="{{ ad.video_poster.url }}"{% endif %}
+                               playsinline
+                               class="ad-video">
+                            <source src="{{ ad.video.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        {% if not ad.autoplay %}
+                        <button class="video-play-btn" aria-label="Play video">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="ad-text">
+                        {% if ad.headline %}
+                            <h2 class="ad-headline">{{ ad.headline }}</h2>
+                        {% endif %}
+                        
+                        {% if ad.subheadline %}
+                            <p class="ad-subheadline">{{ ad.subheadline }}</p>
+                        {% endif %}
+                        
+                        {% if ad.button_text and ad.button_url %}
+                            <a href="{% url 'ad_click' ad.id %}" 
+                               class="ad-button" 
+                               style="background-color: {{ ad.button_color }};"
+                               target="_blank" rel="noopener">
+                                {{ ad.button_text }}
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<script>
+    (function() {
+        'use strict';
+        
+        // Wait for DOM to be ready
+        function initAdControls() {
+            // Handle carousels
+            document.querySelectorAll('.carousel-container').forEach(container => {
+                const slides = container.querySelectorAll('.carousel-slide');
+                const dots = container.querySelectorAll('.dot');
+                const prevBtn = container.querySelector('.carousel-prev');
+                const nextBtn = container.querySelector('.carousel-next');
+                let currentIndex = 0;
+                
+                function showSlide(index) {
+                    slides.forEach((slide, i) => {
+                        slide.classList.toggle('active', i === index);
+                    });
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                    currentIndex = index;
+                }
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        let newIndex = currentIndex - 1;
+                        if (newIndex < 0) newIndex = slides.length - 1;
+                        showSlide(newIndex);
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        let newIndex = currentIndex + 1;
+                        if (newIndex >= slides.length) newIndex = 0;
+                        showSlide(newIndex);
+                    });
+                }
+                
+                dots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => showSlide(index));
+                });
+                
+                // Auto-advance carousel every 5 seconds
+                let autoAdvance = setInterval(() => {
+                    if (slides.length > 1) {
+                        let newIndex = currentIndex + 1;
+                        if (newIndex >= slides.length) newIndex = 0;
+                        showSlide(newIndex);
+                    }
+                }, 5000);
+                
+                // Pause auto-advance on hover
+                container.addEventListener('mouseenter', () => {
+                    clearInterval(autoAdvance);
+                });
+                
+                container.addEventListener('mouseleave', () => {
+                    autoAdvance = setInterval(() => {
+                        if (slides.length > 1) {
+                            let newIndex = currentIndex + 1;
+                            if (newIndex >= slides.length) newIndex = 0;
+                            showSlide(newIndex);
+                        }
+                    }, 5000);
+                });
+            });
+            
+            // Handle video play buttons
+            document.querySelectorAll('.video-play-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const video = this.closest('.video-wrapper').querySelector('video');
+                    if (video.paused) {
+                        video.play();
+                        this.style.opacity = '0';
+                        setTimeout(() => this.style.display = 'none', 300);
+                    }
+                });
+            });
+            
+            // Handle video autoplay (muted)
+            document.querySelectorAll('video[autoplay]').forEach(video => {
+                video.play().catch(e => console.log('Autoplay prevented:', e));
+            });
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initAdControls);
+        } else {
+            initAdControls();
+        }
+    })();
+</script>
+{% endif %}

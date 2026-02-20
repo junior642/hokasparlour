@@ -8,7 +8,7 @@
     --product-card-min-width: 160px;
 }
 
-/* ---------- HOME CONTAINER – ZERO WASTE ---------- */
+/* ---------- HOME CONTAINER ---------- */
 .home-container {
     display: flex;
     gap: 1.5rem;
@@ -16,7 +16,7 @@
     width: 100%;
 }
 
-/* ---------- FILTER SIDEBAR – PURPLE THEME ---------- */
+/* ---------- FILTER SIDEBAR ---------- */
 .sidebar {
     width: var(--filter-sidebar-width);
     background: var(--card);
@@ -134,10 +134,10 @@
     font-weight: 600;
 }
 
-/* ---------- PRODUCTS SECTION – FULL WIDTH ---------- */
+/* ---------- PRODUCTS SECTION ---------- */
 .products-section {
     flex: 1;
-    min-width: 0; /* Prevent flex overflow */
+    min-width: 0;
 }
 
 .products-header {
@@ -172,23 +172,25 @@
     font-weight: 600;
 }
 
-/* ---------- PRODUCT GRID – DENSE, NO WASTED SPACE ---------- */
+/* ---------- PRODUCT GRID ---------- */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--product-card-min-width), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
 }
 
 .product-card {
     background: var(--card);
-    border-radius: 20px;
-    padding: 1rem;
+    border-radius: 5px;
+    padding: 0.2rem;
     border: 1px solid var(--border);
     transition: var(--transition);
     display: flex;
     flex-direction: column;
     position: relative;
     height: 100%;
+    text-decoration: none;
+    color: inherit;
 }
 
 .product-card:hover {
@@ -197,19 +199,17 @@
     transform: translateY(-4px);
 }
 
-/* Product image container */
 .product-image-wrapper {
     position: relative;
     width: 100%;
     aspect-ratio: 1;
-    border-radius: 16px;
+    border-radius: 5px;
     overflow: hidden;
     background: var(--surface);
     margin-bottom: 1rem;
 }
 
-.product-card img,
-.product-image {
+.product-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -220,16 +220,6 @@
     transform: scale(1.05);
 }
 
-.product-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-soft);
-    font-size: 0.85rem;
-    background: var(--surface);
-}
-
-/* Category chip */
 .product-category {
     position: absolute;
     top: 0.75rem;
@@ -314,7 +304,6 @@
     font-size: 0.85rem;
 }
 
-/* No products state */
 .no-products {
     grid-column: 1 / -1;
     text-align: center;
@@ -342,49 +331,33 @@
     font-weight: 600;
 }
 
-/* ---------- USER DROPDOWN – PURPLE THEME ---------- */
-.nav-item.dropdown {
-    position: relative;
+/* Admin links */
+.admin-links {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.dropdown-menu {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 0.75rem 0;
-    box-shadow: var(--shadow-lg);
-    margin-top: 0.5rem;
-}
-
-.dropdown-item {
-    color: var(--text);
-    padding: 0.6rem 1.5rem;
-    font-size: 0.95rem;
+.admin-links a {
+    color: var(--text-soft);
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: var(--transition);
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.dropdown-item:hover {
+.admin-links a:hover {
     background: var(--accent-soft);
     color: var(--accent);
 }
 
-.dropdown-divider {
-    border-top: 1px solid var(--border);
-    margin: 0.5rem 0;
-}
-
-.dropdown-item.text-danger {
-    color: #ef4444;
-}
-
-.dropdown-item.text-danger:hover {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-/* ---------- MOBILE OPTIMIZATION – ZERO WASTE ---------- */
+/* ---------- MOBILE OPTIMIZATION ---------- */
 @media (max-width: 1024px) {
     .home-container {
         gap: 1rem;
@@ -423,10 +396,6 @@
         font-size: 1.25rem;
     }
     
-    :root {
-        --product-card-min-width: 140px;
-    }
-    
     .products-grid {
         gap: 0.75rem;
     }
@@ -451,12 +420,7 @@
     }
 }
 
-/* Extra small devices */
 @media (max-width: 380px) {
-    :root {
-        --product-card-min-width: 100%;
-    }
-    
     .products-grid {
         grid-template-columns: 1fr;
     }
@@ -486,7 +450,6 @@
     }
 }
 
-/* Dark mode adjustments */
 .dark-mode .sidebar,
 .dark-mode .product-card,
 .dark-mode .no-products {
@@ -500,16 +463,14 @@
     border-color: var(--border);
     color: var(--text);
 }
-
-.dark-mode .dropdown-menu {
-    background: var(--card);
-    border-color: var(--border);
-}
 {% endblock %}
 
 {% block content %}
+
+{% include 'includes/search.html' %}
+{% include 'includes/ad_section.html' %}
+
 <div class="home-container">
-    <!-- FILTER SIDEBAR -->
     <aside class="sidebar">
         <h3>
             <i class="fas fa-sliders-h"></i>
@@ -551,70 +512,94 @@
                 </a>
             </div>
         </form>
+
+        {% if user.is_staff %}
+        <div class="admin-links">
+            <a href="{% url 'manage_products' %}">
+                <i class="fas fa-edit"></i> Manage Products
+            </a>
+            <a href="{% url 'ad_list' %}">
+                <i class="fas fa-ad"></i> Manage Ads
+            </a>
+        </div>
+        {% endif %}
     </aside>
     
-    <!-- PRODUCTS SECTION -->
     <section class="products-section">
         <div class="products-header">
             <h2>
                 <i class="fas fa-tshirt" style="color: var(--accent);"></i>
                 Products <span>·</span>
-                <span class="product-count">{{ products.count }} items</span>
+                <span class="product-count">{{ products|length }} items</span>
             </h2>
         </div>
         
         <div class="products-grid">
             {% for product in products %}
-                <div class="product-card">
-                    <div class="product-image-wrapper">
-                        {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
-                        {% else %}
-                            <div class="product-image">
-                                <i class="fas fa-image"></i>
-                            </div>
-                        {% endif %}
-                        <span class="product-category">{{ product.get_category_display }}</span>
-                    </div>
-                    
-                    <h3>{{ product.name }}</h3>
-                    <p>{{ product.description|truncatewords:12 }}</p>
-                    
-                    <div class="product-price">
-                        KSh {{ product.price|floatformat:0 }}
-                    </div>
-                    
-                    <div class="product-stock">
-                        <i class="fas fa-box"></i>
-                        {% if product.stock_quantity > 0 %}
-                            {{ product.stock_quantity }} in stock
-                        {% else %}
-                            <span style="color: #ef4444;">Out of stock</span>
-                        {% endif %}
-                    </div>
-                    
-                    <a href="{% url 'product_detail' product.id %}" class="view-details">
-                        <i class="fas fa-eye"></i> View Details
-                    </a>
+            <a href="{% url 'product_detail' product.id %}" class="product-card">
+                <div class="product-image-wrapper">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+                    {% else %}
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-soft);">
+                            <i class="fas fa-image fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    <span class="product-category">{{ product.get_category_display }}</span>
                 </div>
+                
+                <h3>{{ product.name }}</h3>
+                
+                <p>{{ product.description|truncatewords:12 }}</p>
+                
+                <div class="product-price">
+                    KSh {{ product.price|floatformat:0 }}
+                </div>
+                
+                <div class="product-stock">
+                    <i class="fas fa-box"></i>
+                    {% if product.stock_quantity > 0 %}
+                        {{ product.stock_quantity }} in stock
+                    {% else %}
+                        <span style="color: #ef4444;">Out of stock</span>
+                    {% endif %}
+                </div>
+               
+                <p>
+    <strong>Stock Type:</strong>
+    {% if product.stock_type == 'ready' %}
+        <span style="background:#28a745;color:white;padding:3px 10px;border-radius:12px;font-size:12px;">Ready Stock</span>
+    {% else %}
+        <span style="background:#6c757d;color:white;padding:3px 10px;border-radius:12px;font-size:12px;">Warehouse Stock</span>
+    {% endif %}
+</p>
+<p>
+    <strong>Delivery:</strong>
+    {% if product.stock_type == 'ready' %}
+        <span style="background:#17a2b8;color:white;padding:3px 10px;border-radius:12px;font-size:12px;">Next Day Delivery</span>
+    {% else %}
+        <span style="background:#ffc107;color:black;padding:3px 10px;border-radius:12px;font-size:12px;">Friday Delivery</span>
+    {% endif %}
+</p>
+            </a>
             {% empty %}
-                <div class="no-products">
-                    <i class="fas fa-box-open"></i>
-                    <h3>No products found</h3>
-                    <p>Try adjusting your filters</p>
-                    <a href="{% url 'home' %}">
-                        <i class="fas fa-undo-alt"></i> Clear Filters
-                    </a>
-                </div>
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <h3>No products found</h3>
+                <p>Try adjusting your filters</p>
+                <a href="{% url 'home' %}">
+                    <i class="fas fa-undo-alt"></i> Clear Filters
+                </a>
+            </div>
             {% endfor %}
         </div>
     </section>
 </div>
 
-<!-- USER DROPDOWN SCRIPT (for base.html integration) -->
+<!-- Simplified JavaScript - removed unused carousel/video controls -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Bootstrap dropdown initialization if using Bootstrap
+        // Bootstrap dropdown initialization if needed
         if (typeof bootstrap !== 'undefined') {
             var dropdowns = document.querySelectorAll('.dropdown-toggle');
             dropdowns.forEach(function(dropdown) {

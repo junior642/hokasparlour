@@ -1,0 +1,795 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Advertisement Management - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-ad{% endblock %}
+{% block page_title %}Advertisement Management{% endblock %}
+{% block page_subtitle %}Create and manage your store advertisements{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Stats Cards - More Compact */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-light);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--accent-soft);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.2;
+        margin-bottom: 0.15rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .stat-label {
+        color: var(--text-soft);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Filters Section - More Compact */
+    .filters-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filters-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        flex: 1 1 160px;
+        min-width: 140px;
+    }
+
+    .filter-group label {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex: 0 0 auto;
+    }
+
+    .btn-filter {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .btn-filter:hover {
+        background: var(--accent-light);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-clear {
+        background: var(--surface);
+        color: var(--text);
+        border: 1.5px solid var(--border);
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: var(--transition);
+        white-space: nowrap;
+    }
+
+    .btn-clear:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    /* Create Button */
+    .btn-create {
+        background: var(--accent);
+        color: white;
+        padding: 0.6rem 1.25rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        white-space: nowrap;
+    }
+
+    .btn-create:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Table Container - Optimized for all screens */
+    .ads-table-container {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: auto;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        max-height: calc(100vh - 400px);
+        min-height: 300px;
+    }
+
+    .ads-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px; /* Ensures all columns are visible */
+    }
+
+    .ads-table th {
+        background: var(--surface);
+        padding: 0.75rem 0.5rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-soft);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    .ads-table td {
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.8rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .ads-table tbody tr:hover td {
+        background: var(--accent-soft);
+    }
+
+    /* Compact Table Elements */
+    .ad-preview-mini {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ad-preview-mini img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ad-preview-mini i {
+        font-size: 1.2rem;
+        color: var(--accent-light);
+    }
+
+    .ad-title {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.85rem;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .ad-headline {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Type Badge */
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.7rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .type-badge i {
+        font-size: 0.7rem;
+        color: var(--accent);
+    }
+
+    /* Status Badge - Using admin base status classes */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-badge i {
+        margin-right: 0.2rem;
+        font-size: 0.6rem;
+    }
+
+    .status-badge.active {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .status-badge.inactive {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    /* Performance Numbers */
+    .performance-number {
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.8rem;
+    }
+
+    .ctr-badge {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.15rem 0.4rem;
+        border-radius: 30px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Action Buttons - Compact */
+    .action-buttons {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: nowrap;
+    }
+
+    .btn-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-soft);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.8rem;
+    }
+
+    .btn-icon:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .btn-icon.delete:hover {
+        background: var(--danger-soft);
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: var(--accent-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.25rem;
+    }
+
+    .empty-state p {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Pagination - Compact */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 0.5rem;
+        border-radius: 8px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.8rem;
+    }
+
+    .page-link:hover,
+    .page-link.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    /* Header */
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-title i {
+        color: var(--accent);
+        font-size: 1.5rem;
+    }
+
+    .header-title h1 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: 'Playfair Display', serif;
+        margin: 0;
+    }
+
+    .header-subtitle {
+        color: var(--text-soft);
+        font-size: 0.8rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .admin-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-create {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filters-form {
+            flex-direction: column;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .btn-filter,
+        .btn-clear {
+            flex: 1;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="admin-header">
+    <div>
+        <div class="header-title">
+            <i class="fas fa-ad"></i>
+            <h1>Advertisement Management</h1>
+        </div>
+        <div class="header-subtitle">Manage your store advertisements</div>
+    </div>
+    <a href="{% url 'ad_create' %}" class="btn-create">
+        <i class="fas fa-plus-circle"></i>
+        Create New Ad
+    </a>
+</div>
+
+<!-- Statistics Cards - Compact -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_ads|default:"0" }}</div>
+            <div class="stat-label">Total Ads</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_impressions|default:"0" }}</div>
+            <div class="stat-label">Total Views</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-mouse-pointer"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ total_clicks|default:"0" }}</div>
+            <div class="stat-label">Total Clicks</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-percentage"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">
+                {% if total_impressions and total_impressions > 0 %}
+                    {{ total_clicks|divisibleby:total_impressions|floatformat:1 }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </div>
+            <div class="stat-label">CTR</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-week"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ recent_impressions|default:"0" }}</div>
+            <div class="stat-label">Views (30d)</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ recent_clicks|default:"0" }}</div>
+            <div class="stat-label">Clicks (30d)</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters - Compact -->
+<div class="filters-section">
+    <form method="get" class="filters-form">
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="all" {% if status == 'all' %}selected{% endif %}>All Status</option>
+                <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>Ad Type</label>
+            <select name="type">
+                <option value="all" {% if ad_type == 'all' %}selected{% endif %}>All Types</option>
+                {% for value, label in ad_types %}
+                    <option value="{{ value }}" {% if ad_type == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>From Date</label>
+            <input type="date" name="date_from" value="{{ date_from }}">
+        </div>
+        
+        <div class="filter-group">
+            <label>To Date</label>
+            <input type="date" name="date_to" value="{{ date_to }}">
+        </div>
+        
+        <div class="filter-actions">
+            <button type="submit" class="btn-filter">
+                <i class="fas fa-filter"></i> Apply
+            </button>
+            <a href="{% url 'ad_list' %}" class="btn-clear">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Ads Table - Scrollable with sticky header -->
+<div class="ads-table-container">
+    <table class="ads-table">
+        <thead>
+            <tr>
+                <th>Preview</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Clicks</th>
+                <th>CTR</th>
+                <th>Order</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ad in page_obj %}
+            <tr>
+                <td>
+                    <div class="ad-preview-mini">
+                        {% if ad.ad_type == 'single_image' and ad.single_image %}
+                            <img src="{{ ad.single_image.url }}" alt="{{ ad.title }}">
+                        {% elif ad.ad_type == 'video' %}
+                            <i class="fas fa-video"></i>
+                        {% elif ad.ad_type == 'multi_image' %}
+                            {% if ad.ad_images.first %}
+                                <img src="{{ ad.ad_images.first.image.url }}" alt="{{ ad.title }}">
+                            {% else %}
+                                <i class="fas fa-images"></i>
+                            {% endif %}
+                        {% else %}
+                            <i class="fas fa-ad"></i>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div class="ad-title">{{ ad.title }}</div>
+                    {% if ad.headline %}
+                        <div class="ad-headline">{{ ad.headline|truncatechars:20 }}</div>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="type-badge">
+                        {% if ad.ad_type == 'single_image' %}
+                            <i class="fas fa-image"></i>
+                        {% elif ad.ad_type == 'multi_image' %}
+                            <i class="fas fa-images"></i>
+                        {% elif ad.ad_type == 'video' %}
+                            <i class="fas fa-video"></i>
+                        {% endif %}
+                        {{ ad.get_ad_type_display|truncatechars:8 }}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge {% if ad.is_active %}active{% else %}inactive{% endif %}">
+                        <i class="fas fa-circle"></i>
+                        {% if ad.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td><span class="performance-number">{{ ad.views }}</span></td>
+                <td><span class="performance-number">{{ ad.clicks }}</span></td>
+                <td>
+                    <span class="ctr-badge">
+                        {% if ad.views > 0 %}
+                            {{ ad.clicks|divisibleby:ad.views|floatformat:1 }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </span>
+                </td>
+                <td>#{{ ad.order }}</td>
+                <td>{{ ad.created_at|date:"M d" }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url 'ad_detail' ad.id %}" class="btn-icon" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{% url 'ad_edit' ad.id %}" class="btn-icon" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'ad_toggle_status' ad.id %}" class="btn-icon" title="{% if ad.is_active %}Pause{% else %}Activate{% endif %}">
+                            {% if ad.is_active %}
+                                <i class="fas fa-pause"></i>
+                            {% else %}
+                                <i class="fas fa-play"></i>
+                            {% endif %}
+                        </a>
+                        <a href="{% url 'ad_delete' ad.id %}" class="btn-icon delete" title="Delete" onclick="return confirm('Are you sure you want to delete this advertisement?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" class="empty-state">
+                    <i class="fas fa-ad"></i>
+                    <h3>No Advertisements Found</h3>
+                    <p>Create your first advertisement to get started!</p>
+                    <a href="{% url 'ad_create' %}" class="btn-create" style="display: inline-flex;">
+                        <i class="fas fa-plus-circle"></i> Create New Ad
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1{% if status %}&status={{ status }}{% endif %}{% if ad_type %}&type={{ ad_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="page-link" title="First">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if status %}&status={{ status }}{% endif %}{% if ad_type %}&type={{ ad_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="page-link" title="Previous">
+            <i class="fas fa-angle-left"></i>
+        </a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="page-link active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+            <a href="?page={{ num }}{% if status %}&status={{ status }}{% endif %}{% if ad_type %}&type={{ ad_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="page-link">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if status %}&status={{ status }}{% endif %}{% if ad_type %}&type={{ ad_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="page-link" title="Next">
+            <i class="fas fa-angle-right"></i>
+        </a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if status %}&status={{ status }}{% endif %}{% if ad_type %}&type={{ ad_type }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="page-link" title="Last">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

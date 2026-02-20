@@ -1,0 +1,439 @@
+{% extends "parlour/base.html" %}
+
+{% load static %}
+
+{% block title %}Refund & Return Policy - Hoka's Parlour{% endblock %}
+
+
+<!-- ==================== REFUND & RETURN POLICY PAGE ==================== -->
+{% block extra_style %}
+<style>
+    /* Refund Policy specific styles - matching base.html */
+    .refund-policy {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .policy-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .policy-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        font-family: 'Playfair Display', serif;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .policy-header h1 i {
+        color: var(--accent);
+        font-size: 2.8rem;
+    }
+
+    .policy-subhead {
+        background: var(--accent-soft);
+        color: var(--accent);
+        display: inline-block;
+        padding: 0.5rem 2rem;
+        border-radius: 40px;
+        font-weight: 500;
+        border: 1px solid var(--border);
+    }
+
+    .policy-section {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    .policy-section:hover {
+        box-shadow: 0 10px 25px -10px var(--accent-light);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.8rem;
+        font-weight: 700;
+        font-family: 'Playfair Display', serif;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px dashed var(--border);
+        color: var(--text);
+    }
+
+    .section-title i {
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 0.75rem;
+        border-radius: 16px;
+        font-size: 1.8rem;
+        width: 3.5rem;
+        text-align: center;
+    }
+
+    .subsection-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 1.8rem 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text);
+    }
+
+    .subsection-title i {
+        color: var(--accent);
+    }
+
+    .highlight-box {
+        background: var(--accent-soft);
+        border-left: 6px solid var(--accent);
+        padding: 1.5rem;
+        border-radius: 18px;
+        margin: 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.2rem;
+        margin: 1.8rem 0;
+    }
+
+    .info-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 1.5rem;
+    }
+
+    .info-card h4 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: var(--text);
+    }
+
+    .rule-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .rule-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .rule-list li i {
+        color: var(--accent);
+        min-width: 1.5rem;
+    }
+
+    .timeline-note {
+        background: #e0f2fe;
+        border: 1px solid #7dd3fc;
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.2rem 0;
+        color: #0369a1;
+    }
+
+    .badge-working {
+        background: var(--accent);
+        color: white;
+        padding: 0.2rem 1rem;
+        border-radius: 40px;
+        font-size: 0.8rem;
+        margin-left: 0.8rem;
+    }
+
+    .steps-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.2rem;
+        margin: 2rem 0;
+    }
+
+    .step-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .step-item i {
+        font-size: 2rem;
+        color: var(--accent);
+        background: var(--accent-soft);
+        padding: 1rem;
+        border-radius: 60%;
+        margin-bottom: 1rem;
+    }
+
+    .condition-badge {
+        background: #d1fae5;
+        border: 1px solid #a7f3d0;
+        border-radius: 40px;
+        padding: 0.6rem 1.2rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+        font-weight: 500;
+    }
+
+    .condition-badge.reject {
+        background: #fee2e2;
+        border-color: #fecaca;
+    }
+
+    .commitment-box {
+        background: var(--accent);
+        color: white;
+        border-radius: 24px;
+        padding: 2.5rem;
+        margin-top: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .commitment-box i {
+        font-size: 3rem;
+        color: var(--accent-light);
+    }
+
+    .commitment-text {
+        flex: 1;
+    }
+
+    .commitment-text h3 {
+        color: white;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .commitment-text ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .commitment-text li {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+        .policy-header h1 { font-size: 2rem; }
+        .section-title { font-size: 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="refund-policy">
+    <div class="policy-header">
+        <h1>
+            <i class="fas fa-rotate-left"></i> Refund & Return Policy
+        </h1>
+        <div class="policy-subhead">
+            <i class="fas fa-scale-balanced"></i> Fairness · Transparency · Trust
+        </div>
+    </div>
+
+    <!-- Intro -->
+    <div class="policy-section">
+        <p class="text-soft" style="font-size: 1.1rem; display: flex; gap: 1rem;">
+            <i class="fas fa-hand-holding-heart" style="color: var(--accent); font-size: 2rem;"></i>
+            At Hoka's Parlour, we are committed to fairness, transparency, and protecting our customers' interests. We understand that sometimes circumstances change or issues may arise with an order. This policy clearly explains how cancellations, refunds, and returns are handled.
+        </p>
+    </div>
+
+    <!-- 1. Cancellation -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-ban"></i> 1. Order Cancellation Policy
+        </div>
+
+        <div class="subsection-title">
+            <i class="fas fa-calendar-day"></i> 1.1 Cancellation Before Delivery
+        </div>
+
+        <ul class="rule-list">
+            <li><i class="fas fa-check-circle" style="color: #10b981;"></i> Cancel within <strong>Saturday–Thursday</strong> before dispatch</li>
+            <li><i class="fas fa-times-circle" style="color: #c44536;"></i> <strong>Friday</strong> is delivery day – no cancellations once prepared</li>
+        </ul>
+
+        <div class="highlight-box">
+            <i class="fas fa-envelope"></i>
+            <div>
+                <strong>Submit via:</strong> Official email or website return form
+            </div>
+        </div>
+
+        <p><strong>After approval:</strong></p>
+        <ul class="rule-list">
+            <li><i class="fas fa-envelope-open-text"></i> Confirmation email sent</li>
+            <li><i class="fas fa-clock"></i> Refund within <strong>3 working days</strong></li>
+        </ul>
+
+        <div class="timeline-note">
+            <i class="fas fa-briefcase"></i>
+            <span><strong>Working days:</strong> Saturday–Thursday (Friday excluded)</span>
+        </div>
+    </div>
+
+    <!-- 2. Out of Stock -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-boxes"></i> 2. Out-of-Stock / Store Issues
+        </div>
+
+        <p>In rare cases of:</p>
+        <ul class="rule-list">
+            <li><i class="fas fa-times"></i> Product unavailable</li>
+            <li><i class="fas fa-calculator"></i> Stock miscalculation</li>
+            <li><i class="fas fa-truck"></i> Logistical issues</li>
+        </ul>
+
+        <div class="highlight-box" style="background: #e0f2fe; border-left-color: #0369a1;">
+            <i class="fas fa-bell"></i>
+            <div>
+                <strong>Hoka's Parlour will:</strong>
+                <ul class="mt-2">
+                    <li>Notify immediately</li>
+                    <li>Cancel order</li>
+                    <li>Send confirmation email</li>
+                    <li>Full refund within <strong>3 working days</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Refund Timeline -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-clock"></i> 3. Refund Processing Timeline
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h4><i class="fas fa-hourglass-half"></i> Duration</h4>
+                <p>Within <strong>3 working days</strong> after confirmation email</p>
+            </div>
+            <div class="info-card">
+                <h4><i class="fas fa-credit-card"></i> Method</h4>
+                <p>Original payment method (unless agreed otherwise)</p>
+            </div>
+            <div class="info-card">
+                <h4><i class="fas fa-calendar-week"></i> Working Days</h4>
+                <p>Saturday–Thursday <span class="badge-working">Friday excluded</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Returns After Delivery -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-return"></i> 4. Returns After Delivery
+        </div>
+
+        <ul class="rule-list">
+            <li><i class="fas fa-hourglass-start"></i> Complaints within <strong>3 days after delivery</strong></li>
+            <li><i class="fas fa-ban" style="color: #c44536;"></i> After 3 days → null and void</li>
+            <li><i class="fas fa-envelope"></i> Submit via email or website form</li>
+        </ul>
+
+        <div class="timeline-note" style="background: #fee2e2; color: #991b1b; border-color: #fecaca;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span><strong>Strict 3-day window</strong> – inspect your order promptly</span>
+        </div>
+    </div>
+
+    <!-- 5. Return Procedure -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-arrows-spin"></i> 5. Return Procedure
+        </div>
+
+        <div class="steps-container">
+            <div class="step-item"><i class="fas fa-clipboard-check"></i> <strong>Review</strong><br>Team evaluates case</div>
+            <div class="step-item"><i class="fas fa-camera"></i> <strong>May request</strong><br>Photos, order details, explanation</div>
+            <div class="step-item"><i class="fas fa-message"></i> <strong>Decision</strong><br>Approval, exchange, refund, alternative</div>
+        </div>
+
+        <p class="text-accent mt-4"><i class="fas fa-envelope"></i> Final decision communicated via email</p>
+    </div>
+
+    <!-- 6. Conditions -->
+    <div class="policy-section">
+        <div class="section-title">
+            <i class="fas fa-clipboard"></i> 6. Conditions for Return Approval
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+            <div style="flex: 1;">
+                <h4 class="flex items-center gap-2 font-semibold mb-3"><i class="fas fa-check-circle text-accent"></i> Approved if:</h4>
+                <div>
+                    <span class="condition-badge"><i class="fas fa-tshirt"></i> Unused, original condition</span>
+                    <span class="condition-badge"><i class="fas fa-calendar"></i> Within 3 days</span>
+                    <span class="condition-badge"><i class="fas fa-tag"></i> Matches issue described</span>
+                </div>
+            </div>
+            <div style="flex: 1;">
+                <h4 class="flex items-center gap-2 font-semibold mb-3"><i class="fas fa-times-circle" style="color: #c44536;"></i> Rejected if:</h4>
+                <div>
+                    <span class="condition-badge reject"><i class="fas fa-broken"></i> Damaged after delivery</span>
+                    <span class="condition-badge reject"><i class="fas fa-calendar-exclamation"></i> Past 3 days</span>
+                    <span class="condition-badge reject"><i class="fas fa-face-frown"></i> Misuse signs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. Our Commitment -->
+    <div class="commitment-box">
+        <i class="fas fa-handshake"></i>
+        <div class="commitment-text">
+            <h3>7. Our Commitment</h3>
+            <p>At Hoka's Parlour, we value trust, especially within our MMU community and customers in Rongai. We stand by our responsibility to:</p>
+            <ul class="mt-3">
+                <li><i class="fas fa-truck"></i> Deliver what is ordered</li>
+                <li><i class="fas fa-hand-holding-dollar"></i> Refund fairly when necessary</li>
+                <li><i class="fas fa-comments"></i> Communicate clearly and professionally</li>
+            </ul>
+            <p class="mt-3 font-semibold">Customer satisfaction remains one of our core values.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
