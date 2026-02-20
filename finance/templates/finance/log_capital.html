@@ -1,0 +1,418 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Log Capital Entry - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-coins{% endblock %}
+{% block page_title %}Capital Entry{% endblock %}
+{% block page_subtitle %}Record money flowing in or out of the business{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Back Link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        padding: 0.5rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateX(-4px);
+    }
+
+    /* Form Container */
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Card */
+    .capital-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--accent);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    /* Form Groups */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .form-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .form-label i {
+        color: var(--accent);
+        width: 16px;
+        font-size: 0.8rem;
+    }
+
+    .form-input {
+        padding: 0.6rem 0.75rem;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.85rem;
+        transition: var(--transition);
+        width: 100%;
+        font-family: inherit;
+    }
+
+    .form-input:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .form-input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .form-input[type="number"]::-webkit-outer-spin-button,
+    .form-input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Type Toggle */
+    .type-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    .type-option {
+        position: relative;
+    }
+
+    .type-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .type-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+        background: var(--surface);
+    }
+
+    .type-label:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .type-option input[type="radio"]:checked + .type-label {
+        border-color: var(--success);
+        background: var(--success-soft);
+    }
+
+    .type-option input[type="radio"]:checked + .type-label.out-label {
+        border-color: var(--danger);
+        background: var(--danger-soft);
+    }
+
+    .type-icon {
+        font-size: 2rem;
+    }
+
+    .type-name {
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .type-desc {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+    }
+
+    /* In/Out specific styles */
+    .in-label .type-name {
+        color: var(--success);
+    }
+
+    .out-label .type-name {
+        color: var(--danger);
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        width: 100%;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .submit-btn i {
+        font-size: 1.1rem;
+    }
+
+    /* Messages */
+    .messages-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-left: 4px solid;
+        font-size: 0.85rem;
+    }
+
+    .alert.success {
+        background: var(--success-soft);
+        border-color: var(--success);
+        color: var(--success);
+    }
+
+    .alert.error {
+        background: var(--danger-soft);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .alert.warning {
+        background: var(--warning-soft);
+        border-color: var(--warning);
+        color: var(--warning);
+    }
+
+    /* Hint Text */
+    .hint-text {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .hint-text i {
+        color: var(--accent);
+        font-size: 0.7rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .capital-card {
+        animation: fadeIn 0.4s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Back Link -->
+    <a href="{% url 'finance:dashboard' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Finance Dashboard
+    </a>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for msg in messages %}
+        <div class="alert {{ msg.tags }}">
+            <i class="fas {% if msg.tags == 'success' %}fa-check-circle{% elif msg.tags == 'error' %}fa-exclamation-circle{% elif msg.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+            {{ msg }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Form -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="capital-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-exchange-alt"></i>
+                    Entry Type
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Type Toggle -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tag"></i>
+                        What are you recording?
+                    </label>
+                    <div class="type-toggle">
+                        <div class="type-option">
+                            <input type="radio" name="entry_type" id="type_in" value="in" checked>
+                            <label for="type_in" class="type-label in-label">
+                                <span class="type-icon">💵</span>
+                                <span class="type-name">Money In</span>
+                                <span class="type-desc">Adding capital to business<br>e.g., from savings</span>
+                            </label>
+                        </div>
+                        <div class="type-option">
+                            <input type="radio" name="entry_type" id="type_out" value="out">
+                            <label for="type_out" class="type-label out-label">
+                                <span class="type-icon">💸</span>
+                                <span class="type-name">Money Out</span>
+                                <span class="type-desc">Taking profit out<br>of the business</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-group">
+                    <label class="form-label" for="amount">
+                        <i class="fas fa-coins"></i>
+                        Amount (KSH)
+                    </label>
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        class="form-input"
+                        required
+                    >
+                    <div class="hint-text">
+                        <i class="fas fa-info-circle"></i>
+                        Enter the amount in Kenyan Shillings
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label class="form-label" for="description">
+                        <i class="fas fa-align-left"></i>
+                        Description
+                    </label>
+                    <input
+                        type="text"
+                        id="description"
+                        name="description"
+                        placeholder="e.g., Added KSH 20,000 from savings for stock purchase"
+                        class="form-input"
+                        required
+                    >
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+                    <label class="form-label" for="date">
+                        <i class="fas fa-calendar-alt"></i>
+                        Date
+                    </label>
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        value="{{ today }}"
+                        class="form-input"
+                    >
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-save"></i>
+            Save Capital Entry
+        </button>
+    </form>
+</div>
+{% endblock %}

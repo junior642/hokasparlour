@@ -1,0 +1,870 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Monthly Summary - {{ month_name }} {{ year }}{% endblock %}
+
+{% block page_icon %}fas fa-chart-line{% endblock %}
+{% block page_title %}Monthly Summary{% endblock %}
+{% block page_subtitle %}{{ month_name }} {{ year }} - P&L Overview{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Back Link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        padding: 0.5rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateX(-4px);
+    }
+
+    /* Header */
+    .summary-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .header-title h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: 'Playfair Display', serif;
+        line-height: 1.2;
+    }
+
+    .header-title h1 span {
+        color: var(--accent);
+    }
+
+    .header-title p {
+        color: var(--text-soft);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Month Selector */
+    .month-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+        background: var(--card);
+        padding: 0.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+
+    .month-form select,
+    .month-form input {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        color: var(--text);
+        font-size: 0.85rem;
+        outline: none;
+        transition: var(--transition);
+    }
+
+    .month-form select:focus,
+    .month-form input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .month-form button {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .month-form button:hover {
+        background: var(--accent-light);
+        transform: translateY(-1px);
+    }
+
+    /* P&L Cards */
+    .pnl-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @media (max-width: 1024px) {
+        .pnl-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .pnl-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .pnl-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pnl-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        transition: var(--transition);
+        border-top: 4px solid var(--card-color, var(--accent));
+    }
+
+    .pnl-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .pnl-card.revenue { --card-color: var(--accent); }
+    .pnl-card.cogs { --card-color: var(--danger); }
+    .pnl-card.gross { --card-color: var(--info); }
+    .pnl-card.expenses { --card-color: var(--warning); }
+    .pnl-card.net { --card-color: var(--success); }
+
+    .pnl-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--card-color, var(--accent));
+    }
+
+    .pnl-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.15rem;
+    }
+
+    .pnl-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+        font-weight: 600;
+    }
+
+    /* Net Profit Banner */
+    .net-banner {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.4s 0.05s ease both;
+    }
+
+    .net-banner span:first-child {
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    .net-banner .net-amount {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.8rem;
+        color: white;
+    }
+
+    .net-banner .net-amount.profit {
+        color: #3ddc84;
+    }
+
+    .net-banner .net-amount.loss {
+        color: #ff5f5f;
+    }
+
+    /* Main Grid */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 1.5rem;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    @media (max-width: 1024px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cards */
+    .summary-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--accent);
+    }
+
+    .card-header .badge {
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.2rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Budget Allocation */
+    .allocations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .allocation-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .allocation-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .allocation-name {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .allocation-amounts {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .allocation-bar {
+        height: 6px;
+        background: var(--surface);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .allocation-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    .allocation-footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--text-soft);
+    }
+
+    .allocation-footer .over {
+        color: var(--danger);
+        font-weight: 700;
+    }
+
+    .allocation-footer .remaining {
+        color: var(--success);
+    }
+
+    .allocation-footer .remaining.negative {
+        color: var(--danger);
+    }
+
+    /* Expenses Table */
+    .expenses-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .expenses-table th {
+        padding: 0.6rem 1rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .expenses-table td {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+    }
+
+    .expenses-table tbody tr:hover td {
+        background: var(--accent-soft);
+    }
+
+    .expenses-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .category-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 0.35rem;
+    }
+
+    .expense-amount {
+        font-weight: 700;
+        color: var(--danger);
+    }
+
+    .expense-date {
+        color: var(--text-soft);
+        font-size: 0.7rem;
+    }
+
+    /* P&L Breakdown */
+    .pnl-breakdown {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pnl-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .pnl-row.highlight {
+        background: var(--surface);
+        margin: 0 -1.25rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    .pnl-row.total {
+        background: var(--accent);
+        margin: 0 -1.25rem -1.25rem;
+        padding: 1rem 1.25rem;
+        border-bottom: none;
+    }
+
+    .pnl-label {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .pnl-value {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text);
+    }
+
+    .pnl-value.revenue {
+        color: var(--accent);
+    }
+
+    .pnl-value.cogs {
+        color: var(--danger);
+    }
+
+    .pnl-value.gross {
+        color: var(--info);
+        font-size: 1.1rem;
+    }
+
+    .pnl-value.expenses {
+        color: var(--warning);
+    }
+
+    .pnl-value.net {
+        color: white;
+        font-size: 1.3rem;
+    }
+
+    .pnl-value.net.profit {
+        color: #3ddc84;
+    }
+
+    .pnl-value.net.loss {
+        color: #ff5f5f;
+    }
+
+    /* Capital Flow */
+    .capital-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .capital-box {
+        background: var(--surface);
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid var(--border);
+    }
+
+    .capital-box .value {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .capital-box .value.in {
+        color: var(--success);
+    }
+
+    .capital-box .value.out {
+        color: var(--danger);
+    }
+
+    .capital-box .label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+    }
+
+    .capital-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .capital-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .capital-item:last-child {
+        border-bottom: none;
+    }
+
+    .capital-info h4 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.15rem;
+    }
+
+    .capital-info p {
+        font-size: 0.65rem;
+        color: var(--text-soft);
+    }
+
+    .capital-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .capital-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .capital-badge.in {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .capital-badge.out {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .capital-amount {
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .capital-amount.in {
+        color: var(--success);
+    }
+
+    .capital-amount.out {
+        color: var(--danger);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-soft);
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        color: var(--accent-light);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .summary-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .month-form {
+            width: 100%;
+        }
+
+        .month-form select,
+        .month-form input,
+        .month-form button {
+            flex: 1;
+        }
+
+        .net-banner {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .net-banner .net-amount {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Back Link -->
+<a href="{% url 'finance:dashboard' %}" class="back-link">
+    <i class="fas fa-arrow-left"></i>
+    Back to Finance Dashboard
+</a>
+
+<!-- Header -->
+<div class="summary-header">
+    <div class="header-title">
+        <h1>{{ month_name }} <span>{{ year }}</span></h1>
+        <p>Monthly P&L Summary</p>
+    </div>
+    
+    <form method="get" class="month-form">
+        <select name="month">
+            {% for num, name in month_choices %}
+            <option value="{{ num }}" {% if num == month %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="year" value="{{ year }}" style="width: 90px;">
+        <button type="submit">Go</button>
+    </form>
+</div>
+
+<!-- P&L Cards -->
+<div class="pnl-grid">
+    <div class="pnl-card revenue">
+        <div class="pnl-icon">💰</div>
+        <div class="pnl-value">KSH {{ revenue|floatformat:0 }}</div>
+        <div class="pnl-label">Revenue</div>
+    </div>
+    <div class="pnl-card cogs">
+        <div class="pnl-icon">🧾</div>
+        <div class="pnl-value">KSH {{ cogs|floatformat:0 }}</div>
+        <div class="pnl-label">Stock Cost</div>
+    </div>
+    <div class="pnl-card gross">
+        <div class="pnl-icon">📈</div>
+        <div class="pnl-value">KSH {{ gross_profit|floatformat:0 }}</div>
+        <div class="pnl-label">Gross Profit</div>
+    </div>
+    <div class="pnl-card expenses">
+        <div class="pnl-icon">📋</div>
+        <div class="pnl-value">KSH {{ expenses|floatformat:0 }}</div>
+        <div class="pnl-label">Expenses</div>
+    </div>
+    <div class="pnl-card net">
+        <div class="pnl-icon">{% if net_profit >= 0 %}✅{% else %}⚠️{% endif %}</div>
+        <div class="pnl-value">KSH {{ net_profit|floatformat:0 }}</div>
+        <div class="pnl-label">Net Profit</div>
+    </div>
+</div>
+
+<!-- Net Profit Banner -->
+<div class="net-banner">
+    <span>Net Profit — {{ month_name }} {{ year }}</span>
+    <span class="net-amount {% if net_profit >= 0 %}profit{% else %}loss{% endif %}">
+        {% if net_profit >= 0 %}+{% endif %}KSH {{ net_profit|floatformat:0 }}
+    </span>
+</div>
+
+<!-- Main Grid -->
+<div class="summary-grid">
+    <!-- LEFT COLUMN -->
+    <div>
+        <!-- Budget vs Actual -->
+        {% if expense_breakdown %}
+        <div class="summary-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-chart-pie"></i>
+                    Budget vs Actual
+                </h3>
+                <span class="badge">Monthly Comparison</span>
+            </div>
+            <div class="card-body">
+                <div class="allocations-list">
+                    {% for row in expense_breakdown %}
+                    <div class="allocation-item">
+                        <div class="allocation-header">
+                            <span class="allocation-name">
+                                {{ row.category.icon }} {{ row.category.name }}
+                            </span>
+                            <span class="allocation-amounts">
+                                KSH {{ row.spent|floatformat:0 }} / {{ row.allocated|floatformat:0 }}
+                            </span>
+                        </div>
+                        <div class="allocation-bar">
+                            <div class="allocation-fill" style="
+                                width: {% if row.pct > 100 %}100{% else %}{{ row.pct }}{% endif %}%;
+                                background: {% if row.over %}var(--danger){% elif row.pct > 80 %}var(--warning){% else %}var(--success){% endif %};
+                            "></div>
+                        </div>
+                        <div class="allocation-footer">
+                            <span class="{% if row.over %}over{% else %}normal{% endif %}">
+                                {{ row.pct }}% used{% if row.over %} ⚠️ OVER BUDGET{% endif %}
+                            </span>
+                            <span class="remaining {% if row.remaining < 0 %}negative{% endif %}">
+                                {% if row.remaining >= 0 %}
+                                    KSH {{ row.remaining|floatformat:0 }} left
+                                {% else %}
+                                    KSH {{ row.remaining|floatformat:0 }} over
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- All Expenses -->
+        <div class="summary-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-receipt"></i>
+                    All Expenses
+                </h3>
+                <span class="badge">{{ all_expenses.count }} entries</span>
+            </div>
+            {% if all_expenses %}
+            <table class="expenses-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exp in all_expenses %}
+                    <tr>
+                        <td>{{ exp.description|truncatechars:20 }}</td>
+                        <td>
+                            <span class="category-dot" style="background: {{ exp.category.color }};"></span>
+                            {{ exp.category.name|truncatechars:10 }}
+                        </td>
+                        <td><span class="expense-amount">KSH {{ exp.amount|floatformat:0 }}</span></td>
+                        <td><span class="expense-date">{{ exp.date|date:"d M" }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>No expenses this month.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <!-- P&L Breakdown -->
+        <div class="summary-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-chart-bar"></i>
+                    P&L Breakdown
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 0 1.25rem;">
+                <div class="pnl-breakdown">
+                    <div class="pnl-row">
+                        <span class="pnl-label">Revenue</span>
+                        <span class="pnl-value revenue">KSH {{ revenue|floatformat:0 }}</span>
+                    </div>
+                    <div class="pnl-row">
+                        <span class="pnl-label">− Stock Cost</span>
+                        <span class="pnl-value cogs">KSH {{ cogs|floatformat:0 }}</span>
+                    </div>
+                    <div class="pnl-row highlight">
+                        <span class="pnl-label" style="font-weight: 700;">= Gross Profit</span>
+                        <span class="pnl-value gross">KSH {{ gross_profit|floatformat:0 }}</span>
+                    </div>
+                    <div class="pnl-row">
+                        <span class="pnl-label">− Expenses</span>
+                        <span class="pnl-value expenses">KSH {{ expenses|floatformat:0 }}</span>
+                    </div>
+                    <div class="pnl-row total">
+                        <span class="pnl-label" style="color: rgba(255,255,255,0.7);">= Net Profit</span>
+                        <span class="pnl-value net {% if net_profit >= 0 %}profit{% else %}loss{% endif %}">
+                            KSH {{ net_profit|floatformat:0 }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capital Flow -->
+        <div class="summary-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-coins"></i>
+                    Capital Flow
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="capital-summary">
+                    <div class="capital-box">
+                        <div class="value in">KSH {{ capital_in|floatformat:0 }}</div>
+                        <div class="label">Money In</div>
+                    </div>
+                    <div class="capital-box">
+                        <div class="value out">KSH {{ capital_out|floatformat:0 }}</div>
+                        <div class="label">Money Out</div>
+                    </div>
+                </div>
+
+                <div class="capital-list">
+                    {% for entry in capital_entries %}
+                    <div class="capital-item">
+                        <div class="capital-info">
+                            <h4>{{ entry.description|truncatechars:20 }}</h4>
+                            <p>{{ entry.date|date:"d M Y" }}</p>
+                        </div>
+                        <div class="capital-right">
+                            <span class="capital-badge {{ entry.entry_type }}">
+                                {{ entry.get_entry_type_display }}
+                            </span>
+                            <span class="capital-amount {{ entry.entry_type }}">
+                                KSH {{ entry.amount|floatformat:0 }}
+                            </span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state" style="padding: 1rem;">
+                        <i class="fas fa-coins"></i>
+                        <p>No capital entries.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

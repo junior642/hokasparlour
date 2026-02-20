@@ -1,0 +1,159 @@
+{% comment %}=== SAVE AS: finance/templates/finance/log_expense.html ==={% endcomment %}
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Log Expense{% endblock %}
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@300;400;500;600&display=swap');
+:root{--bg:#f7f4ef;--s1:#fff;--s2:#eeebe4;--border:#ddd8cf;--accent:#1c1c1c;--gold:#b8860b;--green:#1a6b3c;--red:#b91c1c;--text:#1c1c1c;--muted:#7a7369;}
+*{box-sizing:border-box;margin:0;padding:0;}
+.form-page{background:var(--bg);min-height:100vh;font-family:'Inconsolata',monospace;color:var(--text);padding:36px 24px 80px;}
+.form-inner{max-width:600px;margin:0 auto;}
+.back-link{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--muted);font-size:13px;margin-bottom:28px;transition:color .15s;}
+.back-link:hover{color:var(--accent);}
+.form-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:8px;}
+.form-title span{color:var(--green);}
+.form-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;}
+.f-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.f-card-head{padding:16px 22px;border-bottom:1px solid var(--border);}
+.f-card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;}
+.f-card-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:600;}
+.form-input,.form-select,.form-textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inconsolata',monospace;font-size:14px;outline:none;transition:border-color .15s;width:100%;}
+.form-input:focus,.form-select:focus{border-color:var(--green);}
+.budget-info{background:rgba(26,107,60,.06);border:1px solid rgba(26,107,60,.2);border-radius:10px;padding:14px;font-size:13px;}
+.budget-info strong{color:var(--green);}
+.submit-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .15s;}
+.submit-btn:hover{opacity:.85;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="form-page"><div class="form-inner">
+<a href="{% url 'finance:dashboard' %}" class="back-link">← Back to Dashboard</a>
+<h1 class="form-title">Log <span>Expense</span></h1>
+<p class="form-sub">Record a business expense</p>
+<div class="budget-info">
+    Budget: <strong>{{ budget }}</strong> &mdash;
+    Remaining: <strong>KSH {{ budget.remaining|floatformat:0 }}</strong>
+</div>
+<form method="post" style="margin-top:20px;">{% csrf_token %}
+<div class="f-card">
+    <div class="f-card-head"><div class="f-card-title">Expense Details</div></div>
+    <div class="f-card-body">
+        <div class="form-group">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select" required>
+                <option value="">Select category…</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Amount (KSH)</label>
+            <input type="number" name="amount" step="0.01" placeholder="0.00" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <input type="text" name="description" placeholder="What was this expense for?" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" value="{{ today }}" class="form-input">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Receipt / Notes (optional)</label>
+            <input type="text" name="receipt_note" placeholder="Receipt number or extra notes" class="form-input">
+        </div>
+    </div>
+</div>
+<button type="submit" class="submit-btn">Log Expense</button>
+</form>
+</div></div>
+{% endblock %}
+
+
+{% comment %}=== SAVE AS: finance/templates/finance/log_capital.html ==={% endcomment %}
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Log Capital Entry{% endblock %}
+{% block extra_css %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@300;400;500;600&display=swap');
+:root{--bg:#f7f4ef;--s1:#fff;--s2:#eeebe4;--border:#ddd8cf;--accent:#1c1c1c;--gold:#b8860b;--green:#1a6b3c;--red:#b91c1c;--blue:#1e40af;--text:#1c1c1c;--muted:#7a7369;}
+*{box-sizing:border-box;margin:0;padding:0;}
+.form-page{background:var(--bg);min-height:100vh;font-family:'Inconsolata',monospace;color:var(--text);padding:36px 24px 80px;}
+.form-inner{max-width:600px;margin:0 auto;}
+.back-link{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--muted);font-size:13px;margin-bottom:28px;transition:color .15s;}
+.back-link:hover{color:var(--accent);}
+.form-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:8px;}
+.form-title span{color:var(--blue);}
+.form-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;}
+.f-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.f-card-head{padding:16px 22px;border-bottom:1px solid var(--border);}
+.f-card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;}
+.f-card-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:600;}
+.form-input,.form-select{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inconsolata',monospace;font-size:14px;outline:none;transition:border-color .15s;width:100%;}
+.form-input:focus,.form-select:focus{border-color:var(--blue);}
+.type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.type-opt{position:relative;}
+.type-opt input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
+.type-label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center;}
+.type-opt input:checked + .type-label.in-label{border-color:var(--green);background:rgba(26,107,60,.06);color:var(--green);}
+.type-opt input:checked + .type-label.out-label{border-color:var(--red);background:rgba(185,28,28,.06);color:var(--red);}
+.type-icon{font-size:28px;}
+.type-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+.submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:10px;padding:14px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .15s;}
+.submit-btn:hover{opacity:.85;}
+</style>
+{% endblock %}
+{% block content %}
+<div class="form-page"><div class="form-inner">
+<a href="{% url 'finance:dashboard' %}" class="back-link">← Back to Dashboard</a>
+<h1 class="form-title">Capital <span>Entry</span></h1>
+<p class="form-sub">Record money in or out of the business</p>
+<form method="post">{% csrf_token %}
+<div class="f-card">
+    <div class="f-card-head"><div class="f-card-title">Entry Type</div></div>
+    <div class="f-card-body">
+        <div class="type-toggle">
+            <div class="type-opt">
+                <input type="radio" name="entry_type" id="type_in" value="in" checked>
+                <label for="type_in" class="type-label in-label">
+                    <span class="type-icon">💵</span>
+                    <span class="type-name">Money In</span>
+                    <span style="font-size:11px;color:var(--muted);">Adding to business</span>
+                </label>
+            </div>
+            <div class="type-opt">
+                <input type="radio" name="entry_type" id="type_out" value="out">
+                <label for="type_out" class="type-label out-label">
+                    <span class="type-icon">💸</span>
+                    <span class="type-name">Money Out</span>
+                    <span style="font-size:11px;color:var(--muted);">Taking from business</span>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Amount (KSH)</label>
+            <input type="number" name="amount" step="0.01" placeholder="0.00" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <input type="text" name="description" placeholder="e.g. Added savings for stock purchase" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" value="{{ today }}" class="form-input">
+        </div>
+    </div>
+</div>
+<button type="submit" class="submit-btn">Save Entry</button>
+</form>
+</div></div>
+{% endblock %}

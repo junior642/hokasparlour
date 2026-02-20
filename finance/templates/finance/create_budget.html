@@ -1,0 +1,447 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Create Budget - Hoka's Parlour{% endblock %}
+
+{% block page_icon %}fas fa-chart-pie{% endblock %}
+{% block page_title %}Create Budget{% endblock %}
+{% block page_subtitle %}Set your monthly capital and category allocations{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Back Link */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        font-size: 0.85rem;
+        margin-bottom: 1.5rem;
+        transition: var(--transition);
+        padding: 0.5rem 1rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+
+    .back-link:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateX(-4px);
+    }
+
+    /* Form Container */
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Cards */
+    .budget-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--accent);
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Form Grid */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 600px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .form-label i {
+        color: var(--accent);
+        width: 16px;
+        font-size: 0.8rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        padding: 0.6rem 0.75rem;
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--text);
+        font-size: 0.85rem;
+        transition: var(--transition);
+        width: 100%;
+        font-family: inherit;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .form-input[type="number"] {
+        -moz-appearance: textfield;
+    }
+
+    .form-input[type="number"]::-webkit-outer-spin-button,
+    .form-input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Allocation Rows */
+    .allocations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .allocation-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 10px;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .allocation-row:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent-light);
+    }
+
+    .category-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+    }
+
+    .category-icon {
+        font-size: 1.2rem;
+        width: 28px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .category-name {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .stock-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 30px;
+        background: var(--info-soft);
+        color: var(--info);
+        border: 1px solid var(--info);
+        font-weight: 600;
+        white-space: nowrap;
+        margin-left: 0.5rem;
+    }
+
+    .allocation-input {
+        width: 140px;
+        flex-shrink: 0;
+    }
+
+    .allocation-input input {
+        text-align: right;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        width: 100%;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.875rem;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .submit-btn:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .submit-btn i {
+        font-size: 1.1rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: var(--text-soft);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        color: var(--accent-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        margin-bottom: 1rem;
+    }
+
+    .empty-state a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .empty-state a:hover {
+        text-decoration: underline;
+    }
+
+    /* Hint Text */
+    .hint-text {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .hint-text i {
+        color: var(--accent);
+        font-size: 0.7rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .budget-card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .budget-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <!-- Back Link -->
+    <a href="{% url 'finance:dashboard' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Finance Dashboard
+    </a>
+
+    <!-- Header -->
+    <div style="margin-bottom: 1.5rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--text); font-family: 'Playfair Display', serif; margin-bottom: 0.25rem;">
+            Create Budget
+        </h1>
+        <p style="color: var(--text-soft); font-size: 0.9rem;">
+            Set your monthly capital and category allocations
+        </p>
+    </div>
+
+    <!-- Main Form -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Month & Capital Card -->
+        <div class="budget-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-calendar-alt"></i>
+                    Month & Capital
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar"></i>
+                            Month
+                        </label>
+                        <select name="month" class="form-select">
+                            {% for num, name in month_choices %}
+                            <option value="{{ num }}" {% if num == current_month %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            Year
+                        </label>
+                        <input type="number" 
+                               name="year" 
+                               value="{{ current_year }}" 
+                               class="form-input"
+                               min="2020"
+                               max="2030">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-coins"></i>
+                        Total Capital Available (KSH)
+                    </label>
+                    <input type="number" 
+                           name="total_capital" 
+                           step="0.01" 
+                           placeholder="e.g., 50000" 
+                           class="form-input" 
+                           required>
+                    <div class="hint-text">
+                        <i class="fas fa-info-circle"></i>
+                        Enter the total amount available for this month's budget
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-sticky-note"></i>
+                        Notes (optional)
+                    </label>
+                    <textarea name="notes" 
+                              rows="2" 
+                              class="form-textarea" 
+                              placeholder="Any notes about this month's budget…"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Allocations Card -->
+        <div class="budget-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-tags"></i>
+                    Category Allocations
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if categories %}
+                <div class="allocations-list">
+                    {% for cat in categories %}
+                    <div class="allocation-row">
+                        <div class="category-info">
+                            <span class="category-icon">{{ cat.icon }}</span>
+                            <span class="category-name">{{ cat.name }}</span>
+                            {% if cat.is_stock_category %}
+                            <span class="stock-badge">
+                                <i class="fas fa-box"></i> Stock
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="allocation-input">
+                            <input type="number" 
+                                   name="allocation_{{ cat.id }}" 
+                                   step="0.01" 
+                                   placeholder="0.00" 
+                                   class="form-input"
+                                   min="0">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="hint-text" style="margin-top: 1rem;">
+                    <i class="fas fa-info-circle"></i>
+                    Leave empty for categories you don't want to allocate this month
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-tags"></i>
+                    <p>No categories yet.</p>
+                    <a href="{% url 'finance:categories' %}">Create some first</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        {% if categories %}
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-save"></i>
+            Save Budget
+        </button>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

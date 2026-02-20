@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),
+    path('finance/', include('finance.urls', namespace='finance')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('robots.txt', robots_txt),
     

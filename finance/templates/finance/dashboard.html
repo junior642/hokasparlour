@@ -1,0 +1,996 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Finance - {{ month_name }} {{ year }}{% endblock %}
+
+{% block page_icon %}fas fa-chart-pie{% endblock %}
+{% block page_title %}Finance Tracker{% endblock %}
+{% block page_subtitle %}{{ month_name }} {{ year }} - Business Financial Overview{% endblock %}
+
+{% block extra_style %}
+<style>
+    /* Action Buttons */
+    .finance-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+        white-space: nowrap;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+
+    .btn-action i {
+        font-size: 0.9rem;
+        color: var(--accent);
+    }
+
+    .btn-action:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+        transform: translateY(-2px);
+    }
+
+    .btn-action.primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+    }
+
+    .btn-action.primary i {
+        color: white;
+    }
+
+    .btn-action.primary:hover {
+        background: var(--accent-light);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-action.success {
+        background: var(--success);
+        color: white;
+        border: none;
+    }
+
+    .btn-action.success i {
+        color: white;
+    }
+
+    .btn-action.success:hover {
+        background: var(--success);
+        opacity: 0.9;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Month Navigation */
+    .month-nav {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 0.75rem 1.5rem;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .month-nav a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-soft);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .month-nav a:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+    }
+
+    .month-label {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+        font-family: 'Playfair Display', serif;
+    }
+
+    /* Alert Strip */
+    .alert-strip {
+        background: var(--danger-soft);
+        border: 1px solid var(--danger);
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.4s 0.05s ease both;
+    }
+
+    .alert-strip-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--danger);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-strip-title i {
+        font-size: 1.2rem;
+    }
+
+    .alert-items {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .alert-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        background: var(--card);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border);
+    }
+
+    .alert-item-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--danger);
+    }
+
+    .alert-item-meta {
+        font-size: 0.75rem;
+        color: var(--text-soft);
+        margin-top: 0.15rem;
+    }
+
+    .alert-dismiss {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.35rem 0.75rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .alert-dismiss:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+        background: var(--danger-soft);
+    }
+
+    /* P&L Cards */
+    .pnl-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.4s 0.1s ease both;
+    }
+
+    @media (max-width: 1100px) {
+        .pnl-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .pnl-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .pnl-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pnl-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.25rem;
+        transition: var(--transition);
+        border-top: 4px solid var(--card-color, var(--accent));
+    }
+
+    .pnl-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .pnl-card.revenue { --card-color: var(--accent); }
+    .pnl-card.cogs { --card-color: var(--danger); }
+    .pnl-card.expenses { --card-color: var(--warning); }
+    .pnl-card.gross { --card-color: var(--info); }
+    .pnl-card.net { --card-color: var(--success); }
+
+    .pnl-icon {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--card-color, var(--accent));
+    }
+
+    .pnl-value {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.15rem;
+    }
+
+    .pnl-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+        font-weight: 600;
+    }
+
+    /* Main Grid */
+    .finance-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 1.5rem;
+        animation: fadeIn 0.4s 0.15s ease both;
+    }
+
+    @media (max-width: 1024px) {
+        .finance-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Cards */
+    .finance-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .card-header h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-header h3 i {
+        color: var(--accent);
+    }
+
+    .card-badge {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        background: var(--surface);
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        border: 1px solid var(--border);
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Budget Allocations */
+    .allocations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .allocation-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .allocation-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .allocation-name {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .allocation-amounts {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+    }
+
+    .allocation-amounts strong {
+        color: var(--text);
+    }
+
+    .allocation-bar {
+        height: 6px;
+        background: var(--surface);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    .allocation-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+
+    .allocation-percent {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-align: right;
+        color: var(--text-soft);
+    }
+
+    .allocation-percent.over-budget {
+        color: var(--danger);
+    }
+
+    /* Expenses Table */
+    .expenses-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .expenses-table th {
+        background: var(--surface);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .expenses-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-size: 0.85rem;
+    }
+
+    .expenses-table tbody tr:hover td {
+        background: var(--accent-soft);
+    }
+
+    .category-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 0.35rem;
+    }
+
+    .expense-amount {
+        font-weight: 700;
+        color: var(--danger);
+    }
+
+    .expense-date {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+    }
+
+    .btn-delete {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.2rem 0.5rem;
+        font-size: 0.7rem;
+        color: var(--text-soft);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-delete:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+        background: var(--danger-soft);
+    }
+
+    /* Capital Entries */
+    .capital-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .capital-stat {
+        text-align: center;
+        flex: 1;
+    }
+
+    .capital-stat.in {
+        border-right: 1px solid var(--border);
+    }
+
+    .capital-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-soft);
+        margin-bottom: 0.25rem;
+    }
+
+    .capital-value {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .capital-value.in {
+        color: var(--success);
+    }
+
+    .capital-value.out {
+        color: var(--danger);
+    }
+
+    .capital-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .capital-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .capital-item:last-child {
+        border-bottom: none;
+    }
+
+    .capital-info h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.15rem;
+    }
+
+    .capital-info p {
+        font-size: 0.7rem;
+        color: var(--text-soft);
+    }
+
+    .capital-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .capital-type {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+        border-radius: 30px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .capital-type.in {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .capital-type.out {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .capital-amount {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .capital-amount.in {
+        color: var(--success);
+    }
+
+    .capital-amount.out {
+        color: var(--danger);
+    }
+
+    /* Budget Health */
+    .health-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .health-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .health-item:last-child {
+        border-bottom: none;
+    }
+
+    .health-label {
+        font-size: 0.85rem;
+        color: var(--text-soft);
+    }
+
+    .health-value {
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .health-value.success {
+        color: var(--success);
+    }
+
+    .health-value.warning {
+        color: var(--warning);
+    }
+
+    .health-value.danger {
+        color: var(--danger);
+    }
+
+    .utilization-bar {
+        height: 8px;
+        background: var(--surface);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+
+    .utilization-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--accent-light);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-soft);
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .finance-actions {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .month-nav {
+            justify-content: space-between;
+        }
+
+        .month-label {
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Action Buttons -->
+<div class="finance-actions">
+    {% if budget %}
+    <a href="{% url 'finance:log_expense' %}?year={{ year }}&month={{ month }}" class="btn-action success">
+        <i class="fas fa-plus-circle"></i>
+        Log Expense
+    </a>
+    <a href="{% url 'finance:log_capital' %}?year={{ year }}&month={{ month }}" class="btn-action">
+        <i class="fas fa-coins"></i>
+        Capital Entry
+    </a>
+    {% endif %}
+    <a href="{% url 'finance:create_budget' %}" class="btn-action primary">
+        <i class="fas fa-chart-pie"></i>
+        {% if budget %}Edit Budget{% else %}Create Budget{% endif %}
+    </a>
+    <a href="{% url 'finance:categories' %}" class="btn-action">
+        <i class="fas fa-tags"></i>
+        Categories
+    </a>
+    <a href="{% url 'finance:monthly_summary' %}?year={{ year }}&month={{ month }}" class="btn-action">
+        <i class="fas fa-file-alt"></i>
+        Full Summary
+    </a>
+</div>
+
+<!-- Messages -->
+{% if messages %}
+<div style="margin-bottom: 1.5rem;">
+    {% for msg in messages %}
+    <div class="alert {% if msg.tags %}{{ msg.tags }}{% endif %}" style="margin-bottom: 0.5rem;">
+        <i class="fas fa-info-circle"></i>
+        {{ msg }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Month Navigation -->
+<div class="month-nav">
+    <a href="?year={{ prev_year }}&month={{ prev_month }}">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    <span class="month-label">{{ month_name }} {{ year }}</span>
+    <a href="?year={{ next_year }}&month={{ next_month }}">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+
+<!-- Restock Alerts -->
+{% if active_alerts %}
+<div class="alert-strip">
+    <div class="alert-strip-title">
+        <i class="fas fa-exclamation-triangle"></i>
+        Low Stock Alerts — {{ active_alerts.count }} product{{ active_alerts.count|pluralize }} need restocking
+    </div>
+    <div class="alert-items">
+        {% for alert in active_alerts %}
+        <div class="alert-item">
+            <div>
+                <div class="alert-item-name">{{ alert.product.name }}</div>
+                <div class="alert-item-meta">
+                    Only {{ alert.qty_at_alert }} left
+                    {% if alert.estimated_restock_cost %}
+                    &mdash; estimated restock cost: <strong>KSH {{ alert.estimated_restock_cost|floatformat:0 }}</strong>
+                    {% endif %}
+                </div>
+            </div>
+            <form method="post" action="{% url 'finance:dismiss_alert' alert.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="alert-dismiss">Dismiss</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- P&L Summary -->
+<div class="pnl-grid">
+    <div class="pnl-card revenue">
+        <div class="pnl-icon">💰</div>
+        <div class="pnl-value">KSH {{ revenue|floatformat:0 }}</div>
+        <div class="pnl-label">Revenue</div>
+    </div>
+    <div class="pnl-card cogs">
+        <div class="pnl-icon">🧾</div>
+        <div class="pnl-value">KSH {{ cogs|floatformat:0 }}</div>
+        <div class="pnl-label">Stock Cost</div>
+    </div>
+    <div class="pnl-card expenses">
+        <div class="pnl-icon">📋</div>
+        <div class="pnl-value">KSH {{ expenses_total|floatformat:0 }}</div>
+        <div class="pnl-label">Expenses</div>
+    </div>
+    <div class="pnl-card gross">
+        <div class="pnl-icon">📈</div>
+        <div class="pnl-value">KSH {{ gross_profit|floatformat:0 }}</div>
+        <div class="pnl-label">Gross Profit</div>
+    </div>
+    <div class="pnl-card net">
+        <div class="pnl-icon">{% if net_profit >= 0 %}✅{% else %}⚠️{% endif %}</div>
+        <div class="pnl-value">KSH {{ net_profit|floatformat:0 }}</div>
+        <div class="pnl-label">Net Profit</div>
+    </div>
+</div>
+
+{% if budget %}
+
+<div class="finance-grid">
+    <!-- LEFT COLUMN -->
+    <div>
+        <!-- Budget Allocations -->
+        <div class="finance-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-chart-pie"></i>
+                    Budget Allocations
+                </h3>
+                <span class="card-badge">
+                    Total: KSH {{ budget.total_capital|floatformat:0 }}
+                </span>
+            </div>
+            <div class="card-body">
+                {% if allocations %}
+                <div class="allocations-list">
+                    {% for alloc in allocations %}
+                    <div class="allocation-item">
+                        <div class="allocation-header">
+                            <span class="allocation-name">
+                                <span>{{ alloc.category.icon }}</span>
+                                {{ alloc.category.name }}
+                            </span>
+                            <span class="allocation-amounts">
+                                Spent <strong style="color:{% if alloc.is_over_budget %}var(--danger){% else %}var(--text){% endif %};">KSH {{ alloc.spent_amount|floatformat:0 }}</strong>
+                                / KSH {{ alloc.allocated_amount|floatformat:0 }}
+                            </span>
+                        </div>
+                        <div class="allocation-bar">
+                            <div class="allocation-fill" style="
+                                width: {% if alloc.percent_used > 100 %}100{% else %}{{ alloc.percent_used }}{% endif %}%;
+                                background: {% if alloc.is_over_budget %}var(--danger){% elif alloc.percent_used > 80 %}var(--warning){% else %}var(--success){% endif %};
+                            "></div>
+                        </div>
+                        <div class="allocation-percent {% if alloc.is_over_budget %}over-budget{% endif %}">
+                            {{ alloc.percent_used }}% used
+                            {% if alloc.is_over_budget %}<i class="fas fa-exclamation-triangle"></i> Over budget{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-pie"></i>
+                    <p>No allocations set.</p>
+                    <a href="{% url 'finance:create_budget' %}" class="btn-action primary" style="display: inline-flex;">Edit Budget</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Expenses -->
+        <div class="finance-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-receipt"></i>
+                    Recent Expenses
+                </h3>
+                <a href="{% url 'finance:log_expense' %}?year={{ year }}&month={{ month }}" class="btn-action success" style="padding: 0.4rem 1rem; font-size: 0.75rem;">
+                    <i class="fas fa-plus"></i> Add
+                </a>
+            </div>
+            {% if recent_expenses %}
+            <table class="expenses-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exp in recent_expenses %}
+                    <tr>
+                        <td>{{ exp.description|truncatechars:20 }}</td>
+                        <td>
+                            <span class="category-dot" style="background:{{ exp.category.color }};"></span>
+                            {{ exp.category.name|truncatechars:10 }}
+                        </td>
+                        <td><span class="expense-amount">KSH {{ exp.amount|floatformat:0 }}</span></td>
+                        <td><span class="expense-date">{{ exp.date|date:"d M" }}</span></td>
+                        <td>
+                            <form method="post" action="{% url 'finance:delete_expense' exp.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete" onclick="return confirm('Delete this expense?')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>No expenses logged yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <!-- Budget Health -->
+        <div class="finance-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-heartbeat"></i>
+                    Budget Health
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="health-stats">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                            <span class="health-label">Utilization</span>
+                            <span class="health-value {% if budget.utilization_percent > 100 %}danger{% elif budget.utilization_percent > 80 %}warning{% else %}success{% endif %}">
+                                {{ budget.utilization_percent }}%
+                            </span>
+                        </div>
+                        <div class="utilization-bar">
+                            <div class="utilization-fill" style="
+                                width: {% if budget.utilization_percent > 100 %}100{% else %}{{ budget.utilization_percent }}{% endif %}%;
+                                background: {% if budget.utilization_percent > 100 %}var(--danger){% elif budget.utilization_percent > 80 %}var(--warning){% else %}var(--success){% endif %};
+                            "></div>
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <span class="health-label">Total Capital</span>
+                        <span class="health-value">KSH {{ budget.total_capital|floatformat:0 }}</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Allocated</span>
+                        <span class="health-value" style="color: var(--info);">KSH {{ budget.total_allocated|floatformat:0 }}</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Spent</span>
+                        <span class="health-value" style="color: var(--danger);">KSH {{ budget.total_spent|floatformat:0 }}</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Remaining</span>
+                        <span class="health-value success">KSH {{ budget.remaining|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capital Entries -->
+        <div class="finance-card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-coins"></i>
+                    Capital Entries
+                </h3>
+                <a href="{% url 'finance:log_capital' %}?year={{ year }}&month={{ month }}" class="btn-action" style="padding: 0.4rem 1rem; font-size: 0.75rem;">
+                    <i class="fas fa-plus"></i> Add
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="capital-stats">
+                    <div class="capital-stat in">
+                        <div class="capital-label">Money In</div>
+                        <div class="capital-value in">KSH {{ capital_in|floatformat:0 }}</div>
+                    </div>
+                    <div class="capital-stat out">
+                        <div class="capital-label">Money Out</div>
+                        <div class="capital-value out">KSH {{ capital_out|floatformat:0 }}</div>
+                    </div>
+                </div>
+
+                <div class="capital-list">
+                    {% for entry in budget.capital_entries.all %}
+                    <div class="capital-item">
+                        <div class="capital-info">
+                            <h4>{{ entry.description|truncatechars:20 }}</h4>
+                            <p>{{ entry.date|date:"d M Y" }}</p>
+                        </div>
+                        <div class="capital-right">
+                            <span class="capital-type {{ entry.entry_type }}">{{ entry.get_entry_type_display }}</span>
+                            <span class="capital-amount {{ entry.entry_type }}">KSH {{ entry.amount|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state" style="padding: 1.5rem;">
+                        <i class="fas fa-coins"></i>
+                        <p>No capital entries yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- No Budget State -->
+<div class="finance-card">
+    <div class="empty-state">
+        <i class="fas fa-chart-pie"></i>
+        <h3>No Budget for {{ month_name }} {{ year }}</h3>
+        <p>Create a monthly budget to start tracking your expenses and business finances.</p>
+        <a href="{% url 'finance:create_budget' %}" class="btn-action primary">
+            <i class="fas fa-plus-circle"></i> Create Budget
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
