@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
 from .sitemaps import StaticViewSitemap, ProductSitemap
 from parlour.views import robots_txt
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 import os
 
 sitemaps = {
@@ -13,17 +13,11 @@ sitemaps = {
     'products': ProductSitemap,
 }
 
-# Add this at the top with your other imports
-def google_verification(request):
-    return HttpResponse(
-        'google-site-verification: googleb193ab12b0274614.html',
-        content_type='text/plain'
-    )
-
+def google_verify(request):
+    file_path = os.path.join(settings.BASE_DIR, 'static', 'googleb193ab12b0274614.html')
+    return FileResponse(open(file_path, 'rb'), content_type='text/html')
 
 urlpatterns = [
-  path('googleb193ab12b0274614.html', google_verification),
-
     path('admin/', admin.site.urls),
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),
