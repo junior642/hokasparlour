@@ -48,6 +48,7 @@
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
             --shadow: 0 4px 6px -2px rgba(0,0,0,0.02);
             --shadow-md: 0 10px 15px -3px rgba(123, 46, 218, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(123, 46, 218, 0.15);
             --transition: all 0.2s ease;
             
             /* Status colors */
@@ -59,6 +60,9 @@
             --danger-soft: #fee2e2;
             --info: #3b82f6;
             --info-soft: #dbeafe;
+            
+            /* Card RGB for backdrop */
+            --card-rgb: 255, 255, 255;
         }
 
         /* ---------- DARK MODE ---------- */
@@ -74,6 +78,7 @@
             --accent-soft: #281f3a;
             --accent-rgb: 178, 135, 253;
             --shadow-md: 0 10px 15px -3px rgba(178, 135, 253, 0.15);
+            --shadow-lg: 0 20px 25px -5px rgba(178, 135, 253, 0.15);
             
             --success: #34d399;
             --success-soft: #064e3b;
@@ -83,6 +88,8 @@
             --danger-soft: #7f1d1d;
             --info: #60a5fa;
             --info-soft: #1e3a8a;
+            
+            --card-rgb: 30, 30, 36;
         }
 
         * {
@@ -120,7 +127,7 @@
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            transition: var(--transition);
+            transition: transform 0.3s ease;
             box-shadow: var(--shadow-md);
             overflow-y: auto;
         }
@@ -737,6 +744,221 @@
             position: relative;
         }
 
+        /* Desktop Navigation - Fixed positioning */
+        .desktop-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Dropdown Styles - Fixed */
+        .nav-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .nav-dropdown .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            color: var(--text-soft);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: 40px;
+            transition: var(--transition);
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+
+        .nav-dropdown .dropdown-toggle:hover {
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .nav-dropdown .dropdown-toggle i:last-child {
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+        }
+
+        .nav-dropdown:hover .dropdown-toggle i:last-child {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 220px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .nav-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1.5rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .dropdown-menu a i {
+            width: 20px;
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu a:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 0.5rem 0;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-soft);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Mobile Navigation Links - Fixed positioning */
+        .mobile-nav-links {
+            display: none;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Mobile Finance Section */
+        .mobile-section {
+            margin: 0.5rem 0;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            color: var(--text-soft);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .mobile-sub-link {
+            padding-left: 3rem !important;
+            font-size: 0.85rem !important;
+        }
+
+        .mobile-sub-link i {
+            width: 20px !important;
+        }
+
+        .mobile-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 1rem 0;
+        }
+
+        /* Message Styles */
+        .message-success {
+            background: var(--success-soft);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .message-error {
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .message-info {
+            background: var(--accent-soft);
+            border: 1px solid var(--accent-light);
+            color: var(--accent);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            right: 1rem;
+            top: 5rem;
+            width: 24rem;
+            max-width: calc(100vw - 2rem);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+        }
+
+        /* Active States */
+        .desktop-nav a.active,
+        .mobile-nav-links a.active {
+            color: var(--accent);
+            background: var(--accent-soft);
+            font-weight: 600;
+        }
+
+        .text-danger {
+            color: var(--danger);
+        }
+
+        .text-danger:hover {
+            background: var(--danger-soft);
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .admin-sidebar {
@@ -764,6 +986,14 @@
             
             .search-box {
                 width: 200px;
+            }
+            
+            .desktop-nav {
+                display: none;
+            }
+            
+            .mobile-nav-links {
+                display: block;
             }
         }
 
@@ -794,6 +1024,12 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .notification-panel {
+                width: calc(100vw - 2rem);
+                right: 1rem;
+                left: 1rem;
+            }
         }
 
         /* Custom Utilities */
@@ -801,13 +1037,111 @@
             display: none !important;
         }
         
-        /* Add RGB variables for card */
-        :root {
-            --card-rgb: 255, 255, 255;
+        .fixed {
+            position: fixed;
         }
         
-        .dark-mode {
-            --card-rgb: 30, 30, 36;
+        .inset-0 {
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        
+        .bg-black\/50 {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .z-40 {
+            z-index: 40;
+        }
+        
+        .z-50 {
+            z-index: 50;
+        }
+        
+        .right-4 {
+            right: 1rem;
+        }
+        
+        .top-20 {
+            top: 5rem;
+        }
+        
+        .w-96 {
+            width: 24rem;
+        }
+        
+        .max-h-96 {
+            max-height: 24rem;
+        }
+        
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+        
+        .p-4 {
+            padding: 1rem;
+        }
+        
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .mr-2 {
+            margin-right: 0.5rem;
+        }
+        
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        
+        .border {
+            border-width: 1px;
+        }
+        
+        .border-border {
+            border-color: var(--border);
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .text-xs {
+            font-size: 0.75rem;
+        }
+        
+        .font-bold {
+            font-weight: 700;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .mt-1 {
+            margin-top: 0.25rem;
+        }
+        
+        .text-accent {
+            color: var(--accent);
+        }
+        
+        .bg-accent-soft {
+            background: var(--accent-soft);
+        }
+        
+        .hover\:bg-accent-soft:hover {
+            background: var(--accent-soft);
+        }
+        
+        .border-accent-light {
+            border-color: var(--accent-light);
         }
     </style>
     
@@ -931,6 +1265,33 @@
                     </a>
                 </div>
 
+                <!-- Finance Dropdown -->
+                <div class="nav-dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-coins"></i> Finance <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'finance:dashboard' %}">
+                            <i class="fas fa-chart-line"></i> Finance Dashboard
+                        </a>
+                        <a href="{% url 'finance:monthly_summary' %}">
+                            <i class="fas fa-calendar-alt"></i> Monthly Summary
+                        </a>
+                        <a href="{% url 'finance:log_expense' %}">
+                            <i class="fas fa-receipt"></i> Log Expense
+                        </a>
+                        <a href="{% url 'finance:log_capital' %}">
+                            <i class="fas fa-coins"></i> Capital Entry
+                        </a>
+                        <a href="{% url 'finance:create_budget' %}">
+                            <i class="fas fa-chart-pie"></i> Create Budget
+                        </a>
+                        <a href="{% url 'finance:categories' %}">
+                            <i class="fas fa-tags"></i> Categories
+                        </a>
+                    </div>
+                </div>
+
                 <div class="nav-section">
                     <div class="nav-section-title">SETTINGS</div>
                     <a href="/financeSS" class="nav-item">
@@ -953,213 +1314,72 @@
             </div>
 
             <!-- Desktop Navigation -->
-<nav class="desktop-nav">
-   
-    
-    <!-- Finance Dropdown -->
-    <div class="nav-dropdown">
-        <a href="#" class="dropdown-toggle">
-            <i class="fas fa-coins"></i> Finance <i class="fas fa-chevron-down"></i>
-        </a>
-        <div class="dropdown-menu">
-            <a href="{% url 'finance:dashboard' %}">
-                <i class="fas fa-chart-line"></i> Finance Dashboard
-            </a>
-            <a href="{% url 'finance:monthly_summary' %}">
-                <i class="fas fa-calendar-alt"></i> Monthly Summary
-            </a>
-            <a href="{% url 'finance:log_expense' %}">
-                <i class="fas fa-receipt"></i> Log Expense
-            </a>
-            <a href="{% url 'finance:log_capital' %}">
-                <i class="fas fa-coins"></i> Capital Entry
-            </a>
-            <a href="{% url 'finance:create_budget' %}">
-                <i class="fas fa-chart-pie"></i> Create Budget
-            </a>
-            <a href="{% url 'finance:categories' %}">
-                <i class="fas fa-tags"></i> Categories
-            </a>
-        </div>
-    </div>
-    
-    
-    
-    
-    
-   
-    
-    <!-- Theme Toggle -->
-    <button class="theme-toggle" id="themeToggleDesktop" aria-label="Switch between dark and light mode">
-        <i class="fas fa-moon"></i>
-    </button>
-</nav>
+            <nav class="desktop-nav" style="display: none;">    
+                <!-- Finance Dropdown -->
+                <div class="nav-dropdown">
+                    <a href="#" class="dropdown-toggle">
+                        <i class="fas fa-coins"></i> Finance <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'finance:dashboard' %}">
+                            <i class="fas fa-chart-line"></i> Finance Dashboard
+                        </a>
+                        <a href="{% url 'finance:monthly_summary' %}">
+                            <i class="fas fa-calendar-alt"></i> Monthly Summary
+                        </a>
+                        <a href="{% url 'finance:log_expense' %}">
+                            <i class="fas fa-receipt"></i> Log Expense
+                        </a>
+                        <a href="{% url 'finance:log_capital' %}">
+                            <i class="fas fa-coins"></i> Capital Entry
+                        </a>
+                        <a href="{% url 'finance:create_budget' %}">
+                            <i class="fas fa-chart-pie"></i> Create Budget
+                        </a>
+                        <a href="{% url 'finance:categories' %}">
+                            <i class="fas fa-tags"></i> Categories
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" id="themeToggleDesktop" aria-label="Switch between dark and light mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </nav>
 
-<!-- Mobile Navigation -->
-<div class="mobile-nav-links">
-    
-    
-    <!-- Finance Section in Mobile -->
-    <div class="mobile-section">
-        <div class="mobile-section-title">
-            <i class="fas fa-coins" style="color: var(--accent);"></i>
-            <span>Finance</span>
-        </div>
-        <a href="{% url 'finance:dashboard' %}" class="mobile-sub-link">
-            <i class="fas fa-chart-line"></i> Finance Dashboard
-        </a>
-        <a href="{% url 'finance:monthly_summary' %}" class="mobile-sub-link">
-            <i class="fas fa-calendar-alt"></i> Monthly Summary
-        </a>
-        <a href="{% url 'finance:log_expense' %}" class="mobile-sub-link">
-            <i class="fas fa-receipt"></i> Log Expense
-        </a>
-        <a href="{% url 'finance:log_capital' %}" class="mobile-sub-link">
-            <i class="fas fa-coins"></i> Capital Entry
-        </a>
-        <a href="{% url 'finance:create_budget' %}" class="mobile-sub-link">
-            <i class="fas fa-chart-pie"></i> Create Budget
-        </a>
-        <a href="{% url 'finance:categories' %}" class="mobile-sub-link">
-            <i class="fas fa-tags"></i> Categories
-        </a>
-    </div>
-    
-    
-    <a href="{% url 'logout' %}" class="text-danger">
-        <i class="fas fa-sign-out-alt"></i> Logout
-    </a>
-</div>
-
-<style>
-/* Dropdown Styles */
-.nav-dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.nav-dropdown .dropdown-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.2rem;
-    color: var(--text-soft);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    border-radius: 40px;
-    transition: var(--transition);
-    cursor: pointer;
-}
-
-.nav-dropdown .dropdown-toggle:hover {
-    color: var(--accent);
-    background: var(--accent-soft);
-}
-
-.nav-dropdown .dropdown-toggle i:last-child {
-    font-size: 0.7rem;
-    transition: transform 0.2s;
-}
-
-.nav-dropdown:hover .dropdown-toggle i:last-child {
-    transform: rotate(180deg);
-}
-
-.dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 220px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 0.75rem 0;
-    box-shadow: var(--shadow-lg);
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition: all 0.2s ease;
-    z-index: 1000;
-    margin-top: 0.5rem;
-}
-
-.nav-dropdown:hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-.dropdown-menu a {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 1.5rem;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: var(--transition);
-}
-
-.dropdown-menu a i {
-    width: 20px;
-    color: var(--accent);
-    font-size: 0.9rem;
-}
-
-.dropdown-menu a:hover {
-    background: var(--accent-soft);
-    color: var(--accent);
-}
-
-.dropdown-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 0.5rem 0;
-}
-
-/* Mobile Finance Section */
-.mobile-section {
-    margin: 0.5rem 0;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.mobile-section-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 1rem;
-    color: var(--text-soft);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-}
-
-.mobile-sub-link {
-    padding-left: 3rem !important;
-    font-size: 0.85rem !important;
-}
-
-.mobile-sub-link i {
-    width: 20px !important;
-}
-
-.mobile-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 1rem 0;
-}
-
-/* Active States */
-.desktop-nav a.active,
-.mobile-nav-links a.active {
-    color: var(--accent);
-    background: var(--accent-soft);
-    font-weight: 600;
-}
-</style>
+            <!-- Mobile Navigation -->
+            <div class="mobile-nav-links">
+                <!-- Finance Section in Mobile -->
+                <div class="mobile-section">
+                    <div class="mobile-section-title">
+                        <i class="fas fa-coins" style="color: var(--accent);"></i>
+                        <span>Finance</span>
+                    </div>
+                    <a href="{% url 'finance:dashboard' %}" class="nav-item mobile-sub-link">
+                        <i class="fas fa-chart-line"></i> Finance Dashboard
+                    </a>
+                    <a href="{% url 'finance:monthly_summary' %}" class="nav-item mobile-sub-link">
+                        <i class="fas fa-calendar-alt"></i> Monthly Summary
+                    </a>
+                    <a href="{% url 'finance:log_expense' %}" class="nav-item mobile-sub-link">
+                        <i class="fas fa-receipt"></i> Log Expense
+                    </a>
+                    <a href="{% url 'finance:log_capital' %}" class="nav-item mobile-sub-link">
+                        <i class="fas fa-coins"></i> Capital Entry
+                    </a>
+                    <a href="{% url 'finance:create_budget' %}" class="nav-item mobile-sub-link">
+                        <i class="fas fa-chart-pie"></i> Create Budget
+                    </a>
+                    <a href="{% url 'finance:categories' %}" class="nav-item mobile-sub-link">
+                        <i class="fas fa-tags"></i> Categories
+                    </a>
+                </div>
+                
+                <a href="{% url 'logout' %}" class="nav-item text-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
 
             <!-- Sidebar Footer -->
             <div class="sidebar-footer">
@@ -1213,7 +1433,10 @@
                 {% if messages %}
                 <div class="mb-6">
                     {% for message in messages %}
-                    <div class="p-4 rounded-lg border mb-2 {% if message.tags == 'success' %}bg-success-soft border-success text-success{% elif message.tags == 'error' %}bg-danger-soft border-danger text-danger{% else %}bg-accent-soft border-accent-light text-accent{% endif %}">
+                    <div class="p-4 rounded-lg border mb-2 
+                        {% if message.tags == 'success' %}bg-success-soft border-success text-success
+                        {% elif message.tags == 'error' %}bg-danger-soft border-danger text-danger
+                        {% else %}bg-accent-soft border-accent-light text-accent{% endif %}">
                         <i class="fas fa-info-circle mr-2"></i>
                         {{ message }}
                     </div>
@@ -1228,7 +1451,7 @@
     </div>
 
     <!-- Notification Panel (hidden by default) -->
-    <div id="notificationPanel" class="hidden fixed right-4 top-20 w-96 bg-card border border-border rounded-2xl shadow-xl z-50">
+    <div id="notificationPanel" class="notification-panel hidden">
         <div class="p-4 border-b border-border">
             <h3 class="font-bold">Notifications</h3>
         </div>
@@ -1257,20 +1480,23 @@
     <!-- Scripts -->
     <script>
         (function() {
+            'use strict';
+            
             // Theme Toggle
             const root = document.documentElement;
             const sidebarToggle = document.getElementById('sidebarThemeToggle');
+            const desktopToggle = document.getElementById('themeToggleDesktop');
             
             function setDarkMode(isDark) {
                 if (isDark) {
                     root.classList.add('dark-mode');
-                    document.querySelectorAll('.theme-toggle-sidebar i:last-child, #sidebarThemeToggle i').forEach(icon => {
-                        icon.className = 'fas fa-sun';
+                    document.querySelectorAll('#sidebarThemeToggle i, #themeToggleDesktop i').forEach(icon => {
+                        if (icon) icon.className = 'fas fa-sun';
                     });
                 } else {
                     root.classList.remove('dark-mode');
-                    document.querySelectorAll('.theme-toggle-sidebar i:last-child, #sidebarThemeToggle i').forEach(icon => {
-                        icon.className = 'fas fa-moon';
+                    document.querySelectorAll('#sidebarThemeToggle i, #themeToggleDesktop i').forEach(icon => {
+                        if (icon) icon.className = 'fas fa-moon';
                     });
                 }
                 localStorage.setItem('hokasparlour_theme', isDark ? 'dark' : 'light');
@@ -1288,6 +1514,13 @@
 
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    setDarkMode(!root.classList.contains('dark-mode'));
+                });
+            }
+
+            if (desktopToggle) {
+                desktopToggle.addEventListener('click', function(e) {
                     e.preventDefault();
                     setDarkMode(!root.classList.contains('dark-mode'));
                 });
@@ -1318,32 +1551,36 @@
                 overlay.addEventListener('click', closeSidebar);
             }
 
+            // Close sidebar on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                    closeSidebar();
+                }
+            });
+
             // Notification Panel
             const notificationBtn = document.getElementById('notificationBtn');
             const notificationPanel = document.getElementById('notificationPanel');
 
-            if (notificationBtn) {
+            if (notificationBtn && notificationPanel) {
                 notificationBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     notificationPanel.classList.toggle('hidden');
                 });
 
                 document.addEventListener('click', function(e) {
-                    if (!notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
+                    if (notificationPanel && !notificationPanel.contains(e.target) && !notificationBtn.contains(e.target)) {
                         notificationPanel.classList.add('hidden');
                     }
                 });
             }
 
-            // Admin Search (basic implementation)
-            const adminSearch = document.getElementById('adminSearch');
-            if (adminSearch) {
-                adminSearch.addEventListener('input', function(e) {
-                    const query = e.target.value.toLowerCase();
-                    // You can implement search functionality here
-                    console.log('Searching:', query);
-                });
-            }
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 1024 && sidebar.classList.contains('active')) {
+                    closeSidebar();
+                }
+            });
         })();
     </script>
 

@@ -125,6 +125,39 @@
         font-size: 0.8rem;
     }
 
+    /* Stock type info box */
+    .stock-info-box {
+        display: none;
+        margin-top: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        border-left: 4px solid;
+    }
+
+    .stock-info-box.ready {
+        background: #e8f5e9;
+        border-color: #28a745;
+        color: #155724;
+    }
+
+    .stock-info-box.warehouse {
+        background: #fff8e1;
+        border-color: #ffc107;
+        color: #856404;
+    }
+
+    .dark-mode .stock-info-box.ready {
+        background: rgba(40, 167, 69, 0.15);
+        color: #a3d9a5;
+    }
+
+    .dark-mode .stock-info-box.warehouse {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffe083;
+    }
+
     /* File Upload Area */
     .file-upload-area {
         border: 2px dashed var(--border);
@@ -184,6 +217,7 @@
         color: var(--text);
         font-size: 0.9rem;
         word-break: break-all;
+        display: none;
     }
 
     /* Preview Grid */
@@ -360,82 +394,110 @@
                         <option value="socks">Socks</option>
                         <option value="shorts">Shorts</option>
                         <option value="shirts">Shirts</option>
-                        <option value="accessories">Accessories</option>
                     </select>
                 </div>
-                
-                <div class="form-group">
-                    <label for="sku">SKU (Optional)</label>
-                    <input type="text" name="sku" id="sku" placeholder="e.g., HD-BLK-S">
-                    <div class="input-hint">
-                        <i class="fas fa-barcode"></i>
-                        Stock Keeping Unit
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Pricing & Stock Section -->
-        <div class="form-section">
-            <div class="section-title">
-                <i class="fas fa-dollar-sign"></i>
-                Pricing & Stock
-            </div>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="price">Price (KSH) <span class="required">*</span></label>
-                    <input type="number" name="price" id="price" step="0.01" min="0" placeholder="0.00" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="compare_price">Compare at Price (Optional)</label>
-                    <input type="number" name="compare_price" id="compare_price" step="0.01" min="0" placeholder="0.00">
-                    <div class="input-hint">
-                        <i class="fas fa-tag"></i>
-                        Original price for showing discounts
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
-                    <input type="number" name="stock_quantity" id="stock_quantity" min="0" placeholder="0" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="low_stock_threshold">Low Stock Threshold</label>
-                    <input type="number" name="low_stock_threshold" id="low_stock_threshold" min="1" value="5" placeholder="5">
-                    <div class="input-hint">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        Alert when stock falls below this number
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Variants Section -->
-        <div class="form-section">
-            <div class="section-title">
-                <i class="fas fa-tags"></i>
-                Product Variants
-            </div>
-            
-            <div class="form-grid">
+
                 <div class="form-group">
                     <label for="available_sizes">Available Sizes <span class="required">*</span></label>
-                    <input type="text" name="available_sizes" id="available_sizes" placeholder="S, M, L, XL" required>
+                    <input type="text" name="available_sizes" id="available_sizes" placeholder="S,M,L,XL" required>
                     <div class="input-hint">
                         <i class="fas fa-info-circle"></i>
                         Separate sizes with commas (e.g., S,M,L,XL)
                     </div>
                 </div>
-                
+            </div>
+        </div>
+        
+        <!-- Stock Type Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-boxes"></i>
+                Stock Type
+            </div>
+
+            <div class="form-group">
+                <label for="stock_type">Stock Type <span class="required">*</span></label>
+                <select name="stock_type" id="stock_type" required>
+                    <option value="">Select stock type</option>
+                    <option value="ready">Ready Stock — you own the items</option>
+                    <option value="warehouse">Warehouse Stock — sourced after order</option>
+                </select>
+                <div class="input-hint">
+                    <i class="fas fa-info-circle"></i>
+                    This determines delivery speed and how stock is managed
+                </div>
+
+                <!-- Dynamic info boxes -->
+                <div class="stock-info-box ready" id="readyInfo">
+                    <strong>✅ Next Day Delivery</strong><br>
+                    You already have this item. Stock quantity will decrease with each order.
+                    Fill in <strong>Purchase Cost</strong> below (what you paid upfront).
+                </div>
+                <div class="stock-info-box warehouse" id="warehouseInfo">
+                    <strong>📦 Friday Delivery</strong><br>
+                    Items are sourced from a supplier after the order is placed. Stock quantity is ignored.
+                    Fill in <strong>Supplier Cost</strong> below (what you pay per order).
+                </div>
+            </div>
+
+            <div class="form-grid">
                 <div class="form-group">
-                    <label for="available_colors">Available Colors</label>
-                    <input type="text" name="available_colors" id="available_colors" placeholder="Black, White, Red">
+                    <label for="stock_quantity">Stock Quantity <span class="required">*</span></label>
+                    <input type="number" name="stock_quantity" id="stock_quantity" min="0" placeholder="0" value="1" required>
                     <div class="input-hint">
                         <i class="fas fa-info-circle"></i>
-                        Separate colors with commas
+                        Only applies to Ready Stock
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing & Cost Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-dollar-sign"></i>
+                Pricing & Cost
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="price">Selling Price (KSH) <span class="required">*</span></label>
+                    <input type="number" name="price" id="price" step="0.01" min="0" placeholder="0.00" required>
+                    <div class="input-hint">
+                        <i class="fas fa-tag"></i>
+                        The price the customer pays
+                    </div>
+                </div>
+
+                <div class="form-group" id="purchaseCostGroup">
+                    <label for="purchase_cost">Purchase Cost (KSH)</label>
+                    <input type="number" name="purchase_cost" id="purchase_cost" step="0.01" min="0" placeholder="0.00">
+                    <div class="input-hint">
+                        <i class="fas fa-receipt"></i>
+                        <span id="costHintText">What you paid to acquire this item (Ready Stock)</span>
+                    </div>
+                </div>
+
+                <div class="form-group" id="supplierCostGroup">
+                    <label for="supplier_cost">Supplier Cost (KSH)</label>
+                    <input type="number" name="supplier_cost" id="supplier_cost" step="0.01" min="0" placeholder="0.00">
+                    <div class="input-hint">
+                        <i class="fas fa-truck"></i>
+                        What you pay the supplier per item (Warehouse Stock)
+                    </div>
+                </div>
+
+                <!-- Live profit preview -->
+                <div class="form-group full-width" id="profitPreview" style="display:none;">
+                    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-soft); margin-bottom: 2px;">Profit / Item</div>
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--success);" id="profitValue">KSH —</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.75rem; color: var(--text-soft); margin-bottom: 2px;">Margin %</div>
+                            <div style="font-weight: 700; font-size: 1.1rem; color: var(--success);" id="marginValue">—%</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -455,7 +517,7 @@
                     <span class="upload-label">Click to upload main image</span>
                     <span class="upload-hint">or drag and drop</span>
                     <div class="file-name" id="mainImageName"></div>
-                    <input type="file" name="main_image" id="main_image" accept="image/*" required>
+                    <input type="file" name="image" id="main_image" accept="image/*" required>
                 </div>
                 <div class="input-hint">
                     <i class="fas fa-info-circle"></i>
@@ -479,26 +541,6 @@
             </div>
         </div>
         
-        <!-- SEO Section -->
-        <div class="form-section">
-            <div class="section-title">
-                <i class="fas fa-search"></i>
-                SEO Settings (Optional)
-            </div>
-            
-            <div class="form-grid">
-                <div class="form-group full-width">
-                    <label for="meta_title">Meta Title</label>
-                    <input type="text" name="meta_title" id="meta_title" placeholder="SEO title for search engines">
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="meta_description">Meta Description</label>
-                    <textarea name="meta_description" id="meta_description" rows="3" placeholder="SEO description for search engines"></textarea>
-                </div>
-            </div>
-        </div>
-        
         <!-- Form Actions -->
         <div class="form-actions">
             <a href="{% url 'manage_products' %}" class="btn btn-secondary">
@@ -513,113 +555,158 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Main image upload handling
+
+    // ── Stock type toggle ──────────────────────────────────────────
+    const stockTypeSelect = document.getElementById('stock_type');
+    const readyInfo       = document.getElementById('readyInfo');
+    const warehouseInfo   = document.getElementById('warehouseInfo');
+    const purchaseCostGroup = document.getElementById('purchaseCostGroup');
+    const supplierCostGroup = document.getElementById('supplierCostGroup');
+    const stockQtyInput   = document.getElementById('stock_quantity');
+
+    function applyStockType(value) {
+        readyInfo.style.display     = value === 'ready'     ? 'block' : 'none';
+        warehouseInfo.style.display = value === 'warehouse' ? 'block' : 'none';
+
+        // Highlight relevant cost field
+        purchaseCostGroup.style.opacity = value === 'ready'     ? '1' : '0.4';
+        supplierCostGroup.style.opacity = value === 'warehouse' ? '1' : '0.4';
+
+        // Warehouse stock quantity doesn't matter — dim it
+        stockQtyInput.disabled = value === 'warehouse';
+        if (value === 'warehouse') {
+            stockQtyInput.value = 0;
+        }
+
+        updateProfit();
+    }
+
+    stockTypeSelect.addEventListener('change', function() {
+        applyStockType(this.value);
+    });
+
+    // ── Live profit calculator ─────────────────────────────────────
+    const priceInput       = document.getElementById('price');
+    const purchaseCostInput = document.getElementById('purchase_cost');
+    const supplierCostInput = document.getElementById('supplier_cost');
+    const profitPreview    = document.getElementById('profitPreview');
+    const profitValue      = document.getElementById('profitValue');
+    const marginValue      = document.getElementById('marginValue');
+
+    function updateProfit() {
+        const stockType = stockTypeSelect.value;
+        const price = parseFloat(priceInput.value) || 0;
+        const cost = stockType === 'ready'
+            ? parseFloat(purchaseCostInput.value) || 0
+            : parseFloat(supplierCostInput.value) || 0;
+
+        if (price > 0 && cost > 0) {
+            const profit = price - cost;
+            const margin = ((profit / price) * 100).toFixed(1);
+            const color  = profit >= 0 ? 'var(--success, green)' : 'var(--danger, red)';
+
+            profitValue.textContent = `KSH ${profit.toFixed(2)}`;
+            marginValue.textContent = `${margin}%`;
+            profitValue.style.color = color;
+            marginValue.style.color = color;
+            profitPreview.style.display = 'block';
+        } else {
+            profitPreview.style.display = 'none';
+        }
+    }
+
+    [priceInput, purchaseCostInput, supplierCostInput].forEach(el => {
+        el.addEventListener('input', updateProfit);
+    });
+
+    // ── Main image upload ──────────────────────────────────────────
     const mainImageInput = document.getElementById('main_image');
-    const mainImageArea = document.getElementById('mainImageArea');
-    const mainImageName = document.getElementById('mainImageName');
-    
-    if (mainImageInput) {
-        mainImageInput.addEventListener('change', function(e) {
-            if (this.files.length > 0) {
-                const file = this.files[0];
-                mainImageName.textContent = file.name;
-                mainImageArea.classList.add('has-file');
-            } else {
-                mainImageName.textContent = '';
-                mainImageArea.classList.remove('has-file');
-            }
-        });
-    }
-    
-    // Additional images preview
-    const additionalImages = document.getElementById('additional_images');
-    const previewGrid = document.getElementById('preview-grid');
-    const additionalArea = document.getElementById('additionalImagesArea');
-    
-    if (additionalImages) {
-        additionalImages.addEventListener('change', function(e) {
-            previewGrid.innerHTML = '';
-            
-            if (this.files.length > 0) {
-                additionalArea.classList.add('has-file');
-                
-                Array.from(this.files).forEach((file, index) => {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const previewItem = document.createElement('div');
-                        previewItem.className = 'preview-item';
-                        previewItem.innerHTML = `
-                            <img src="${event.target.result}" alt="Preview ${index + 1}">
-                            <button type="button" class="preview-remove" data-index="${index}">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        `;
-                        previewGrid.appendChild(previewItem);
-                        
-                        // Add remove functionality
-                        const removeBtn = previewItem.querySelector('.preview-remove');
-                        removeBtn.addEventListener('click', function() {
-                            previewItem.remove();
-                            // Note: This doesn't remove from FileList, would need more complex implementation
-                        });
-                    };
-                    reader.readAsDataURL(file);
-                });
-            } else {
-                additionalArea.classList.remove('has-file');
-            }
-        });
-    }
-    
-    // Form validation
-    const form = document.getElementById('productForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const required = form.querySelectorAll('[required]');
-            let valid = true;
-            
-            required.forEach(field => {
-                if (!field.value.trim()) {
-                    field.style.borderColor = 'var(--danger)';
-                    valid = false;
-                    
-                    // Add error message if not exists
-                    let errorMsg = field.parentNode.querySelector('.error-message');
-                    if (!errorMsg) {
-                        errorMsg = document.createElement('div');
-                        errorMsg.className = 'error-message';
-                        errorMsg.style.color = 'var(--danger)';
-                        errorMsg.style.fontSize = '0.8rem';
-                        errorMsg.style.marginTop = '0.25rem';
-                        errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> This field is required';
-                        field.parentNode.appendChild(errorMsg);
-                    }
-                } else {
-                    field.style.borderColor = '';
-                    const errorMsg = field.parentNode.querySelector('.error-message');
-                    if (errorMsg) errorMsg.remove();
-                }
+    const mainImageArea  = document.getElementById('mainImageArea');
+    const mainImageName  = document.getElementById('mainImageName');
+
+    mainImageInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            mainImageName.textContent = this.files[0].name;
+            mainImageName.style.display = 'block';
+            mainImageArea.classList.add('has-file');
+        } else {
+            mainImageName.style.display = 'none';
+            mainImageArea.classList.remove('has-file');
+        }
+    });
+
+    // ── Additional images preview ──────────────────────────────────
+    const additionalImages  = document.getElementById('additional_images');
+    const previewGrid       = document.getElementById('preview-grid');
+    const additionalArea    = document.getElementById('additionalImagesArea');
+
+    additionalImages.addEventListener('change', function() {
+        previewGrid.innerHTML = '';
+
+        if (this.files.length > 0) {
+            additionalArea.classList.add('has-file');
+
+            Array.from(this.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${event.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="preview-remove" title="Remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    previewGrid.appendChild(previewItem);
+
+                    previewItem.querySelector('.preview-remove').addEventListener('click', function() {
+                        previewItem.remove();
+                    });
+                };
+                reader.readAsDataURL(file);
             });
-            
-            if (!valid) {
-                e.preventDefault();
-                
-                // Scroll to first error
-                const firstError = form.querySelector('[required]');
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            additionalArea.classList.remove('has-file');
+        }
+    });
+
+    // ── Form validation ────────────────────────────────────────────
+    const form = document.getElementById('productForm');
+
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+
+        form.querySelectorAll('[required]').forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = 'var(--danger)';
+                valid = false;
+
+                if (!field.parentNode.querySelector('.error-message')) {
+                    const msg = document.createElement('div');
+                    msg.className = 'error-message';
+                    msg.style.cssText = 'color:var(--danger);font-size:0.8rem;margin-top:0.25rem;';
+                    msg.innerHTML = '<i class="fas fa-exclamation-circle"></i> This field is required';
+                    field.parentNode.appendChild(msg);
                 }
+            } else {
+                field.style.borderColor = '';
+                const err = field.parentNode.querySelector('.error-message');
+                if (err) err.remove();
             }
         });
-    }
-    
-    // Input cleanup on focus
-    const inputs = form.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
+
+        if (!valid) {
+            e.preventDefault();
+            form.querySelector('[required]:invalid, [required][style*="danger"]')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    // Clear errors on focus
+    form.querySelectorAll('input, select, textarea').forEach(input => {
         input.addEventListener('focus', function() {
             this.style.borderColor = '';
-            const errorMsg = this.parentNode.querySelector('.error-message');
-            if (errorMsg) errorMsg.remove();
+            this.parentNode.querySelector('.error-message')?.remove();
         });
     });
 });

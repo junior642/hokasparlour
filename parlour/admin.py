@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.utils.html import format_html, mark_safe
 from .models import (
     Product, ProductImage, Order, OrderItem, StoreSettings, 
-    EmailOTP, Profile, OrderHistory, Advertisement, AdImage, AdImpression
+    EmailOTP, Profile, OrderHistory, Advertisement, AdImage, AdImpression,
+    MpesaPayment
 )
 
 
@@ -71,10 +72,13 @@ class ProductAdmin(admin.ModelAdmin):
         'stock_type',
         'delivery_badge',
         'price',
+        'cost_display',
+        'profit_display',
+        'margin_display',
         'stock_quantity',
         'is_in_stock',
         'image_count',
-        'created_at'
+        'created_at',
     )
 
     list_filter = ('category', 'stock_type', 'created_at')
@@ -82,14 +86,34 @@ class ProductAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     inlines = [ProductImageInline]
 
+    readonly_fields = (
+        'profit_display',
+        'margin_display',
+        'delivery_type_display',
+    )
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('name', 'category', 'stock_type', 'price', 'stock_quantity')
         }),
+        ('Cost & Profitability', {
+            'fields': (
+                'purchase_cost',
+                'supplier_cost',
+                'profit_display',
+                'margin_display',
+            ),
+            'description': (
+                '• Ready Stock → fill in <strong>Purchase Cost</strong> (what you paid upfront).<br>'
+                '• Warehouse Stock → fill in <strong>Supplier Cost</strong> (what you pay per order).'
+            ),
+        }),
         ('Details', {
-            'fields': ('description', 'available_sizes', 'image')
+            'fields': ('description', 'available_sizes', 'image', 'delivery_type_display')
         }),
     )
+
+    # ── List display helpers ───────────────────────────────────────
 
     def is_in_stock(self, obj):
         return obj.is_in_stock()
@@ -114,6 +138,42 @@ class ProductAdmin(admin.ModelAdmin):
             'border-radius:12px;font-size:11px;">Friday Delivery</span>'
         )
     delivery_badge.short_description = "Delivery Type"
+
+    def cost_display(self, obj):
+        cost = obj.get_cost()
+        if cost is not None:
+            label = 'Purchased' if obj.stock_type == 'ready' else 'Supplier'
+            return format_html(
+                '<span style="color:#555;">KSH {}<br>'
+                '<small style="color:#999;">{}</small></span>',
+                cost, label
+            )
+        return mark_safe('<span style="color:#ccc;">—</span>')
+    cost_display.short_description = 'Cost'
+
+    def profit_display(self, obj):
+        profit = obj.get_profit_per_item()
+        if profit is not None:
+            color = 'green' if profit > 0 else 'red'
+            return format_html(
+                '<strong style="color:{};">KSH {}</strong>', color, profit
+            )
+        return mark_safe('<span style="color:#ccc;">N/A</span>')
+    profit_display.short_description = 'Profit / Item'
+
+    def margin_display(self, obj):
+        margin = obj.get_profit_margin_percent()
+        if margin is not None:
+            color = 'green' if margin >= 20 else 'orange' if margin >= 10 else 'red'
+            return format_html(
+                '<strong style="color:{};">{}%</strong>', color, margin
+            )
+        return mark_safe('<span style="color:#ccc;">N/A</span>')
+    margin_display.short_description = 'Margin %'
+
+    def delivery_type_display(self, obj):
+        return obj.get_delivery_type()
+    delivery_type_display.short_description = 'Delivery Type'
 
 
 @admin.register(ProductImage)
@@ -343,3 +403,51 @@ class AdImpressionAdmin(admin.ModelAdmin):
     
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(MpesaPayment)
+class MpesaPaymentAdmin(admin.ModelAdmin):
+    list_display = (
+        'checkout_request_id', 'phone_number', 'amount',
+        'status_badge', 'mpesa_receipt_number', 'transaction_date', 'created_at'
+    )
+    list_filter = ('status', 'created_at')
+    search_fields = ('checkout_request_id', 'phone_number', 'mpesa_receipt_number')
+    readonly_fields = (
+        'checkout_request_id', 'phone_number', 'amount',
+        'mpesa_receipt_number', 'transaction_date', 'result_code',
+        'result_desc', 'session_key', 'created_at', 'updated_at'
+    )
+    ordering = ('-created_at',)
+
+    fieldsets = (
+        ('Transaction Info', {
+            'fields': ('checkout_request_id', 'phone_number', 'amount', 'status')
+        }),
+        ('M-Pesa Response', {
+            'fields': ('mpesa_receipt_number', 'transaction_date', 'result_code', 'result_desc'),
+            'classes': ('collapse',)
+        }),
+        ('Meta', {
+            'fields': ('session_key', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def status_badge(self, obj):
+        colors = {
+            'success': ('#28a745', 'white'),
+            'pending': ('#ffc107', 'black'),
+            'failed': ('#dc3545', 'white'),
+            'cancelled': ('#6c757d', 'white'),
+        }
+        bg, text = colors.get(obj.status, ('#999', 'white'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 10px;'
+            'border-radius:12px;font-size:11px;">{}</span>',
+            bg, text, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'

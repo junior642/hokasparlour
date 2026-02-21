@@ -201,43 +201,52 @@ def add_product(request):
             price = request.POST.get('price')
             category = request.POST.get('category')
             available_sizes = request.POST.get('available_sizes')
-            stock_quantity = request.POST.get('stock_quantity')
-            main_image = request.FILES.get('main_image')
-            
+            stock_type = request.POST.get('stock_type')
+            stock_quantity = request.POST.get('stock_quantity', 1)
+            purchase_cost = request.POST.get('purchase_cost')
+            supplier_cost = request.POST.get('supplier_cost')
+            main_image = request.FILES.get('image')
+
             # Validate required fields
-            if not all([name, description, price, category, available_sizes, stock_quantity]):
-                messages.error(request, 'All fields are required!')
+            if not all([name, description, price, category, available_sizes, stock_type]):
+                messages.error(request, 'All required fields must be filled in!')
                 return redirect('add_product')
-            
+
+            # Warehouse stock doesn't need a quantity
+            if stock_type == 'warehouse':
+                stock_quantity = 0
+
             # Create product
             product = Product.objects.create(
                 name=name,
                 description=description,
                 price=Decimal(price),
                 category=category,
+                stock_type=stock_type,
                 available_sizes=available_sizes,
                 stock_quantity=int(stock_quantity),
-                image=main_image if main_image else None
+                purchase_cost=Decimal(purchase_cost) if purchase_cost else None,
+                supplier_cost=Decimal(supplier_cost) if supplier_cost else None,
+                image=main_image if main_image else None,
             )
-            
+
             # Handle additional images
             additional_images = request.FILES.getlist('additional_images')
             for idx, img_file in enumerate(additional_images):
                 ProductImage.objects.create(
                     product=product,
                     image=img_file,
-                    order=idx
+                    order=idx,
                 )
-            
+
             messages.success(request, f'Product "{product.name}" added successfully!')
             return redirect('manage_products')
-            
+
         except Exception as e:
             messages.error(request, f'Error adding product: {str(e)}')
             return redirect('add_product')
-    
-    return render(request, 'parlour/add_product.html')
 
+    return render(request, 'parlour/add_product.html')
 
 @login_required
 @user_passes_test(is_staff_user)
