@@ -25,8 +25,7 @@ from django.utils import timezone
 from django.db import models
 from .models import Product, Advertisement, AdImpression
 import logging
-
-logger = logging.getLogger(__name__)
+from .models import Category
 
 def home(request):
     products = Product.objects.all()
@@ -38,7 +37,7 @@ def home(request):
     
     # Apply category filter
     if category:
-        products = products.filter(category=category)
+        products = products.filter(category__id=category)  # 👈 fixed
     
     # Apply price filters
     if min_price:
@@ -47,20 +46,17 @@ def home(request):
         products = products.filter(price__lte=max_price)
     
     # Get all categories for the filter
-    categories = Product.CATEGORY_CHOICES
+    categories = Category.objects.all()
     
     # Get active advertisements with better error handling
     now = timezone.now()
     
-    # Debug: Print ad query info
     print(f"Current time: {now}")
     print(f"Total ads in DB: {Advertisement.objects.count()}")
     print(f"Active ads: {Advertisement.objects.filter(is_active=True).count()}")
     
-    # Base query for active ads
     ads = Advertisement.objects.filter(is_active=True)
     
-    # Apply date filters
     ads = ads.filter(
         models.Q(start_date__isnull=True) | models.Q(start_date__lte=now)
     ).filter(
@@ -69,38 +65,29 @@ def home(request):
     
     print(f"Ads after date filter: {ads.count()}")
     
-    # Order by display order
     ads = ads.order_by('order', '-created_at')
     
-    # Debug: Print all matching ads
     for ad in ads:
         print(f"Found ad: {ad.title} (Type: {ad.ad_type}, Active: {ad.is_active})")
     
-    # Device detection (simplified)
     user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
     is_mobile = any(x in user_agent for x in ['mobile', 'android', 'iphone', 'phone'])
     is_tablet = any(x in user_agent for x in ['ipad', 'tablet'])
     
     print(f"Device: Mobile={is_mobile}, Tablet={is_tablet}")
     
-    # Filter by device visibility
     filtered_ads = []
     for ad in ads:
         if is_mobile and not ad.show_on_mobile:
-            print(f"Ad '{ad.title}' hidden on mobile")
             continue
         if is_tablet and not ad.show_on_tablet:
-            print(f"Ad '{ad.title}' hidden on tablet")
             continue
         if not is_mobile and not is_tablet and not ad.show_on_desktop:
-            print(f"Ad '{ad.title}' hidden on desktop")
             continue
         filtered_ads.append(ad)
-        print(f"Ad '{ad.title}' passed device filter")
     
     print(f"Ads after device filter: {len(filtered_ads)}")
     
-    # Record impressions
     session_key = request.session.session_key
     if not session_key:
         request.session.save()
@@ -109,8 +96,6 @@ def home(request):
     final_ads = []
     for ad in filtered_ads:
         final_ads.append(ad)
-        
-        # Record impression (don't let failures stop the page)
         try:
             AdImpression.objects.create(
                 advertisement=ad,
@@ -127,7 +112,7 @@ def home(request):
     context = {
         'products': products,
         'categories': categories,
-        'selected_category': category,
+        'selected_category': int(category) if category else None,  # 👈 fixed
         'min_price': min_price,
         'max_price': max_price,
         'ads': final_ads,
@@ -139,7 +124,6 @@ def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     sizes = [size.strip() for size in product.available_sizes.split(',')]
     
-    # Get all images (main + additional)
     all_images = []
     if product.image:
         all_images.append({'url': product.image.url, 'is_main': True})
@@ -151,10 +135,9 @@ def product_detail(request, product_id):
             'alt_text': additional_image.alt_text
         })
     
-    # Get recommended products
+    # Fix: category is now a ForeignKey
     recommended_products = Product.objects.filter(
-        category=product.category,
-        stock_quantity__gt=0
+        category=product.category,  
     ).exclude(
         id=product.id
     ).order_by('-created_at')[:4]
@@ -166,7 +149,6 @@ def product_detail(request, product_id):
         'recommended_products': recommended_products,
     }
     return render(request, 'parlour/product_detail.html', context)
-
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
@@ -685,7 +667,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.conf import settings
-from django.core.mail import send_mail
 from django.core.mail import EmailMessage
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -693,22 +674,21 @@ import logging
 import random
 import string
 from .models import EmailOTP
-from django import forms 
+from django import forms
 
 logger = logging.getLogger(__name__)
+
 
 def generate_otp():
     """Generate a 6-digit OTP"""
     return ''.join(random.choices(string.digits, k=6))
 
-from django.core.mail import EmailMessage  # Keep this import
 
-def send_otp_email(user, otp):
+def send_otp_email_to_address(email, username, otp):
     """Send OTP email with error handling and logging"""
     try:
-        subject = 'Your OTP Verification Code - Hoka\'s Parlour'
-        
-        # HTML email template
+        subject = "Your OTP Verification Code - Hoka's Parlour"
+
         html_message = f"""
         <!DOCTYPE html>
         <html>
@@ -769,23 +749,23 @@ def send_otp_email(user, otp):
                     <div class="logo">HOKA'S<span>PARLOUR</span></div>
                     <p style="color: #666; margin-top: 10px;">Welcome to Hoka's Parlour!</p>
                 </div>
-                
+
                 <h2 style="text-align: center; color: #333;">Email Verification</h2>
-                
+
                 <p style="color: #666; font-size: 16px; line-height: 1.6;">
-                    Hello <strong>{user.username}</strong>,<br><br>
+                    Hello <strong>{username}</strong>,<br><br>
                     Thank you for signing up! Please use the OTP code below to verify your email address:
                 </p>
-                
+
                 <div class="otp-code">
                     {otp}
                 </div>
-                
+
                 <p style="color: #666; font-size: 16px; line-height: 1.6;">
                     This code will expire in 10 minutes.<br>
                     If you didn't request this, please ignore this email.
                 </p>
-                
+
                 <div class="footer">
                     <p>© 2026 Hoka's Parlour. All rights reserved.</p>
                     <p style="color: #999; font-size: 12px;">Rongai, Kajiado County, Kenya</p>
@@ -794,98 +774,79 @@ def send_otp_email(user, otp):
         </body>
         </html>
         """
-        
-        # Create email with HTML content
-        email = EmailMessage(
+
+        email_msg = EmailMessage(
             subject=subject,
             body=html_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[user.email],
+            to=[email],
         )
-        email.content_subtype = "html"  # This makes it an HTML email
-        
-        # Send email
-        sent_count = email.send(fail_silently=False)
-        
-        logger.info(f"Email sent successfully to {user.email}. Result: {sent_count}")
+        email_msg.content_subtype = "html"
+        sent_count = email_msg.send(fail_silently=False)
+
+        logger.info(f"Email sent successfully to {email}. Result: {sent_count}")
         return True
-        
+
     except Exception as e:
-        logger.error(f"Failed to send email to {user.email}: {str(e)}")
-        
-        # Print to console for development
+        logger.error(f"Failed to send email to {email}: {str(e)}")
         print(f"\n{'='*50}")
-        print(f"🔐 OTP for {user.email}: {otp}")
+        print(f"🔐 OTP for {email}: {otp}")
         print(f"{'='*50}\n")
-        
-        # Re-raise to be caught in the view
         raise e
-    
-    
+
+
 def user_signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        
-        # Add email field to form
         form.fields['email'] = forms.EmailField(required=True)
-        
+
         if form.is_valid():
+            email = form.cleaned_data['email']
+            username = form.cleaned_data['username']
+
+            # Check if email already exists
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'This email is already registered.')
+                return render(request, 'parlour/signup.html', {'form': form})
+
+            # Check if username already exists
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'This username is already taken.')
+                return render(request, 'parlour/signup.html', {'form': form})
+
+            # Generate OTP
+            otp = generate_otp()
+
+            # Store signup data in session (no user created yet)
+            request.session['pending_signup'] = {
+                'username': username,
+                'email': email,
+                'password': form.cleaned_data['password1'],
+                'otp': otp,
+            }
+
+            # Send OTP email
             try:
-                # Check if email already exists
-                email = form.cleaned_data['email']
-                if User.objects.filter(email=email).exists():
-                    messages.error(request, 'This email is already registered.')
-                    return render(request, 'parlour/signup.html', {'form': form})
-                
-                # Create user
-                user = form.save(commit=False)
-                user.email = email
-                user.is_active = False  # Deactivate until OTP verification
-                user.save()
-                
-                # Generate OTP
-                otp = generate_otp()
-                
-                # Save OTP to database
-                EmailOTP.objects.update_or_create(
-                    user=user,
-                    defaults={'otp': otp}
-                )
-                
-                # Try to send email
-                try:
-                    send_otp_email(user, otp)
-                    messages.success(request, f'✅ An OTP has been sent to {email}. Please check your inbox (and spam folder).')
-                except Exception as e:
-                    # If email fails, still show OTP for development
-                    messages.warning(request, f'⚠️ Email sending failed. For development, your OTP is: {otp}')
-                    logger.error(f"Email sending failed: {e}")
-                
-                # Store user ID in session
-                request.session['otp_user_id'] = user.id
-                request.session['otp_email'] = email
-                
-                return redirect('verify_otp')
-                
-            except IntegrityError as e:
-                messages.error(request, 'An error occurred. Please try again.')
-                logger.error(f"Signup error: {e}")
+                send_otp_email_to_address(email, username, otp)
+                messages.success(request, f'✅ An OTP has been sent to {email}. Please check your inbox (and spam folder).')
             except Exception as e:
-                messages.error(request, 'An unexpected error occurred.')
-                logger.error(f"Unexpected signup error: {e}")
+                messages.warning(request, f'⚠️ Email sending failed. For development, your OTP is: {otp}')
+                logger.error(f"Email sending failed: {e}")
+
+            return redirect('verify_otp')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = UserCreationForm()
         form.fields['email'] = forms.EmailField(required=True)
-    
+
     return render(request, 'parlour/signup.html', {'form': form})
 
-def verify_otp(request):
-    user_id = request.session.get('otp_user_id')
-    email = request.session.get('otp_email')
 
-    if not user_id:
+def verify_otp(request):
+    pending = request.session.get('pending_signup')
+
+    if not pending:
         messages.error(request, 'Session expired. Please sign up again.')
         return redirect('signup')
 
@@ -895,82 +856,47 @@ def verify_otp(request):
 
         # Resend OTP
         if action == 'resend':
+            new_otp = generate_otp()
+            request.session['pending_signup']['otp'] = new_otp
+            request.session.modified = True
+
             try:
-                user = User.objects.get(id=user_id)
-                otp = generate_otp()
-                
-                EmailOTP.objects.update_or_create(
-                    user=user,
-                    defaults={'otp': otp}
-                )
-                
-                try:
-                    send_otp_email(user, otp)
-                    messages.success(request, f'✅ A new OTP has been sent to {email}')
-                except Exception as e:
-                    messages.warning(request, f'⚠️ New OTP: {otp}')
-                
-                return redirect('verify_otp')
-                
-            except User.DoesNotExist:
-                messages.error(request, 'User not found.')
-                return redirect('signup')
+                send_otp_email_to_address(pending['email'], pending['username'], new_otp)
+                messages.success(request, f"✅ A new OTP has been sent to {pending['email']}")
+            except Exception as e:
+                messages.warning(request, f'⚠️ New OTP: {new_otp}')
+
+            return redirect('verify_otp')
 
         # Verify OTP
-        try:
-            otp_obj = EmailOTP.objects.get(user_id=user_id)
-            
-            if otp_obj.otp == otp_input:
-                user = otp_obj.user
+        if otp_input == pending.get('otp'):
+            try:
+                # OTP correct — now create the user
+                user = User.objects.create_user(
+                    username=pending['username'],
+                    email=pending['email'],
+                    password=pending['password'],
+                )
                 user.is_active = True
                 user.save()
-                
-                otp_obj.delete()
-                del request.session['otp_user_id']
-                del request.session['otp_email']
-                
+
+                # Clear session
+                del request.session['pending_signup']
+
                 # Log the user in
                 login(request, user)
-                messages.success(request, '🎉 Account verified successfully! Welcome to Hoka\'s Parlour!')
+                messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
                 return redirect('home')
-            else:
-                messages.error(request, '❌ Invalid OTP. Please try again.')
-        except EmailOTP.DoesNotExist:
-            messages.error(request, 'OTP expired. Please request a new one.')
 
-    return render(request, 'parlour/verify_otp.html')
+            except IntegrityError as e:
+                logger.error(f"Account creation failed after OTP verification: {e}")
+                messages.error(request, 'An error occurred while creating your account. Please sign up again.')
+                del request.session['pending_signup']
+                return redirect('signup')
+        else:
+            messages.error(request, '❌ Invalid OTP. Please try again.')
 
-def verify_otp(request):
-    user_id = request.session.get('otp_user_id')
-
-    if not user_id:
-        messages.error(request, 'Session expired. Please sign up again.')
-        return redirect('signup')
-
-    if request.method == 'POST':
-        otp_input = request.POST.get('otp')
-
-        try:
-            otp_obj = EmailOTP.objects.get(user_id=user_id)
-
-            if otp_obj.otp == otp_input:
-                user = otp_obj.user
-                user.is_active = True
-                user.save()
-
-                otp_obj.delete()
-                del request.session['otp_user_id']
-
-                login(request, user)
-                messages.success(request, 'Account verified successfully!')
-                return redirect('home')
-            else:
-                messages.error(request, 'Invalid OTP.')
-        except EmailOTP.DoesNotExist:
-            messages.error(request, 'OTP not found.')
-
-    return render(request, 'parlour/verify_otp.html')
-
+    return render(request, 'parlour/verify_otp.html', {'email': pending.get('email')})
 
 def user_logout(request):
     logout(request)

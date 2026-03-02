@@ -9,43 +9,121 @@ from decimal import Decimal
 import decimal
 
 class StoreSettings(models.Model):
+    # ── Store Info ────────────────────────────────────────────────
     pickup_location = models.CharField(max_length=300, default='Hoka\'s Parlour Main Store, 123 Fashion Street')
-    pickup_date = models.DateField(default=timezone.now, help_text='Pickup date for all orders')
-    pickup_time = models.TimeField(default='22:00:00', help_text='Pickup time (e.g., 10:00 PM)')
-    pickup_days_info = models.TextField(default='Monday - Saturday', help_text='Pickup days information')
     store_phone = models.CharField(max_length=20, default='+254 700 000 000')
     store_email = models.EmailField(default='hokasparlour@gmail.com')
-    
+
+    # ── Ready Stock Delivery (Next Day, Mon-Fri) ──────────────────
+    ready_delivery_time = models.TimeField(
+        default='10:00:00',
+        help_text='What time ready stock orders are delivered the next day'
+    )
+    ready_delivery_days = models.CharField(
+        max_length=100,
+        default='Monday,Tuesday,Wednesday,Thursday,Friday',
+        help_text='Days next-day delivery is available (comma-separated)'
+    )
+
+    # ── Warehouse Stock Delivery (Always Friday) ──────────────────
+    warehouse_delivery_time = models.TimeField(
+        default='10:00:00',
+        help_text='What time warehouse stock orders are delivered on Friday'
+    )
+
     class Meta:
         verbose_name = 'Store Settings'
         verbose_name_plural = 'Store Settings'
-    
+
     def __str__(self):
         return 'Store Settings'
-    
+
     def save(self, *args, **kwargs):
         self.pk = 1
         super().save(*args, **kwargs)
-    
+
     @classmethod
     def get_settings(cls):
-        settings, created = cls.objects.get_or_create(
-            id=1,
-            defaults={
-                'pickup_date': (timezone.now() + timedelta(days=1)).date()
-            }
-        )
+        settings, created = cls.objects.get_or_create(id=1)
         return settings
 
+    def get_ready_delivery_info(self):
+        """Returns next day delivery date and time for ready stock."""
+        from datetime import date, timedelta
+        today = date.today()
+        next_day = today + timedelta(days=1)
+
+        # Skip to Monday if next day falls on weekend
+        if next_day.weekday() == 5:  # Saturday
+            next_day += timedelta(days=2)
+        elif next_day.weekday() == 6:  # Sunday
+            next_day += timedelta(days=1)
+
+        return {
+            'date': next_day,
+            'time': self.ready_delivery_time,
+            'label': f"Next Day Delivery — {next_day.strftime('%A, %d %b %Y')} by {self.ready_delivery_time.strftime('%I:%M %p')}",
+            'days': self.ready_delivery_days,
+        }
+
+    def get_warehouse_delivery_info(self):
+        """Returns the next upcoming Friday delivery date and time."""
+        from datetime import date, timedelta
+        today = date.today()
+
+        # Calculate days until next Friday (weekday 4)
+        days_until_friday = (4 - today.weekday()) % 7
+        if days_until_friday == 0:
+            days_until_friday = 7  # If today is Friday, go to next Friday
+
+        next_friday = today + timedelta(days=days_until_friday)
+
+        return {
+            'date': next_friday,
+            'time': self.warehouse_delivery_time,
+            'label': f"Friday Delivery — {next_friday.strftime('%A, %d %b %Y')} by {self.warehouse_delivery_time.strftime('%I:%M %p')}",
+        }
+
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
+        ordering = ['name']
+
+class Color(models.Model):
+    name = models.CharField(max_length=50, unique=True)  # e.g. "Red", "Navy Blue"
+    hex_code = models.CharField(
+        max_length=7, 
+        blank=True, 
+        help_text="e.g. #FF0000"
+    )
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Color'
+        verbose_name_plural = 'Colors'
 
 class Product(models.Model):
-    CATEGORY_CHOICES = [
-        ('hoodies', 'Hoodies'),
-        ('sweatpants', 'Sweatpants'),
-        ('socks', 'Socks'),
-        ('shorts', 'Shorts'),
-        ('shirts', 'Shirts'),
-    ]
+    
 
     STOCK_TYPE_CHOICES = [
         ('ready', 'Ready Stock'),
@@ -59,7 +137,20 @@ class Product(models.Model):
         decimal_places=2,
         help_text="Selling price (what the customer pays)"
     )
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    category = models.ForeignKey(
+    'Category', 
+    on_delete=models.SET_NULL, 
+    null=True, 
+    blank=True,
+    related_name='products'
+    )
+
+    colors = models.ManyToManyField(
+    'Color',
+    blank=True,
+    related_name='products',
+    help_text="Select all available colors for this product"
+    )
     
     stock_type = models.CharField(
         max_length=20,
@@ -161,11 +252,13 @@ class Product(models.Model):
         return None
 
     # ── Delivery Logic ────────────────────────────────────────────
-    def get_delivery_type(self):
+    def get_delivery_info(self):
+        """Returns delivery info based on stock type."""
+        from .models import StoreSettings
+        settings = StoreSettings.get_settings()
         if self.stock_type == 'ready':
-            return "Next Day Delivery"
-        return "Friday Delivery"
-
+            return settings.get_ready_delivery_info()
+        return settings.get_warehouse_delivery_info()
     # ── Images ───────────────────────────────────────────────────
     def get_all_images(self):
         images = [self.image] if self.image else []
@@ -233,11 +326,21 @@ class Order(models.Model):
 
     def get_pickup_info(self):
         settings = StoreSettings.get_settings()
+        
+        # Check if any order items are warehouse stock
+        has_warehouse = self.orderitem_set.filter(product__stock_type='warehouse').exists()
+        
+        if has_warehouse:
+            delivery = settings.get_warehouse_delivery_info()
+        else:
+            delivery = settings.get_ready_delivery_info()
+        
         return {
             'location': settings.pickup_location,
-            'date': settings.pickup_date,
-            'time': settings.pickup_time,
-            'days': settings.pickup_days_info
+            'date': delivery['date'],
+            'time': delivery['time'],
+            'label': delivery['label'],
+            'days': delivery.get('days', 'Every Friday'),
         }
     
     class Meta:

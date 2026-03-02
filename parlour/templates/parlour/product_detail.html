@@ -1039,18 +1039,17 @@ select.form-control {
             
             <h1 class="product-title">{{ product.name }}</h1>
             
-            <div class="product-meta">
-                <span class="category-badge">
-                    <i class="fas fa-{% if product.category == 'men' %}male{% elif product.category == 'women' %}female{% else %}tshirt{% endif %}"></i>
-                    {{ product.get_category_display }}
-                </span>
-                {% if product.sku %}
-                    <span class="product-sku">
-                        <i class="fas fa-barcode"></i> SKU: {{ product.sku }}
-                    </span>
-                {% endif %}
-            </div>
-            
+<div class="product-meta">
+    <span class="category-badge">
+        <i class="fas fa-tshirt"></i>
+        {{ product.category.name }}  <!-- 👈 was get_category_display, now ForeignKey -->
+    </span>
+    {% if product.sku %}
+        <span class="product-sku">
+            <i class="fas fa-barcode"></i> SKU: {{ product.sku }}
+        </span>
+    {% endif %}
+</div>
             <!-- Rating (Static for now - can be dynamic later) -->
             <div class="product-rating">
                 <div class="stars">

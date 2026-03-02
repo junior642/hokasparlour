@@ -1,0 +1,21 @@
+{% extends "parlour/base.html" %}  <!-- use your existing base template -->
+
+{% block content %}
+<div class="container">
+    <h2>Login with Google</h2>
+    
+    {% for provider in providers %}
+        <a href="{% url 'socialaccount_signup' %}" class="btn btn-google">
+            <img src="https://developers.google.com/identity/images/g-logo.png" width="20">
+            Continue with {{ provider.name }}
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}
+```
+
+---
+
+But actually that page at `/accounts/google/login/` is just a **confirmation step** that allauth adds. You can **skip it entirely** by going directly to:
+```
+http://localhost:8000/accounts/google/login/?process=login&next=/

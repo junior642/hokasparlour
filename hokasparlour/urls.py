@@ -18,6 +18,7 @@ def google_verify(request):
     return FileResponse(open(file_path, 'rb'), content_type='text/html')
 
 urlpatterns = [
+    path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),

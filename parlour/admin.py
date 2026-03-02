@@ -6,7 +6,32 @@ from .models import (
     MpesaPayment
 )
 
+from .models import Category
 
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'slug', 'created_at']
+    prepopulated_fields = {'slug': ('name',)}
+
+
+
+from .models import Color
+
+@admin.register(Color)
+class ColorAdmin(admin.ModelAdmin):
+    list_display = ['name', 'hex_code', 'color_preview']
+    
+    def color_preview(self, obj):
+        if obj.hex_code:
+            from django.utils.html import format_html
+            return format_html(
+                '<div style="width:30px; height:30px; background:{}; '
+                'border-radius:50%; border:1px solid #ccc;"></div>',
+                obj.hex_code
+            )
+        return '-'
+    color_preview.short_description = 'Preview'
+    
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 3
@@ -45,15 +70,19 @@ class AdImageInline(admin.TabularInline):
 
 @admin.register(StoreSettings)
 class StoreSettingsAdmin(admin.ModelAdmin):
-    list_display = ('pickup_location', 'pickup_date', 'pickup_time', 'store_phone', 'store_email')
+    list_display = ('store_phone', 'store_email', 'ready_delivery_time', 'warehouse_delivery_time')
     
     fieldsets = (
-        ('Pickup Information (Applies to ALL Orders)', {
-            'fields': ('pickup_location', 'pickup_date', 'pickup_time', 'pickup_days_info'),
-            'description': 'This pickup information will be sent to ALL customers in their order confirmation emails.'
+        ('Store Information', {
+            'fields': ('pickup_location', 'store_phone', 'store_email'),
         }),
-        ('Contact Information', {
-            'fields': ('store_phone', 'store_email')
+        ('Ready Stock Delivery (Next Day)', {
+            'fields': ('ready_delivery_time', 'ready_delivery_days'),
+            'description': 'Ready stock is delivered the next working day (Monday - Friday). Set the delivery time and available days.'
+        }),
+        ('Warehouse Stock Delivery (Every Friday)', {
+            'fields': ('warehouse_delivery_time',),
+            'description': 'Warehouse stock is always delivered on Fridays. Set the delivery time.'
         }),
     )
     
@@ -112,6 +141,8 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('description', 'available_sizes', 'image', 'delivery_type_display')
         }),
     )
+
+    filter_horizontal = ('colors',) 
 
     # ── List display helpers ───────────────────────────────────────
 
