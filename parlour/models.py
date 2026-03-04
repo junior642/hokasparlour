@@ -466,9 +466,41 @@ class Advertisement(models.Model):
         ('new', 'New Visitors Only'),
         ('returning', 'Returning Visitors'),
     ]
+
+    AD_CATEGORIES = [
+        ('main', 'Main (Homepage Hero)'),
+        ('banner', 'Banner'),
+        ('sidebar', 'Sidebar'),
+        ('popup', 'Popup'),
+        ('footer', 'Footer'),
+    ]
+
+    LINK_TYPES = [
+        ('external', 'External URL'),
+        ('product', 'Internal Product'),
+    ]
     
     title = models.CharField(max_length=200, help_text="Internal name for the ad")
     ad_type = models.CharField(max_length=20, choices=AD_TYPES, default='single_image')
+    
+    # ── Ad Category ───────────────────────────────────────────────
+    ad_category = models.CharField(
+        max_length=20,
+        choices=AD_CATEGORIES,
+        default='main',
+        help_text="Where this ad appears on the site"
+    )
+    # ── Product Category targeting ────────────────────────────────
+    product_category = models.ForeignKey(
+        'Category',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='advertisements',
+        help_text="Show this ad only to visitors browsing this product category. Leave blank to show to all."
+    )
+    # ─────────────────────────────────────────────────────────────
+
     target_audience = models.CharField(max_length=20, choices=TARGET_AUDIENCES, default='all')
     
     single_image = models.ImageField(upload_to='ads/single/', blank=True, null=True)
@@ -485,7 +517,28 @@ class Advertisement(models.Model):
     headline = models.CharField(max_length=200, blank=True)
     subheadline = models.CharField(max_length=300, blank=True)
     button_text = models.CharField(max_length=50, blank=True, default="Shop Now")
-    button_url = models.URLField(blank=True)
+
+    # ── Button Link (external or internal product) ────────────────
+    link_type = models.CharField(
+        max_length=10,
+        choices=LINK_TYPES,
+        default='external',
+        help_text="External = any URL. Internal = link directly to a product page."
+    )
+    button_url = models.URLField(
+        blank=True,
+        help_text="Used when link type is External"
+    )
+    linked_product = models.ForeignKey(
+        'Product',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='advertisements',
+        help_text="Used when link type is Internal Product"
+    )
+    # ─────────────────────────────────────────────────────────────
+
     button_color = models.CharField(max_length=20, default="#667eea")
     
     order = models.PositiveIntegerField(default=0)
@@ -513,8 +566,18 @@ class Advertisement(models.Model):
         verbose_name_plural = "Advertisements"
     
     def __str__(self):
-        return f"{self.title} ({self.get_ad_type_display()})"
+        return f"{self.title} ({self.get_ad_type_display()}) [{self.get_ad_category_display()}]"
     
+    def get_button_url(self):
+        """
+        Returns the correct URL for the button regardless of link type.
+        Use this in templates instead of button_url directly.
+        """
+        if self.link_type == 'product' and self.linked_product:
+            from django.urls import reverse
+            return reverse('product_detail', args=[self.linked_product.id])
+        return self.button_url or '#'
+
     def increment_views(self):
         self.views += 1
         self.save(update_fields=['views'])
@@ -527,6 +590,7 @@ class Advertisement(models.Model):
         return self.ad_images.all().order_by('order')
 
 
+        
 class AdImage(models.Model):
     advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name='ad_images')
     image = models.ImageField(upload_to='ads/multi/')

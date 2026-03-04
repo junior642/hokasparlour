@@ -28,97 +28,131 @@ import logging
 from .models import Category
 
 def home(request):
+    from django.db.models import Sum
+
+    # ── Base product queryset ─────────────────────────────────────
     products = Product.objects.all()
-    
+
     # Get filter parameters
     category = request.GET.get('category')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
-    
-    # Apply category filter
+
+    # Apply filters
     if category:
-        products = products.filter(category__id=category)  # 👈 fixed
-    
-    # Apply price filters
+        products = products.filter(category__id=category)
     if min_price:
         products = products.filter(price__gte=min_price)
     if max_price:
         products = products.filter(price__lte=max_price)
-    
-    # Get all categories for the filter
+
+    # Get all categories for the filter sidebar
     categories = Category.objects.all()
-    
-    # Get active advertisements with better error handling
+
+    # ── Top selling products ──────────────────────────────────────
+    top_selling = Product.objects.filter(
+        orderitem__order__isnull=False
+    ).annotate(
+        total_sold=Sum('orderitem__quantity')
+    ).order_by('-total_sold')[:8]
+
+    # ── Active ads helper ─────────────────────────────────────────
     now = timezone.now()
-    
-    print(f"Current time: {now}")
-    print(f"Total ads in DB: {Advertisement.objects.count()}")
-    print(f"Active ads: {Advertisement.objects.filter(is_active=True).count()}")
-    
-    ads = Advertisement.objects.filter(is_active=True)
-    
-    ads = ads.filter(
-        models.Q(start_date__isnull=True) | models.Q(start_date__lte=now)
-    ).filter(
-        models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
-    )
-    
-    print(f"Ads after date filter: {ads.count()}")
-    
-    ads = ads.order_by('order', '-created_at')
-    
-    for ad in ads:
-        print(f"Found ad: {ad.title} (Type: {ad.ad_type}, Active: {ad.is_active})")
-    
-    user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
-    is_mobile = any(x in user_agent for x in ['mobile', 'android', 'iphone', 'phone'])
-    is_tablet = any(x in user_agent for x in ['ipad', 'tablet'])
-    
-    print(f"Device: Mobile={is_mobile}, Tablet={is_tablet}")
-    
-    filtered_ads = []
-    for ad in ads:
-        if is_mobile and not ad.show_on_mobile:
-            continue
-        if is_tablet and not ad.show_on_tablet:
-            continue
-        if not is_mobile and not is_tablet and not ad.show_on_desktop:
-            continue
-        filtered_ads.append(ad)
-    
-    print(f"Ads after device filter: {len(filtered_ads)}")
-    
+
+    def get_active_ads(queryset):
+        """Filter ads by date range and device."""
+        queryset = queryset.filter(
+            models.Q(start_date__isnull=True) | models.Q(start_date__lte=now)
+        ).filter(
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
+        )
+        user_agent = request.META.get('HTTP_USER_AGENT', '').lower()
+        is_mobile = any(x in user_agent for x in ['mobile', 'android', 'iphone', 'phone'])
+        is_tablet = any(x in user_agent for x in ['ipad', 'tablet'])
+
+        result = []
+        for ad in queryset:
+            if is_mobile and not ad.show_on_mobile:
+                continue
+            if is_tablet and not ad.show_on_tablet:
+                continue
+            if not is_mobile and not is_tablet and not ad.show_on_desktop:
+                continue
+            result.append(ad)
+        return result
+
+    # ── Session for impression tracking ──────────────────────────
     session_key = request.session.session_key
     if not session_key:
         request.session.save()
         session_key = request.session.session_key
-    
-    final_ads = []
-    for ad in filtered_ads:
-        final_ads.append(ad)
-        try:
-            AdImpression.objects.create(
-                advertisement=ad,
-                session_key=session_key,
-                ip_address=request.META.get('REMOTE_ADDR', ''),
-                user_agent=request.META.get('HTTP_USER_AGENT', '')[:255]
-            )
-            ad.increment_views()
-        except Exception as e:
-            print(f"Error recording impression: {e}")
-    
-    print(f"Final ads to display: {len(final_ads)}")
-    
+
+    def record_impressions(ads_list):
+        """Record impressions for a list of ads."""
+        for ad in ads_list:
+            try:
+                AdImpression.objects.create(
+                    advertisement=ad,
+                    session_key=session_key,
+                    ip_address=request.META.get('REMOTE_ADDR', ''),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:255]
+                )
+                ad.increment_views()
+            except Exception as e:
+                print(f"Error recording impression: {e}")
+
+    # ── Main (hero) ads ───────────────────────────────────────────
+    main_ads_qs = Advertisement.objects.filter(
+        is_active=True,
+        ad_category='main',
+    ).order_by('order', '-created_at')
+    final_ads = get_active_ads(main_ads_qs)
+    record_impressions(final_ads)
+
+    # ── Category sections with their own ads ──────────────────────
+    category_sections = []
+
+    all_categories = Category.objects.all()
+    for cat in all_categories:
+        cat_products = products.filter(category=cat)
+        if not cat_products.exists():
+            continue
+
+        # Ads targeting this specific category (non-main)
+        cat_ads_qs = Advertisement.objects.filter(
+            is_active=True,
+            product_category=cat,
+        ).exclude(ad_category='main').order_by('order', '-created_at')
+
+        cat_ads = get_active_ads(cat_ads_qs)
+        record_impressions(cat_ads)
+
+        category_sections.append({
+            'category': cat,
+            'products': cat_products,
+            'ads': cat_ads,
+        })
+
+    # Uncategorized products
+    uncategorized = products.filter(category__isnull=True)
+    if uncategorized.exists():
+        category_sections.append({
+            'category': None,
+            'products': uncategorized,
+            'ads': [],
+        })
+
     context = {
         'products': products,
         'categories': categories,
-        'selected_category': int(category) if category else None,  # 👈 fixed
+        'selected_category': int(category) if category else None,
         'min_price': min_price,
         'max_price': max_price,
-        'ads': final_ads,
+        'ads': final_ads,                        # main hero ads
+        'category_sections': category_sections,  # per-category sections + ads
+        'top_selling': top_selling,
     }
     return render(request, 'parlour/home.html', context)
-
 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -905,7 +939,8 @@ def user_logout(request):
 
 
 
-from .mpesa_utils import stk_push
+from .lipana_utils import stk_push
+
 
 
 from decimal import Decimal
@@ -913,30 +948,32 @@ from django.http import JsonResponse
 from .models import MpesaPayment
 
 def mpesa_payment(request):
-    """M-Pesa payment page - initiates STK Push"""
     pending_order = request.session.get('pending_order')
-    
+
     if not pending_order:
         messages.error(request, 'No pending order found.')
         return redirect('cart')
-    
+
     stk_result = None
     stk_error = None
-    
+
+    # Only block re-submission on GET, not POST
+    existing_checkout_id = request.session.get('checkout_request_id')
+
     if request.method == 'POST':
-        # Trigger STK Push
+        # Always allow a fresh POST (user clicked Pay button)
+        # Clear any old checkout_request_id first
+        if 'checkout_request_id' in request.session:
+            del request.session['checkout_request_id']
+
         phone = pending_order['phone_number']
         amount = pending_order['total']
-        
-        # Use a temporary order ID for reference
         temp_ref = f"TEMP{request.session.session_key[-6:]}"
-        
         result = stk_push(phone, amount, temp_ref)
-        
+
         if result['success']:
             checkout_request_id = result['checkout_request_id']
-            
-            # Save payment record
+
             MpesaPayment.objects.create(
                 checkout_request_id=checkout_request_id,
                 phone_number=phone,
@@ -944,22 +981,20 @@ def mpesa_payment(request):
                 session_key=request.session.session_key,
                 status='pending'
             )
-            
-            # Save checkout request ID in session
+
             request.session['checkout_request_id'] = checkout_request_id
             stk_result = result
             messages.success(request, f'STK Push sent to {phone}! Check your phone and enter your M-Pesa PIN.')
         else:
             stk_error = result['message']
             messages.error(request, f'STK Push failed: {result["message"]}')
-    
+
     context = {
         'pending_order': pending_order,
         'stk_result': stk_result,
-        'stk_error': stk_error
+        'stk_error': stk_error,
     }
     return render(request, 'parlour/mpesa_payment.html', context)
-
 
 def check_payment_status(request):
     """API endpoint to check payment status"""
@@ -1142,6 +1177,72 @@ def confirm_mpesa_payment(request):
         return redirect('order_confirmation', order_id=order.id)
     
     return redirect('checkout')
+
+
+
+#===========================================LIPANA.DEV===========================================
+
+import hmac, hashlib, json, os
+from decimal import Decimal
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
+from django.contrib import messages
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from .models import MpesaPayment, Order, OrderItem, Product
+from .email_utils import send_order_confirmation_email
+
+@csrf_exempt
+def lipana_webhook(request):
+    """Replaces mpesa_callback. Handles Lipana payment events."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    # Verify signature
+    signature = request.headers.get('X-Lipana-Signature', '')
+    webhook_secret = os.getenv('LIPANA_WEBHOOK_SECRET', '')
+    if webhook_secret and signature:
+        expected = hmac.new(
+            webhook_secret.encode(), request.body, hashlib.sha256
+        ).hexdigest()
+        if not hmac.compare_digest(signature, expected):
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        event = data.get('event')           # "payment.success" / "payment.failed"
+        event_data = data.get('data', {})
+        checkout_request_id = event_data.get('checkoutRequestID')
+
+        try:
+            payment = MpesaPayment.objects.get(checkout_request_id=checkout_request_id)
+
+            if event == 'payment.success':
+                payment.status = 'success'
+                payment.mpesa_receipt_number = event_data.get('transactionId', '')
+                payment.amount = Decimal(str(event_data.get('amount', payment.amount)))
+                ts = event_data.get('timestamp')
+                if ts:
+                    payment.transaction_date = timezone.datetime.fromisoformat(
+                        ts.replace('Z', '+00:00')
+                    )
+
+            elif event == 'payment.failed':
+                payment.status = 'failed'
+                payment.result_desc = event_data.get('message', 'Payment failed')
+
+            elif event == 'payment.pending':
+                payment.status = 'pending'
+
+            payment.save()
+
+        except MpesaPayment.DoesNotExist:
+            print(f"No record for checkoutRequestID: {checkout_request_id}")
+
+    except Exception as e:
+        print(f"Lipana webhook error: {e}")
+
+    return JsonResponse({'status': 'ok'})  # Always 200 so Lipana doesn't retry
 
 
 
@@ -1806,15 +1907,14 @@ def ad_list(request):
 def ad_create(request):
     """Create a new advertisement"""
     if request.method == 'POST':
-        # Create ad object
         ad = Advertisement()
         ad.title = request.POST.get('title')
         ad.ad_type = request.POST.get('ad_type')
+        ad.ad_category = request.POST.get('ad_category', 'main')  # ← new
         ad.target_audience = request.POST.get('target_audience', 'all')
         ad.headline = request.POST.get('headline', '')
         ad.subheadline = request.POST.get('subheadline', '')
         ad.button_text = request.POST.get('button_text', 'Shop Now')
-        ad.button_url = request.POST.get('button_url', '')
         ad.button_color = request.POST.get('button_color', '#667eea')
         ad.order = request.POST.get('order', 0)
         ad.is_active = request.POST.get('is_active') == 'on'
@@ -1824,18 +1924,46 @@ def ad_create(request):
         ad.background_color = request.POST.get('background_color', '')
         ad.text_color = request.POST.get('text_color', '#ffffff')
         ad.overlay_opacity = request.POST.get('overlay_opacity', 0.3)
-        
+
+        # ── Link type (external URL or internal product) ──────────
+        ad.link_type = request.POST.get('link_type', 'external')
+        if ad.link_type == 'external':
+            ad.button_url = request.POST.get('button_url', '')
+            ad.linked_product = None
+        else:
+            ad.button_url = ''
+            product_id = request.POST.get('linked_product')
+            if product_id:
+                try:
+                    ad.linked_product = Product.objects.get(id=product_id)
+                except Product.DoesNotExist:
+                    ad.linked_product = None
+            else:
+                ad.linked_product = None
+        # ─────────────────────────────────────────────────────────
+
+        # ── Product category targeting ────────────────────────────
+        product_category_id = request.POST.get('product_category')
+        if product_category_id:
+            try:
+                ad.product_category = Category.objects.get(id=product_category_id)
+            except Category.DoesNotExist:
+                ad.product_category = None
+        else:
+            ad.product_category = None
+        # ─────────────────────────────────────────────────────────
+
         # Handle dates
         if request.POST.get('start_date'):
             ad.start_date = request.POST.get('start_date')
         if request.POST.get('end_date'):
             ad.end_date = request.POST.get('end_date')
-        
+
         # Handle file uploads based on ad type
         if ad.ad_type == 'single_image':
             if 'single_image' in request.FILES:
                 ad.single_image = request.FILES['single_image']
-        
+
         elif ad.ad_type == 'video':
             if 'video' in request.FILES:
                 ad.video = request.FILES['video']
@@ -1843,9 +1971,9 @@ def ad_create(request):
                 ad.video_poster = request.FILES['video_poster']
             ad.autoplay = request.POST.get('autoplay') == 'on'
             ad.loop = request.POST.get('loop') == 'on'
-        
+
         ad.save()
-        
+
         # Handle multiple images
         if ad.ad_type == 'multi_image':
             images = request.FILES.getlist('multi_images')
@@ -1856,16 +1984,120 @@ def ad_create(request):
                     caption=request.POST.get(f'caption_{index}', ''),
                     order=index
                 )
-        
+
         messages.success(request, f'Advertisement "{ad.title}" created successfully!')
         return redirect('ad_detail', ad_id=ad.id)
-    
+
     context = {
         'ad_types': Advertisement.AD_TYPES,
         'target_audiences': Advertisement.TARGET_AUDIENCES,
+        'ad_categories': Advertisement.AD_CATEGORIES,              # ← new
+        'product_categories': Category.objects.all(),              # ← new
+        'all_products': Product.objects.order_by('name'),          # ← new
     }
     return render(request, 'parlour/admin/ad_form.html', context)
 
+
+@staff_member_required
+def ad_edit(request, ad_id):
+    """Edit an existing advertisement"""
+    ad = get_object_or_404(Advertisement, id=ad_id)
+
+    if request.method == 'POST':
+        ad.title = request.POST.get('title')
+        ad.ad_type = request.POST.get('ad_type')
+        ad.ad_category = request.POST.get('ad_category', 'main')  # ← new
+        ad.target_audience = request.POST.get('target_audience', 'all')
+        ad.headline = request.POST.get('headline', '')
+        ad.subheadline = request.POST.get('subheadline', '')
+        ad.button_text = request.POST.get('button_text', 'Shop Now')
+        ad.button_color = request.POST.get('button_color', '#667eea')
+        ad.order = request.POST.get('order', 0)
+        ad.is_active = request.POST.get('is_active') == 'on'
+        ad.show_on_mobile = request.POST.get('show_on_mobile') == 'on'
+        ad.show_on_tablet = request.POST.get('show_on_tablet') == 'on'
+        ad.show_on_desktop = request.POST.get('show_on_desktop') == 'on'
+        ad.background_color = request.POST.get('background_color', '')
+        ad.text_color = request.POST.get('text_color', '#ffffff')
+        ad.overlay_opacity = request.POST.get('overlay_opacity', 0.3)
+
+        # ── Link type ─────────────────────────────────────────────
+        ad.link_type = request.POST.get('link_type', 'external')
+        if ad.link_type == 'external':
+            ad.button_url = request.POST.get('button_url', '')
+            ad.linked_product = None
+        else:
+            ad.button_url = ''
+            product_id = request.POST.get('linked_product')
+            if product_id:
+                try:
+                    ad.linked_product = Product.objects.get(id=product_id)
+                except Product.DoesNotExist:
+                    ad.linked_product = None
+            else:
+                ad.linked_product = None
+        # ─────────────────────────────────────────────────────────
+
+        # ── Product category targeting ────────────────────────────
+        product_category_id = request.POST.get('product_category')
+        if product_category_id:
+            try:
+                ad.product_category = Category.objects.get(id=product_category_id)
+            except Category.DoesNotExist:
+                ad.product_category = None
+        else:
+            ad.product_category = None
+        # ─────────────────────────────────────────────────────────
+
+        # Handle dates
+        if request.POST.get('start_date'):
+            ad.start_date = request.POST.get('start_date')
+        else:
+            ad.start_date = None
+
+        if request.POST.get('end_date'):
+            ad.end_date = request.POST.get('end_date')
+        else:
+            ad.end_date = None
+
+        # Handle file uploads
+        if 'single_image' in request.FILES:
+            ad.single_image = request.FILES['single_image']
+
+        if 'video' in request.FILES:
+            ad.video = request.FILES['video']
+
+        if 'video_poster' in request.FILES:
+            ad.video_poster = request.FILES['video_poster']
+
+        ad.autoplay = request.POST.get('autoplay') == 'on'
+        ad.loop = request.POST.get('loop') == 'on'
+
+        ad.save()
+
+        # Handle new multiple images
+        if 'multi_images' in request.FILES:
+            images = request.FILES.getlist('multi_images')
+            for index, image in enumerate(images):
+                AdImage.objects.create(
+                    advertisement=ad,
+                    image=image,
+                    caption=request.POST.get(f'new_caption_{index}', ''),
+                    order=ad.ad_images.count() + index
+                )
+
+        messages.success(request, f'Advertisement "{ad.title}" updated successfully!')
+        return redirect('ad_detail', ad_id=ad.id)
+
+    context = {
+        'ad': ad,
+        'ad_types': Advertisement.AD_TYPES,
+        'target_audiences': Advertisement.TARGET_AUDIENCES,
+        'ad_categories': Advertisement.AD_CATEGORIES,              # ← new
+        'product_categories': Category.objects.all(),              # ← new
+        'all_products': Product.objects.order_by('name'),          # ← new
+    }
+    return render(request, 'parlour/admin/ad_form.html', context)
 
 # views.py - Update the ad_detail function
 
@@ -1948,75 +2180,6 @@ def ad_detail(request, ad_id):
     }
     return render(request, 'parlour/admin/ad_detail.html', context)
 
-@staff_member_required
-def ad_edit(request, ad_id):
-    """Edit an existing advertisement"""
-    ad = get_object_or_404(Advertisement, id=ad_id)
-    
-    if request.method == 'POST':
-        ad.title = request.POST.get('title')
-        ad.ad_type = request.POST.get('ad_type')
-        ad.target_audience = request.POST.get('target_audience', 'all')
-        ad.headline = request.POST.get('headline', '')
-        ad.subheadline = request.POST.get('subheadline', '')
-        ad.button_text = request.POST.get('button_text', 'Shop Now')
-        ad.button_url = request.POST.get('button_url', '')
-        ad.button_color = request.POST.get('button_color', '#667eea')
-        ad.order = request.POST.get('order', 0)
-        ad.is_active = request.POST.get('is_active') == 'on'
-        ad.show_on_mobile = request.POST.get('show_on_mobile') == 'on'
-        ad.show_on_tablet = request.POST.get('show_on_tablet') == 'on'
-        ad.show_on_desktop = request.POST.get('show_on_desktop') == 'on'
-        ad.background_color = request.POST.get('background_color', '')
-        ad.text_color = request.POST.get('text_color', '#ffffff')
-        ad.overlay_opacity = request.POST.get('overlay_opacity', 0.3)
-        
-        # Handle dates
-        if request.POST.get('start_date'):
-            ad.start_date = request.POST.get('start_date')
-        else:
-            ad.start_date = None
-            
-        if request.POST.get('end_date'):
-            ad.end_date = request.POST.get('end_date')
-        else:
-            ad.end_date = None
-        
-        # Handle file uploads
-        if 'single_image' in request.FILES:
-            ad.single_image = request.FILES['single_image']
-        
-        if 'video' in request.FILES:
-            ad.video = request.FILES['video']
-        
-        if 'video_poster' in request.FILES:
-            ad.video_poster = request.FILES['video_poster']
-        
-        ad.autoplay = request.POST.get('autoplay') == 'on'
-        ad.loop = request.POST.get('loop') == 'on'
-        
-        ad.save()
-        
-        # Handle new multiple images
-        if 'multi_images' in request.FILES:
-            images = request.FILES.getlist('multi_images')
-            for index, image in enumerate(images):
-                AdImage.objects.create(
-                    advertisement=ad,
-                    image=image,
-                    caption=request.POST.get(f'new_caption_{index}', ''),
-                    order=ad.ad_images.count() + index
-                )
-        
-        messages.success(request, f'Advertisement "{ad.title}" updated successfully!')
-        return redirect('ad_detail', ad_id=ad.id)
-    
-    context = {
-        'ad': ad,
-        'ad_types': Advertisement.AD_TYPES,
-        'target_audiences': Advertisement.TARGET_AUDIENCES,
-    }
-    return render(request, 'parlour/admin/ad_form.html', context)
 
 
 @staff_member_required

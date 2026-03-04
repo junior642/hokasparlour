@@ -649,6 +649,64 @@
                 </span>
             </div>
         </div>
+
+     <!-- Payment Information Divider -->
+<div class="relative my-6 sm:my-8 md:my-10">
+    <!-- Decorative Line with Gradient -->
+    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+        <div class="w-full border-t border-dashed border-[var(--border)] dark:border-gray-700"></div>
+    </div>
+    
+    <!-- Content Card - Centered with Background -->
+    <div class="relative flex justify-center">
+        <div class="bg-[var(--card)] dark:bg-gray-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4 rounded-2xl shadow-sm border border-[var(--border)] dark:border-gray-700 max-w-2xl mx-auto">
+            
+            <!-- M-Pesa Icon and Header -->
+            <div class="flex items-center justify-center gap-2 mb-2 sm:mb-3">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-full flex items-center justify-center">
+                    <i class="fas fa-mobile-alt text-[var(--accent)] dark:text-[#8B3DFF] text-sm sm:text-base"></i>
+                </div>
+                <span class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-white uppercase tracking-wider">M-Pesa Express</span>
+            </div>
+            
+            <!-- Main Instruction -->
+            <p class="text-center text-[var(--text)] dark:text-white text-xs sm:text-sm md:text-base font-medium mb-2">
+                📱 Click <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--accent)] text-white rounded-full text-xs sm:text-sm font-bold whitespace-nowrap">Send Payment Request</span> 
+                to get an M-Pesa prompt on your phone
+            </p>
+            
+            <!-- Payment Details -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-2">
+                <div class="flex items-center gap-1.5">
+                    <i class="fas fa-building text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs"></i>
+                    <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-gray-400">Pay to:</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-[var(--text)] dark:text-white bg-[var(--surface)] dark:bg-gray-700 px-2 py-0.5 rounded-full">LIPANA TECHNOLOGIES</span>
+                </div>
+                
+                <div class="hidden sm:block w-1 h-1 bg-[var(--border)] dark:bg-gray-600 rounded-full"></div>
+                
+                <div class="flex items-center gap-1.5">
+                    <i class="fas fa-hashtag text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs"></i>
+                    <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-gray-400">Account:</span>
+                    <span class="text-[10px] sm:text-xs font-bold text-[var(--text)] dark:text-white bg-[var(--surface)] dark:bg-gray-700 px-2 py-0.5 rounded-full">Hokasparlour</span>
+                </div>
+            </div>
+            
+            <!-- Help Text -->
+            <p class="text-center text-[var(--text-soft)] dark:text-gray-400 text-[9px] sm:text-xs mt-2 flex items-center justify-center gap-1">
+                <i class="fas fa-info-circle text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                No prompt? Follow the manual payment steps below
+            </p>
+            
+            <!-- Decorative Wave Pattern -->
+            <div class="absolute -bottom-1 left-0 right-0 flex justify-center opacity-20">
+                <svg width="120" height="8" viewBox="0 0 120 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 4L15 0L30 8L45 0L60 8L75 0L90 8L105 0L120 4" stroke="var(--accent)" stroke-width="2"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
         
         <!-- STK Push Status Messages -->
         {% if stk_result %}
@@ -705,15 +763,15 @@
                 </li>
                 <li class="step-item">
                     <span class="step-number">3</span>
-                    <span class="step-content">Select <strong>"Pay Bill"</strong></span>
+                    <span class="step-content">Select <strong>"Buy Goods and services"</strong></span>
                 </li>
                 <li class="step-item">
                     <span class="step-number">4</span>
-                    <span class="step-content">Business No: <strong>174379</strong></span>
+                    <span class="step-content">Till No: <strong>4126792</strong></span>
                 </li>
                 <li class="step-item">
                     <span class="step-number">5</span>
-                    <span class="step-content">Account No: <strong>HOKA{{ pending_order.phone_number|slice:"-4:" }}</strong></span>
+                    <span class="step-content">Account Name : <strong>Getrine Hoka  ochunyi{{ pending_order.phone_number|slice:"-4:" }}</strong></span>
                 </li>
                 <li class="step-item">
                     <span class="step-number">6</span>

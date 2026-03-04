@@ -4,13 +4,7 @@
 
 {% block extra_style %}
 <style>
-    /* Preserve all original CSS variables and animations */
-    :root {
-        --filter-sidebar-width: 280px;
-        --product-card-min-width: 160px;
-    }
-    
-    /* Keep only essential animations and transitions that Tailwind doesn't have */
+    /* Preserve animations and transitions that Tailwind doesn't handle */
     .product-card:hover img {
         transform: scale(1.05);
     }
@@ -108,7 +102,7 @@
         }
     }
 
-    /* Ensure text doesn't overflow on mobile */
+    /* Line clamp utilities */
     .line-clamp-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -298,7 +292,22 @@
     
     <!-- PRODUCTS SECTION -->
     <section class="flex-1 min-w-0">
-        
+
+        <!-- Top Selling Section -->
+        {% if top_selling %}
+        <section class="mb-6 lg:mb-10">
+            <h2 class="text-sm lg:text-2xl font-bold text-[var(--text)] flex items-center gap-2 mb-3 lg:mb-5">
+                <span class="w-1 h-4 lg:h-7 bg-[var(--accent)] rounded-full inline-block"></span>
+                🔥 Top Selling
+            </h2>
+            <div class="grid grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 lg:gap-6">
+                {% for product in top_selling %}
+                    {% include 'includes/product_card.html' %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
         <!-- Products Header (desktop only) -->
         <div class="hidden lg:flex flex-wrap items-center justify-between gap-4 mb-6">
             <h2 class="text-2xl font-bold text-[var(--text)] font-display flex items-center gap-2">
@@ -309,98 +318,67 @@
                 </span>
             </h2>
         </div>
-        
-        <!-- Products Grid - 3 columns on mobile, 4 on desktop -->
-        <div class="grid grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 lg:gap-6">
-            {% for product in products %}
-            <a href="{% url 'product_detail' product.id %}" 
-               class="product-card bg-[var(--card)] rounded-lg p-1 lg:p-2 border border-[var(--border)] transition-all hover:border-[var(--accent-light)] hover:shadow-md hover:-translate-y-1 flex flex-col h-full no-underline text-inherit">
-                
-                <!-- Product Image with Category Badge -->
-                <div class="product-image-wrapper relative w-full aspect-square rounded-lg overflow-hidden bg-[var(--surface)] mb-1 lg:mb-4">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy"
-                             class="w-full h-full object-cover">
-                    {% else %}
-                        <div class="flex items-center justify-center h-full text-[var(--text-soft)]">
-                            <i class="fas fa-image fa-lg lg:fa-2x"></i>
-                        </div>
-                    {% endif %}
-                    
-                    <span class="absolute top-1 left-1 lg:top-3 lg:left-3 bg-[var(--accent)]/90 backdrop-blur-sm text-white px-1.5 lg:px-3 py-0.5 lg:py-1 rounded-full text-[8px] lg:text-xs font-semibold uppercase tracking-wider z-10">
-                        {{ product.get_category_display }}
-                    </span>
-                </div>
-                
-                <!-- Product Name -->
-                <h3 class="text-xs lg:text-lg font-bold mb-0.5 lg:mb-1 text-[var(--text)] leading-tight line-clamp-2">
-                    {{ product.name }}
-                </h3>
-                
-                <!-- Description - Always visible on both mobile and desktop -->
-                <p class="text-[9px] lg:text-sm text-[var(--text-soft)] mb-1 lg:mb-3 leading-tight lg:leading-relaxed line-clamp-2 lg:line-clamp-3">
-                    {{ product.description|truncatewords:8 }}
-                </p>
-                
-                <!-- Price -->
-                <div class="text-xs lg:text-2xl font-extrabold text-[var(--accent)] my-0.5 lg:my-2 leading-none">
-                    KSh {{ product.price|floatformat:0 }}
-                </div>
-                
-                <!-- Stock Quantity -->
-                <div class="text-[8px] lg:text-xs text-[var(--text-soft)] flex items-center gap-1 mb-1 lg:mb-3">
-                    <i class="fas fa-box text-[var(--accent)] text-[8px] lg:text-xs"></i>
-                    {% if product.stock_quantity > 0 %}
-                        <span class="truncate">{{ product.stock_quantity }} in stock</span>
-                    {% else %}
-                        <span style="color: #ef4444;" class="text-[8px] lg:text-xs">Out of stock</span>
+
+        <!-- Category Sections -->
+        {% if category_sections %}
+            {% for section in category_sections %}
+            <div class="mb-8 lg:mb-12">
+
+                <!-- Category Header -->
+                <div class="flex items-center justify-between mb-3 lg:mb-4 px-1">
+                    <h2 class="text-sm lg:text-xl font-bold text-[var(--text)] flex items-center gap-2">
+                        <span class="w-1 h-4 lg:h-6 bg-[var(--accent)] rounded-full inline-block"></span>
+                        {% if section.category %}{{ section.category.name }}{% else %}Other Products{% endif %}
+                    </h2>
+                    {% if section.category %}
+                    <a href="?category={{ section.category.id }}"
+                       class="text-[9px] lg:text-sm text-[var(--accent)] font-semibold hover:underline flex items-center gap-1">
+                        View all <i class="fas fa-arrow-right text-[8px] lg:text-xs"></i>
+                    </a>
                     {% endif %}
                 </div>
-                
-                <!-- Stock Type and Delivery Badges - Always visible on both mobile and desktop -->
-                <div class="mb-1 lg:mb-3 space-y-0.5 lg:space-y-1">
-                    <!-- Stock Type Badge -->
-                    <div class="flex items-center gap-1 lg:gap-2 text-[8px] lg:text-sm">
-                        <strong class="text-[var(--text)] hidden lg:inline">Stock Type:</strong>
-                        {% if product.stock_type == 'ready' %}
-                            <span style="background:#28a745;color:white;padding:2px 6px;border-radius:8px;font-size:7px;display:inline-block;" class="lg:px-3 lg:py-1 lg:text-xs lg:rounded-xl">Ready Stock</span>
-                        {% else %}
-                            <span style="background:#6c757d;color:white;padding:2px 6px;border-radius:8px;font-size:7px;display:inline-block;" class="lg:px-3 lg:py-1 lg:text-xs lg:rounded-xl">Warehouse Stock</span>
-                        {% endif %}
+
+                <!-- Category Ad (if any) -->
+                {% for ad in section.ads %}
+                    {% with ad=ad %}
+                        {% include 'includes/category_ad.html' %}
+                    {% endwith %}
+                {% endfor %}
+
+                <!-- Products Grid -->
+                <div class="grid grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 lg:gap-6">
+                    {% for product in section.products %}
+                        {% include 'includes/product_card.html' %}
+                    {% empty %}
+                    <div class="col-span-full text-center p-4 text-[var(--text-soft)] text-xs">
+                        No products in this category.
                     </div>
-                    
-                    <!-- Delivery Badge -->
-                    <div class="flex items-center gap-1 lg:gap-2 text-[8px] lg:text-sm">
-                        <strong class="text-[var(--text)] hidden lg:inline">Delivery:</strong>
-                        {% if product.stock_type == 'ready' %}
-                            <span style="background:#17a2b8;color:white;padding:2px 6px;border-radius:8px;font-size:7px;display:inline-block;" class="lg:px-3 lg:py-1 lg:text-xs lg:rounded-xl">Next Day Delivery</span>
-                        {% else %}
-                            <span style="background:#ffc107;color:black;padding:2px 6px;border-radius:8px;font-size:7px;display:inline-block;" class="lg:px-3 lg:py-1 lg:text-xs lg:rounded-xl">Friday Delivery</span>
-                        {% endif %}
-                    </div>
+                    {% endfor %}
                 </div>
-                
-                <!-- View Details Button -->
-                <div class="flex items-center justify-center gap-0.5 lg:gap-2 p-1 lg:p-3 bg-[var(--accent-soft)] text-[var(--accent)] rounded lg:rounded-2xl font-semibold text-[7px] lg:text-sm transition-all hover:bg-[var(--accent)] hover:text-white border border-transparent hover:border-[var(--accent)] mt-auto">
-                    View Details
-                    <i class="fas fa-arrow-right text-[6px] lg:text-sm"></i>
-                </div>
-            </a>
-            {% empty %}
-            
-            <!-- No Products State -->
-            <div class="col-span-full text-center p-4 lg:p-12 bg-[var(--card)] rounded-xl lg:rounded-3xl border border-[var(--border)] text-[var(--text-soft)]">
-                <i class="fas fa-box-open text-2xl lg:text-5xl text-[var(--accent-light)] mb-1 lg:mb-4"></i>
-                <h3 class="text-sm lg:text-xl font-bold text-[var(--text)] mb-0.5 lg:mb-2">No products found</h3>
-                <p class="text-xs lg:text-base mb-2 lg:mb-6">Try adjusting your filters</p>
-                <a href="{% url 'home' %}" 
-                   class="inline-block px-4 lg:px-8 py-1.5 lg:py-3 bg-[var(--accent)] text-white rounded-full text-xs lg:text-base font-semibold hover:bg-[var(--accent-light)] transition-all">
-                    <i class="fas fa-undo-alt mr-1 lg:mr-2"></i>
-                    Clear Filters
-                </a>
+
             </div>
             {% endfor %}
-        </div>
+
+        {% else %}
+            <!-- Fallback flat grid when filters are active -->
+            <div class="grid grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 lg:gap-6">
+                {% for product in products %}
+                    {% include 'includes/product_card.html' %}
+                {% empty %}
+                <div class="col-span-full text-center p-4 lg:p-12 bg-[var(--card)] rounded-xl lg:rounded-3xl border border-[var(--border)] text-[var(--text-soft)]">
+                    <i class="fas fa-box-open text-2xl lg:text-5xl text-[var(--accent-light)] mb-1 lg:mb-4"></i>
+                    <h3 class="text-sm lg:text-xl font-bold text-[var(--text)] mb-0.5 lg:mb-2">No products found</h3>
+                    <p class="text-xs lg:text-base mb-2 lg:mb-6">Try adjusting your filters</p>
+                    <a href="{% url 'home' %}"
+                       class="inline-block px-4 lg:px-8 py-1.5 lg:py-3 bg-[var(--accent)] text-white rounded-full text-xs lg:text-base font-semibold hover:bg-[var(--accent-light)] transition-all">
+                        <i class="fas fa-undo-alt mr-1 lg:mr-2"></i>
+                        Clear Filters
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
     </section>
 </div>
 

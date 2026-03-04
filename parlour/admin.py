@@ -328,8 +328,8 @@ class OrderHistoryAdmin(admin.ModelAdmin):
 
 @admin.register(Advertisement)
 class AdvertisementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'ad_type', 'is_active', 'order', 'views', 'clicks', 'ctr', 'status_badge')
-    list_filter = ('ad_type', 'is_active', 'target_audience', 'created_at')
+    list_display = ('title', 'ad_type', 'ad_category', 'product_category', 'is_active', 'order', 'views', 'clicks', 'ctr', 'status_badge')
+    list_filter = ('ad_type', 'ad_category', 'is_active', 'target_audience', 'product_category', 'created_at')
     search_fields = ('title', 'headline', 'subheadline')
     ordering = ('order', '-created_at')
     list_editable = ('order', 'is_active')
@@ -337,7 +337,7 @@ class AdvertisementAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'ad_type', 'target_audience', 'order', 'is_active')
+            'fields': ('title', 'ad_type', 'ad_category', 'product_category', 'target_audience', 'order', 'is_active')
         }),
         ('Single Image Ad', {
             'fields': ('single_image',),
@@ -348,7 +348,11 @@ class AdvertisementAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
         ('Ad Content', {
-            'fields': ('headline', 'subheadline', 'button_text', 'button_url', 'button_color')
+            'fields': ('headline', 'subheadline', 'button_text', 'button_color')
+        }),
+        ('Button Link', {
+            'fields': ('link_type', 'button_url', 'linked_product'),
+            'description': 'Choose External URL for outside links, or Internal Product to link directly to a product page.'
         }),
         ('Display Settings', {
             'fields': ('show_on_mobile', 'show_on_tablet', 'show_on_desktop')
@@ -368,12 +372,22 @@ class AdvertisementAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ('views', 'clicks')
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Make button_url and linked_product not required at form level
+        # since only one is needed depending on link_type
+        if 'button_url' in form.base_fields:
+            form.base_fields['button_url'].required = False
+        if 'linked_product' in form.base_fields:
+            form.base_fields['linked_product'].required = False
+        return form
     
     def ctr(self, obj):
         if obj.views > 0:
             rate = (obj.clicks / obj.views) * 100
             color = 'green' if rate > 5 else 'orange' if rate > 2 else 'red'
-            return format_html('<span style="color: {};">{:.2f}%</span>', color, rate)
+            return format_html('<span style="color: {};">{}%</span>', color, f"{rate:.2f}")
         return mark_safe('<span>0%</span>')
     ctr.short_description = 'CTR'
     

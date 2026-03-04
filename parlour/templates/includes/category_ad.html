@@ -1,0 +1,71 @@
+<!-- Category Ad Banner -->
+<div class="mb-3 lg:mb-5 rounded-xl overflow-hidden relative group transition-all hover:shadow-lg"
+     style="background-color: {{ ad.background_color|default:'#7b2eda' }}; min-height: 200px;">
+
+    <!-- Background Image/Video with Parallax Effect on Hover -->
+    {% if ad.single_image %}
+    <img src="{{ ad.single_image.url }}" 
+         alt="{{ ad.headline }}"
+         class="w-full h-full object-cover max-h-28 sm:max-h-32 md:max-h-40 lg:max-h-48 xl:max-h-56 block transition-transform duration-700 group-hover:scale-105">
+    {% elif ad.ad_type == 'video' and ad.video %}
+    <video class="w-full h-full object-cover max-h-28 sm:max-h-32 md:max-h-40 lg:max-h-48 xl:max-h-56 block"
+           {% if ad.autoplay %}autoplay muted playsinline{% endif %}
+           {% if ad.loop %}loop{% endif %}
+           poster="{% if ad.video_poster %}{{ ad.video_poster.url }}{% endif %}">
+        <source src="{{ ad.video.url }}" type="video/mp4">
+    </video>
+    {% endif %}
+
+    <!-- Gradient Overlay (more sophisticated than solid) -->
+    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent flex items-center"
+         style="background: linear-gradient(90deg, rgba(0,0,0,{{ ad.overlay_opacity|default:'0.7' }}) 0%, rgba(0,0,0,{{ ad.overlay_opacity|default:'0.3'|cut:' ' }}) 50%, transparent 100%);">
+        
+        <!-- Content Container with Responsive Padding -->
+        <div class="w-full sm:w-3/4 md:w-2/3 lg:w-3/5 xl:w-1/2 px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-2 sm:py-3 md:py-4">
+            
+            <!-- Headline with Responsive Sizes -->
+            {% if ad.headline %}
+            <h3 class="font-extrabold leading-tight mb-0.5 sm:mb-1 md:mb-2 drop-shadow-lg"
+                style="color: {{ ad.text_color|default:'#ffffff' }}">
+                <span class="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl block">
+                    {{ ad.headline }}
+                </span>
+            </h3>
+            {% endif %}
+
+            <!-- Subheadline with Responsive Sizes -->
+            {% if ad.subheadline %}
+            <p class="opacity-90 mb-1 sm:mb-1.5 md:mb-2 lg:mb-3 drop-shadow"
+               style="color: {{ ad.text_color|default:'#ffffff' }}">
+                <span class="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg">
+                    {{ ad.subheadline }}
+                </span>
+            </p>
+            {% endif %}
+
+            <!-- Button with Hover Effects -->
+            {% if ad.button_text %}
+            <a href="{{ ad.get_button_url }}"
+               class="inline-flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-3 md:px-4 lg:px-5 py-0.5 sm:py-1 md:py-1.5 lg:py-2 rounded-full text-white font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-105 active:scale-95"
+               style="background-color: {{ ad.button_color|default:'#7b2eda' }};">
+                <span class="text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base">
+                    {{ ad.button_text }}
+                </span>
+                <i class="fas fa-arrow-right text-[6px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm transition-transform duration-300 group-hover:translate-x-1"></i>
+            </a>
+            {% endif %}
+        </div>
+        
+        <!-- Decorative Element - Optional Brand Icon on Larger Screens -->
+        <div class="hidden lg:block absolute right-4 bottom-2 opacity-10">
+            <i class="fas fa-tag text-6xl text-white"></i>
+        </div>
+    </div>
+    
+    <!-- Small Badge for Category (optional) -->
+    {% if ad.product_category %}
+    <div class="absolute top-2 right-2 bg-white/20 backdrop-blur-sm text-white text-[8px] xs:text-[10px] px-2 py-0.5 rounded-full border border-white/30">
+        <i class="fas fa-tag mr-1"></i> {{ ad.product_category.name }}
+    </div>
+    {% endif %}
+</div>

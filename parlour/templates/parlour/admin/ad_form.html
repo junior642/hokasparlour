@@ -7,548 +7,30 @@
 {% block page_title %}{% if ad %}Edit{% else %}Create{% endif %} Advertisement{% endblock %}
 {% block page_subtitle %}{% if ad %}Update your advertisement details{% else %}Add a new advertisement to your store{% endif %}{% endblock %}
 
-{% block extra_style %}
-<style>
-    /* Form Container */
-    .form-container {
-        max-width: 1000px;
-        margin: 0 auto;
-    }
-
-    /* Form Card */
-    .form-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 1.5rem;
-    }
-
-    /* Form Header Actions */
-    .form-actions-header {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        margin-bottom: 1.5rem;
-    }
-
-    .btn-action {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.6rem 1.25rem;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        text-decoration: none;
-        transition: var(--transition);
-        border: none;
-        cursor: pointer;
-        white-space: nowrap;
-    }
-
-    .btn-back {
-        background: var(--surface);
-        color: var(--text);
-        border: 1px solid var(--border);
-    }
-
-    .btn-back:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: var(--accent-soft);
-        transform: translateY(-2px);
-    }
-
-    .btn-save {
-        background: var(--accent);
-        color: white;
-        margin-left: auto;
-    }
-
-    .btn-save:hover {
-        background: var(--accent-light);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    /* Form Sections - Compact */
-    .form-section {
-        padding: 1.5rem;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .form-section:last-child {
-        border-bottom: none;
-    }
-
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .section-number {
-        width: 28px;
-        height: 28px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.9rem;
-    }
-
-    .section-header i {
-        color: var(--accent);
-        font-size: 1.2rem;
-    }
-
-    .section-header h3 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--text);
-        margin: 0;
-    }
-
-    /* Form Grid */
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
-    }
-
-    @media (max-width: 640px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-    }
-
-    .form-group.full-width {
-        grid-column: 1 / -1;
-    }
-
-    .form-group label {
-        font-weight: 600;
-        color: var(--text);
-        font-size: 0.85rem;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .form-group label i {
-        color: var(--accent);
-        width: 16px;
-        font-size: 0.9rem;
-    }
-
-    .form-group label .required {
-        color: var(--danger);
-        font-size: 1rem;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 0.6rem 0.75rem;
-        border: 1.5px solid var(--border);
-        border-radius: 10px;
-        background: var(--surface);
-        color: var(--text);
-        font-size: 0.85rem;
-        transition: var(--transition);
-        font-family: inherit;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        border-color: var(--accent);
-        outline: none;
-        box-shadow: 0 0 0 3px var(--accent-soft);
-    }
-
-    .form-group input[type="color"] {
-        height: 38px;
-        padding: 0.25rem;
-        cursor: pointer;
-    }
-
-    .form-group small {
-        color: var(--text-soft);
-        font-size: 0.7rem;
-        margin-top: 0.15rem;
-    }
-
-    /* Checkbox Group - Compact */
-    .checkbox-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        padding: 0.25rem 0;
-    }
-
-    .checkbox-item {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .checkbox-item input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        accent-color: var(--accent);
-        margin: 0;
-    }
-
-    .checkbox-item label {
-        font-weight: 500;
-        font-size: 0.8rem;
-        cursor: pointer;
-    }
-
-    /* File Upload - Compact */
-    .file-upload {
-        border: 2px dashed var(--border);
-        border-radius: 12px;
-        padding: 1.25rem;
-        text-align: center;
-        background: var(--surface);
-        cursor: pointer;
-        transition: var(--transition);
-        position: relative;
-    }
-
-    .file-upload:hover {
-        border-color: var(--accent);
-        background: var(--accent-soft);
-    }
-
-    .file-upload i {
-        font-size: 2rem;
-        color: var(--accent);
-        margin-bottom: 0.5rem;
-    }
-
-    .file-upload p {
-        color: var(--text-soft);
-        font-size: 0.85rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .file-upload small {
-        color: var(--text-soft);
-        font-size: 0.7rem;
-    }
-
-    .file-upload input[type="file"] {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .file-name {
-        margin-top: 0.5rem;
-        padding: 0.35rem;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        color: var(--accent);
-        font-size: 0.75rem;
-        word-break: break-all;
-    }
-
-    /* Current File Display */
-    .current-file {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        background: var(--surface);
-        border-radius: 10px;
-        margin-top: 0.75rem;
-        border: 1px solid var(--border);
-    }
-
-    .current-file img {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        object-fit: cover;
-    }
-
-    .current-file .file-info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .current-file .file-info strong {
-        display: block;
-        color: var(--text);
-        font-size: 0.85rem;
-        margin-bottom: 0.15rem;
-    }
-
-    .current-file .file-info span {
-        color: var(--text-soft);
-        font-size: 0.7rem;
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .btn-remove {
-        color: var(--danger);
-        background: none;
-        border: none;
-        font-size: 1rem;
-        cursor: pointer;
-        padding: 0.35rem;
-        border-radius: 6px;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-remove:hover {
-        background: var(--danger-soft);
-    }
-
-    /* Image Gallery - Compact */
-    .image-gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 0.75rem;
-        margin: 1rem 0;
-    }
-
-    .gallery-item {
-        position: relative;
-        aspect-ratio: 1;
-        border-radius: 8px;
-        overflow: hidden;
-        border: 2px solid var(--border);
-    }
-
-    .gallery-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .gallery-item .item-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: var(--transition);
-    }
-
-    .gallery-item:hover .item-overlay {
-        opacity: 1;
-    }
-
-    .btn-delete-image {
-        color: white;
-        background: var(--danger);
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        transition: var(--transition);
-        font-size: 0.8rem;
-    }
-
-    .btn-delete-image:hover {
-        transform: scale(1.1);
-        background: var(--danger);
-    }
-
-    .caption-input {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: 0.25rem;
-        background: rgba(0, 0, 0, 0.7);
-        border: none;
-        color: white;
-        font-size: 0.65rem;
-        width: 100%;
-    }
-
-    /* Preview Section - Compact */
-    .preview-section {
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .preview-title {
-        color: white;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        opacity: 0.9;
-    }
-
-    .preview-title i {
-        font-size: 1rem;
-    }
-
-    .ad-preview {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 1.25rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .preview-content {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
-        color: white;
-    }
-
-    .preview-media {
-        width: 70px;
-        height: 70px;
-        border-radius: 8px;
-        overflow: hidden;
-        background: rgba(255, 255, 255, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-
-    .preview-media i {
-        font-size: 2rem;
-        opacity: 0.8;
-        color: white;
-    }
-
-    .preview-media img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .preview-text {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .preview-text h3 {
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .preview-text p {
-        opacity: 0.9;
-        font-size: 0.8rem;
-        margin-bottom: 0.5rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .preview-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.35rem 1rem;
-        background: white;
-        color: var(--accent);
-        border-radius: 30px;
-        font-weight: 600;
-        font-size: 0.75rem;
-        white-space: nowrap;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .form-actions-header {
-            flex-direction: column;
-        }
-
-        .btn-save {
-            margin-left: 0;
-        }
-
-        .preview-content {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .preview-media {
-            width: 60px;
-            height: 60px;
-        }
-
-        .preview-text h3 {
-            font-size: 1rem;
-        }
-
-        .preview-text p {
-            font-size: 0.75rem;
-        }
-    }
-
-    /* Ad Type Sections */
-    .ad-type-section {
-        margin-top: 1rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="form-container">
+<!-- Custom animations and keyframes -->
+<style>
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-slide-up {
+    animation: fadeSlideUp 0.6s ease;
+}
+</style>
+
+<div class="max-w-[1000px] mx-auto animate-fade-slide-up">
+    
     <!-- Header Actions -->
-    <div class="form-actions-header">
-        <a href="{% url 'ad_list' %}" class="btn-action btn-back">
+    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <a href="{% url 'ad_list' %}" 
+           class="inline-flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] border border-[var(--border)] dark:border-[#2A2D3A] rounded-xl font-semibold text-sm hover:border-[var(--accent)] hover:text-[var(--accent)] dark:hover:text-[#8B3DFF] hover:bg-[var(--accent-soft)] dark:hover:bg-[rgba(139,61,255,0.08)] transition-all hover:-translate-y-1">
             <i class="fas fa-arrow-left"></i>
             Back to List
         </a>
-        <button type="submit" form="adForm" class="btn-action btn-save">
+        <button type="submit" form="adForm" 
+                class="inline-flex items-center justify-center sm:justify-start gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--accent)] dark:bg-[#8B3DFF] text-white rounded-xl font-semibold text-sm hover:bg-[var(--accent-light)] dark:hover:bg-[#6B1FCC] transition-all hover:-translate-y-1 hover:shadow-md sm:ml-auto">
             <i class="fas fa-save"></i>
             {% if ad %}Update{% else %}Create{% endif %} Advertisement
         </button>
@@ -558,210 +40,296 @@
     <form method="post" enctype="multipart/form-data" id="adForm">
         {% csrf_token %}
         
-        <!-- Basic Information -->
-        <div class="form-card">
-            <div class="form-section">
-                <div class="section-header">
-                    <span class="section-number">1</span>
-                    <i class="fas fa-info-circle"></i>
-                    <h3>Basic Information</h3>
+        <!-- Basic Information Card -->
+        <div class="bg-[var(--card)] dark:bg-[#13141B] border border-[var(--border)] dark:border-[#2A2D3A] rounded-2xl overflow-hidden shadow-sm mb-4 sm:mb-6">
+            <div class="p-4 sm:p-6 border-b border-[var(--border)] dark:border-[#2A2D3A]">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">1</span>
+                    <i class="fas fa-info-circle text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Basic Information</h3>
                 </div>
                 
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label>
-                            <i class="fas fa-tag"></i>
-                            Title <span class="required">*</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Title -->
+                    <div class="col-span-1 sm:col-span-2 flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-tag text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
+                            Title <span class="text-[#EF4444] text-sm sm:text-base">*</span>
                         </label>
                         <input type="text" 
                                name="title" 
                                id="title"
                                value="{{ ad.title|default:'' }}"
                                placeholder="e.g., Summer Sale Banner"
-                               required>
-                        <small>Internal name for the advertisement</small>
+                               required
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all placeholder:text-[var(--text-soft)] dark:placeholder:text-[#B0B7C3]">
+                        <small class="text-[var(--text-soft)] dark:text-[#B0B7C3] text-[10px] sm:text-xs mt-0.5">Internal name for the advertisement</small>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-ad"></i>
-                            Ad Type <span class="required">*</span>
+                    <!-- Ad Type -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-ad text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
+                            Ad Type <span class="text-[#EF4444] text-sm sm:text-base">*</span>
                         </label>
-                        <select name="ad_type" id="adType" required>
+                        <select name="ad_type" id="adType" required
+                                class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all appearance-none"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;">
                             <option value="">Select Type</option>
                             {% for value, label in ad_types %}
-                                <option value="{{ value }}" {% if ad.ad_type == value %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
+                                <option value="{{ value }}" {% if ad.ad_type == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-users"></i>
+                    <!-- Ad Category - NEW -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-layer-group text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
+                            Ad Category
+                        </label>
+                        <select name="ad_category"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all appearance-none"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;">
+                            {% for value, label in ad_categories %}
+                                <option value="{{ value }}" {% if ad.ad_category == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-[var(--text-soft)] dark:text-[#B0B7C3] text-[10px] sm:text-xs mt-0.5">Where this ad appears on the site</small>
+                    </div>
+                    
+                    <!-- Product Category - NEW -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-tags text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
+                            Product Category
+                        </label>
+                        <select name="product_category"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all appearance-none"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;">
+                            <option value="">All Categories</option>
+                            {% for category in product_categories %}
+                                <option value="{{ category.id }}" {% if ad.product_category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-[var(--text-soft)] dark:text-[#B0B7C3] text-[10px] sm:text-xs mt-0.5">Target ads to specific product category</small>
+                    </div>
+                    
+                    <!-- Target Audience -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-users text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Target Audience
                         </label>
-                        <select name="target_audience">
+                        <select name="target_audience"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all appearance-none"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;">
                             {% for value, label in target_audiences %}
-                                <option value="{{ value }}" {% if ad.target_audience == value %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
+                                <option value="{{ value }}" {% if ad.target_audience == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-sort-numeric-up"></i>
+                    <!-- Display Order -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-sort-numeric-up text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Display Order
                         </label>
                         <input type="number" 
                                name="order" 
                                id="order"
                                value="{{ ad.order|default:'0' }}"
-                               min="0">
-                        <small>Lower numbers appear first</small>
+                               min="0"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
+                        <small class="text-[var(--text-soft)] dark:text-[#B0B7C3] text-[10px] sm:text-xs mt-0.5">Lower numbers appear first</small>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-toggle-on"></i>
+                    <!-- Status -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-toggle-on text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Status
                         </label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
+                        <div class="flex gap-4 items-center h-8 sm:h-10">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
                                 <input type="checkbox" 
                                        name="is_active" 
                                        id="is_active"
-                                       {% if ad.is_active or not ad %}checked{% endif %}>
-                                <label for="is_active">Active</label>
-                            </div>
+                                       {% if ad.is_active or not ad %}checked{% endif %}
+                                       class="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[var(--accent)] dark:accent-[#8B3DFF] cursor-pointer">
+                                <span class="text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF] font-medium">Active</span>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Content Section -->
-            <div class="form-section">
-                <div class="section-header">
-                    <span class="section-number">2</span>
-                    <i class="fas fa-pencil-alt"></i>
-                    <h3>Ad Content</h3>
+            <!-- Ad Content Section -->
+            <div class="p-4 sm:p-6 border-b border-[var(--border)] dark:border-[#2A2D3A]">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">2</span>
+                    <i class="fas fa-pencil-alt text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Ad Content</h3>
                 </div>
                 
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label>
-                            <i class="fas fa-heading"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Headline -->
+                    <div class="col-span-1 sm:col-span-2 flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-heading text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Headline
                         </label>
                         <input type="text" 
                                name="headline" 
                                id="headline"
                                value="{{ ad.headline|default:'' }}"
-                               placeholder="e.g., Summer Sale - 50% Off">
+                               placeholder="e.g., Summer Sale - 50% Off"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
                     </div>
                     
-                    <div class="form-group full-width">
-                        <label>
-                            <i class="fas fa-subscript"></i>
+                    <!-- Subheadline -->
+                    <div class="col-span-1 sm:col-span-2 flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-subscript text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Subheadline
                         </label>
                         <textarea name="subheadline" 
                                   id="subheadline" 
                                   rows="2"
-                                  placeholder="e.g., Limited time offer on selected items">{{ ad.subheadline|default:'' }}</textarea>
+                                  placeholder="e.g., Limited time offer on selected items"
+                                  class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all resize-none">{{ ad.subheadline|default:'' }}</textarea>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-link"></i>
+                    <!-- Button Text -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-link text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Button Text
                         </label>
                         <input type="text" 
                                name="button_text" 
                                id="button_text"
-                               value="{{ ad.button_text|default:'Shop Now' }}">
+                               value="{{ ad.button_text|default:'Shop Now' }}"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-external-link-alt"></i>
+                    <!-- Link Type - NEW -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-link text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
+                            Link Type
+                        </label>
+                        <select name="link_type" id="linkType"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all appearance-none"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;">
+                            <option value="external" {% if not ad or ad.link_type == 'external' %}selected{% endif %}>External URL</option>
+                            <option value="product" {% if ad.link_type == 'product' %}selected{% endif %}>Internal Product</option>
+                        </select>
+                    </div>
+                    
+                    <!-- External Button URL -->
+                    <div class="flex flex-col gap-1" id="externalUrlField">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-external-link-alt text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Button URL
                         </label>
-                        <input type="url" 
-                               name="button_url" 
+                        <input type="url"
+                               name="button_url"
                                id="button_url"
                                value="{{ ad.button_url|default:'' }}"
-                               placeholder="https://example.com">
+                               placeholder="https://example.com"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-palette"></i>
+                    <!-- Internal Product Link - NEW -->
+                    <div class="flex flex-col gap-1 hidden" id="productLinkField">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-box text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
+                            Linked Product
+                        </label>
+                        <select name="linked_product"
+                                class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all appearance-none"
+                                style="background-image: url('data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;">
+                            <option value="">Select a product</option>
+                            {% for product in all_products %}
+                                <option value="{{ product.id }}" {% if ad.linked_product_id == product.id %}selected{% endif %}>
+                                    {{ product.name }} — Ksh {{ product.price }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-[var(--text-soft)] dark:text-[#B0B7C3] text-[10px] sm:text-xs mt-0.5">Button will link directly to this product page</small>
+                    </div>
+                    
+                    <!-- Button Color -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-palette text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Button Color
                         </label>
                         <input type="color" 
                                name="button_color" 
                                id="button_color"
-                               value="{{ ad.button_color|default:'#7b2eda' }}">
+                               value="{{ ad.button_color|default:'#7b2eda' }}"
+                               class="w-full h-8 sm:h-10 px-1 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] cursor-pointer">
                     </div>
                 </div>
             </div>
 
-            <!-- Media Upload Section -->
-            <div class="form-section" id="singleImageSection" style="display: none;">
-                <div class="section-header">
-                    <span class="section-number">3</span>
-                    <i class="fas fa-image"></i>
-                    <h3>Single Image</h3>
+            <!-- Single Image Section -->
+            <div class="p-4 sm:p-6 border-b border-[var(--border)] dark:border-[#2A2D3A] hidden" id="singleImageSection">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">3</span>
+                    <i class="fas fa-image text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Single Image</h3>
                 </div>
                 
-                <div class="file-upload" id="singleImageUpload">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Click to upload image</p>
-                    <small>Recommended: 1200x400px</small>
+                <div class="relative border-2 border-dashed border-[var(--border)] dark:border-[#2A2D3A] rounded-xl p-4 sm:p-5 text-center bg-[var(--surface)] dark:bg-[#1E1F2C] hover:border-[var(--accent)] dark:hover:border-[#8B3DFF] hover:bg-[var(--accent-soft)] dark:hover:bg-[rgba(139,61,255,0.08)] transition-all cursor-pointer group" id="singleImageUpload">
+                    <i class="fas fa-cloud-upload-alt text-2xl sm:text-3xl text-[var(--accent)] dark:text-[#8B3DFF] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <p class="text-xs sm:text-sm text-[var(--text-soft)] dark:text-[#B0B7C3] mb-1">Click to upload image</p>
+                    <small class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-[#B0B7C3]">Recommended: 1200x400px</small>
                     <input type="file" 
                            name="single_image" 
                            id="single_image" 
-                           accept="image/*">
+                           accept="image/*"
+                           class="absolute inset-0 opacity-0 cursor-pointer">
                 </div>
                 
                 {% if ad and ad.single_image %}
-                <div class="current-file" id="currentSingleImage">
-                    <img src="{{ ad.single_image.url }}" alt="Current">
-                    <div class="file-info">
-                        <strong>Current Image</strong>
-                        <span>{{ ad.single_image.name|truncatechars:30 }}</span>
+                <div class="flex items-center gap-3 p-3 bg-[var(--surface)] dark:bg-[#1E1F2C] rounded-xl border border-[var(--border)] dark:border-[#2A2D3A] mt-3" id="currentSingleImage">
+                    <img src="{{ ad.single_image.url }}" alt="Current" class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover">
+                    <div class="flex-1 min-w-0">
+                        <strong class="block text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF] mb-0.5">Current Image</strong>
+                        <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-[#B0B7C3] truncate block">{{ ad.single_image.name|truncatechars:30 }}</span>
                     </div>
-                    <button type="button" class="btn-remove" onclick="removeCurrentImage()">
+                    <button type="button" class="text-[#EF4444] hover:bg-[rgba(239,68,68,0.08)] p-2 rounded-lg transition-all" onclick="removeCurrentImage()">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 {% endif %}
             </div>
 
-            <div class="form-section" id="multiImageSection" style="display: none;">
-                <div class="section-header">
-                    <span class="section-number">3</span>
-                    <i class="fas fa-images"></i>
-                    <h3>Multiple Images</h3>
+            <!-- Multi Image Section -->
+            <div class="p-4 sm:p-6 border-b border-[var(--border)] dark:border-[#2A2D3A] hidden" id="multiImageSection">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">3</span>
+                    <i class="fas fa-images text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Multiple Images</h3>
                 </div>
                 
                 {% if ad and ad.ad_images.exists %}
-                <div class="image-gallery" id="imageGallery">
+                <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mb-3 sm:mb-4" id="imageGallery">
                     {% for image in ad.ad_images.all %}
-                    <div class="gallery-item" id="image-{{ image.id }}">
-                        <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                    <div class="relative aspect-square rounded-lg overflow-hidden border-2 border-[var(--border)] dark:border-[#2A2D3A] group" id="image-{{ image.id }}">
+                        <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="w-full h-full object-cover">
                         <input type="text" 
-                               class="caption-input" 
+                               class="absolute bottom-0 left-0 right-0 px-2 py-1 bg-black/70 text-white text-[8px] sm:text-xs w-full border-none focus:outline-none"
                                placeholder="Caption"
                                value="{{ image.caption }}"
                                onchange="updateImageCaption({{ image.id }}, this.value)">
-                        <div class="item-overlay">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <a href="{% url 'ad_image_delete' image.id %}" 
-                               class="btn-delete-image"
+                               class="w-6 h-6 sm:w-7 sm:h-7 bg-[#EF4444] text-white rounded-full flex items-center justify-center text-xs sm:text-sm hover:scale-110 transition-transform"
                                onclick="return confirm('Delete this image?')">
                                 <i class="fas fa-trash"></i>
                             </a>
@@ -771,165 +339,183 @@
                 </div>
                 {% endif %}
                 
-                <div class="file-upload" id="multiImageUpload">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Click to upload multiple images</p>
-                    <small>Select multiple images at once</small>
+                <div class="relative border-2 border-dashed border-[var(--border)] dark:border-[#2A2D3A] rounded-xl p-4 sm:p-5 text-center bg-[var(--surface)] dark:bg-[#1E1F2C] hover:border-[var(--accent)] dark:hover:border-[#8B3DFF] hover:bg-[var(--accent-soft)] dark:hover:bg-[rgba(139,61,255,0.08)] transition-all cursor-pointer group" id="multiImageUpload">
+                    <i class="fas fa-cloud-upload-alt text-2xl sm:text-3xl text-[var(--accent)] dark:text-[#8B3DFF] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <p class="text-xs sm:text-sm text-[var(--text-soft)] dark:text-[#B0B7C3] mb-1">Click to upload multiple images</p>
+                    <small class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-[#B0B7C3]">Select multiple images at once</small>
                     <input type="file" 
                            name="multi_images" 
                            id="multi_images" 
                            accept="image/*" 
-                           multiple>
+                           multiple
+                           class="absolute inset-0 opacity-0 cursor-pointer">
                 </div>
             </div>
 
-            <div class="form-section" id="videoSection" style="display: none;">
-                <div class="section-header">
-                    <span class="section-number">3</span>
-                    <i class="fas fa-video"></i>
-                    <h3>Video</h3>
+            <!-- Video Section -->
+            <div class="p-4 sm:p-6 border-b border-[var(--border)] dark:border-[#2A2D3A] hidden" id="videoSection">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">3</span>
+                    <i class="fas fa-video text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Video</h3>
                 </div>
                 
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label>
-                            <i class="fas fa-video"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Video File -->
+                    <div class="col-span-1 sm:col-span-2 flex flex-col gap-2">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-video text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Video File
                         </label>
-                        <div class="file-upload">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Click to upload video</p>
-                            <small>MP4, WebM, OGG (Max: 50MB)</small>
+                        <div class="relative border-2 border-dashed border-[var(--border)] dark:border-[#2A2D3A] rounded-xl p-4 text-center bg-[var(--surface)] dark:bg-[#1E1F2C] hover:border-[var(--accent)] dark:hover:border-[#8B3DFF] hover:bg-[var(--accent-soft)] dark:hover:bg-[rgba(139,61,255,0.08)] transition-all cursor-pointer group">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-[var(--accent)] dark:text-[#8B3DFF] mb-2 group-hover:scale-110 transition-transform"></i>
+                            <p class="text-xs text-[var(--text-soft)] dark:text-[#B0B7C3] mb-1">Click to upload video</p>
+                            <small class="text-[10px] text-[var(--text-soft)] dark:text-[#B0B7C3]">MP4, WebM, OGG (Max: 50MB)</small>
                             <input type="file" 
                                    name="video" 
                                    id="video" 
-                                   accept="video/mp4,video/webm,video/ogg">
+                                   accept="video/mp4,video/webm,video/ogg"
+                                   class="absolute inset-0 opacity-0 cursor-pointer">
                         </div>
                         
                         {% if ad and ad.video %}
-                        <div class="current-file">
-                            <i class="fas fa-video" style="font-size: 1.5rem; color: var(--accent);"></i>
-                            <div class="file-info">
-                                <strong>Current Video</strong>
-                                <span>{{ ad.video.name|truncatechars:30 }}</span>
+                        <div class="flex items-center gap-3 p-3 bg-[var(--surface)] dark:bg-[#1E1F2C] rounded-xl border border-[var(--border)] dark:border-[#2A2D3A]">
+                            <i class="fas fa-video text-xl sm:text-2xl text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                            <div class="flex-1 min-w-0">
+                                <strong class="block text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF] mb-0.5">Current Video</strong>
+                                <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-[#B0B7C3] truncate block">{{ ad.video.name|truncatechars:30 }}</span>
                             </div>
                         </div>
                         {% endif %}
                     </div>
                     
-                    <div class="form-group full-width">
-                        <label>
-                            <i class="fas fa-camera"></i>
+                    <!-- Video Poster -->
+                    <div class="col-span-1 sm:col-span-2 flex flex-col gap-2">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-camera text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Video Poster
                         </label>
-                        <div class="file-upload">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <p>Upload poster image</p>
+                        <div class="relative border-2 border-dashed border-[var(--border)] dark:border-[#2A2D3A] rounded-xl p-4 text-center bg-[var(--surface)] dark:bg-[#1E1F2C] hover:border-[var(--accent)] dark:hover:border-[#8B3DFF] hover:bg-[var(--accent-soft)] dark:hover:bg-[rgba(139,61,255,0.08)] transition-all cursor-pointer group">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-[var(--accent)] dark:text-[#8B3DFF] mb-2 group-hover:scale-110 transition-transform"></i>
+                            <p class="text-xs text-[var(--text-soft)] dark:text-[#B0B7C3]">Upload poster image</p>
                             <input type="file" 
                                    name="video_poster" 
                                    id="video_poster" 
-                                   accept="image/*">
+                                   accept="image/*"
+                                   class="absolute inset-0 opacity-0 cursor-pointer">
                         </div>
                         
                         {% if ad and ad.video_poster %}
-                        <div class="current-file">
-                            <img src="{{ ad.video_poster.url }}" alt="Poster">
-                            <div class="file-info">
-                                <strong>Current Poster</strong>
-                                <span>{{ ad.video_poster.name|truncatechars:30 }}</span>
+                        <div class="flex items-center gap-3 p-3 bg-[var(--surface)] dark:bg-[#1E1F2C] rounded-xl border border-[var(--border)] dark:border-[#2A2D3A]">
+                            <img src="{{ ad.video_poster.url }}" alt="Poster" class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover">
+                            <div class="flex-1 min-w-0">
+                                <strong class="block text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF] mb-0.5">Current Poster</strong>
+                                <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-[#B0B7C3] truncate block">{{ ad.video_poster.name|truncatechars:30 }}</span>
                             </div>
                         </div>
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
+                    <!-- Video Options -->
+                    <div class="col-span-1 sm:col-span-2">
+                        <div class="flex gap-4 items-center">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
                                 <input type="checkbox" 
                                        name="autoplay" 
                                        id="autoplay"
-                                       {% if ad.autoplay %}checked{% endif %}>
-                                <label for="autoplay">Autoplay (muted)</label>
-                            </div>
+                                       {% if ad.autoplay %}checked{% endif %}
+                                       class="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[var(--accent)] dark:accent-[#8B3DFF]">
+                                <span class="text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF]">Autoplay (muted)</span>
+                            </label>
                             
-                            <div class="checkbox-item">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
                                 <input type="checkbox" 
                                        name="loop" 
                                        id="loop"
-                                       {% if ad.loop %}checked{% endif %}>
-                                <label for="loop">Loop video</label>
-                            </div>
+                                       {% if ad.loop %}checked{% endif %}
+                                       class="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[var(--accent)] dark:accent-[#8B3DFF]">
+                                <span class="text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF]">Loop video</span>
+                            </label>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Display Settings -->
-            <div class="form-section">
-                <div class="section-header">
-                    <span class="section-number">4</span>
-                    <i class="fas fa-tv"></i>
-                    <h3>Display Settings</h3>
+            <div class="p-4 sm:p-6 border-b border-[var(--border)] dark:border-[#2A2D3A]">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">4</span>
+                    <i class="fas fa-tv text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Display Settings</h3>
                 </div>
                 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-mobile-alt"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Show on Devices -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-mobile-alt text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Show on Devices
                         </label>
-                        <div class="checkbox-group">
-                            <div class="checkbox-item">
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
                                 <input type="checkbox" 
                                        name="show_on_mobile" 
                                        id="show_on_mobile"
-                                       {% if ad.show_on_mobile or not ad %}checked{% endif %}>
-                                <label for="show_on_mobile">Mobile</label>
-                            </div>
+                                       {% if ad.show_on_mobile or not ad %}checked{% endif %}
+                                       class="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[var(--accent)] dark:accent-[#8B3DFF]">
+                                <span class="text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF]">Mobile</span>
+                            </label>
                             
-                            <div class="checkbox-item">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
                                 <input type="checkbox" 
                                        name="show_on_tablet" 
                                        id="show_on_tablet"
-                                       {% if ad.show_on_tablet or not ad %}checked{% endif %}>
-                                <label for="show_on_tablet">Tablet</label>
-                            </div>
+                                       {% if ad.show_on_tablet or not ad %}checked{% endif %}
+                                       class="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[var(--accent)] dark:accent-[#8B3DFF]">
+                                <span class="text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF]">Tablet</span>
+                            </label>
                             
-                            <div class="checkbox-item">
+                            <label class="flex items-center gap-1.5 cursor-pointer">
                                 <input type="checkbox" 
                                        name="show_on_desktop" 
                                        id="show_on_desktop"
-                                       {% if ad.show_on_desktop or not ad %}checked{% endif %}>
-                                <label for="show_on_desktop">Desktop</label>
-                            </div>
+                                       {% if ad.show_on_desktop or not ad %}checked{% endif %}
+                                       class="w-3.5 h-3.5 sm:w-4 sm:h-4 accent-[var(--accent)] dark:accent-[#8B3DFF]">
+                                <span class="text-xs sm:text-sm text-[var(--text)] dark:text-[#F9FAFF]">Desktop</span>
+                            </label>
                         </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-paint-bucket"></i>
+                    <!-- Background Color -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-paint-bucket text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Background Color
                         </label>
                         <input type="color" 
                                name="background_color" 
                                id="background_color"
-                               value="{{ ad.background_color|default:'#7b2eda' }}">
+                               value="{{ ad.background_color|default:'#7b2eda' }}"
+                               class="w-full h-8 sm:h-10 px-1 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] cursor-pointer">
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-font"></i>
+                    <!-- Text Color -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-font text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Text Color
                         </label>
                         <input type="color" 
                                name="text_color" 
                                id="text_color"
-                               value="{{ ad.text_color|default:'#ffffff' }}">
+                               value="{{ ad.text_color|default:'#ffffff' }}"
+                               class="w-full h-8 sm:h-10 px-1 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] cursor-pointer">
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-layer-group"></i>
+                    <!-- Overlay Opacity -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-layer-group text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Overlay Opacity
                         </label>
                         <input type="number" 
@@ -938,41 +524,44 @@
                                value="{{ ad.overlay_opacity|default:'0.3' }}"
                                min="0" 
                                max="1" 
-                               step="0.1">
-                        <small>0 = transparent, 1 = solid</small>
+                               step="0.1"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
+                        <small class="text-[var(--text-soft)] dark:text-[#B0B7C3] text-[10px] sm:text-xs">0 = transparent, 1 = solid</small>
                     </div>
                 </div>
             </div>
 
             <!-- Scheduling -->
-            <div class="form-section">
-                <div class="section-header">
-                    <span class="section-number">5</span>
-                    <i class="fas fa-calendar-alt"></i>
-                    <h3>Scheduling (Optional)</h3>
+            <div class="p-4 sm:p-6">
+                <div class="flex items-center gap-3 mb-3 sm:mb-4">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">5</span>
+                    <i class="fas fa-calendar-alt text-[var(--accent)] dark:text-[#8B3DFF] text-base sm:text-lg"></i>
+                    <h3 class="text-sm sm:text-base font-bold text-[var(--text)] dark:text-[#F9FAFF] m-0">Scheduling (Optional)</h3>
                 </div>
                 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-calendar-plus"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-calendar-plus text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             Start Date
                         </label>
                         <input type="datetime-local" 
                                name="start_date" 
                                id="start_date"
-                               value="{{ ad.start_date|date:'Y-m-d\TH:i'|default:'' }}">
+                               value="{{ ad.start_date|date:'Y-m-d\TH:i'|default:'' }}"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
                     </div>
                     
-                    <div class="form-group">
-                        <label>
-                            <i class="fas fa-calendar-times"></i>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-[#F9FAFF] flex items-center gap-1">
+                            <i class="fas fa-calendar-times text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm w-4"></i>
                             End Date
                         </label>
                         <input type="datetime-local" 
                                name="end_date" 
                                id="end_date"
-                               value="{{ ad.end_date|date:'Y-m-d\TH:i'|default:'' }}">
+                               value="{{ ad.end_date|date:'Y-m-d\TH:i'|default:'' }}"
+                               class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border-2 border-[var(--border)] dark:border-[#2A2D3A] rounded-xl bg-[var(--surface)] dark:bg-[#1E1F2C] text-[var(--text)] dark:text-[#F9FAFF] text-xs sm:text-sm focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all">
                     </div>
                 </div>
             </div>
@@ -980,20 +569,20 @@
     </form>
 
     <!-- Live Preview -->
-    <div class="preview-section">
-        <div class="preview-title">
-            <i class="fas fa-eye"></i>
+    <div class="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-xl p-4 sm:p-6 relative overflow-hidden mt-4 sm:mt-6">
+        <div class="text-white text-xs sm:text-sm font-semibold mb-2 sm:mb-3 flex items-center gap-1 opacity-90">
+            <i class="fas fa-eye text-sm sm:text-base"></i>
             Live Preview
         </div>
-        <div class="ad-preview" id="livePreview">
-            <div class="preview-content">
-                <div class="preview-media" id="previewMedia">
-                    <i class="fas fa-image"></i>
+        <div class="bg-white/10 backdrop-blur-lg rounded-xl p-4 sm:p-5 border border-white/20" id="livePreview">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-white">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-white/20 flex items-center justify-center flex-shrink-0" id="previewMedia">
+                    <i class="fas fa-image text-xl sm:text-2xl opacity-80 text-white"></i>
                 </div>
-                <div class="preview-text">
-                    <h3 id="previewHeadline">Your Headline Here</h3>
-                    <p id="previewSubheadline">Your subheadline will appear here</p>
-                    <span class="preview-button" id="previewButton">
+                <div class="flex-1 text-center sm:text-left">
+                    <h3 class="text-sm sm:text-base font-bold mb-0.5 truncate max-w-full" id="previewHeadline">Your Headline Here</h3>
+                    <p class="text-xs sm:text-sm opacity-90 mb-1 truncate max-w-full" id="previewSubheadline">Your subheadline will appear here</p>
+                    <span class="inline-flex items-center gap-1 px-3 py-1 bg-white text-[var(--accent)] dark:text-[#8B3DFF] rounded-full font-semibold text-[10px] sm:text-xs whitespace-nowrap" id="previewButton">
                         Shop Now <i class="fas fa-arrow-right"></i>
                     </span>
                 </div>
@@ -1005,9 +594,18 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const adType = document.getElementById('adType');
+    const linkType = document.getElementById('linkType');
+    const externalUrlField = document.getElementById('externalUrlField');
+    const productLinkField = document.getElementById('productLinkField');
     const singleImageSection = document.getElementById('singleImageSection');
     const multiImageSection = document.getElementById('multiImageSection');
     const videoSection = document.getElementById('videoSection');
+    
+    // Debug - check if elements exist
+    console.log('adType:', adType);
+    console.log('singleImageSection:', singleImageSection);
+    console.log('multiImageSection:', multiImageSection);
+    console.log('videoSection:', videoSection);
     
     // Form input elements for preview
     const headlineInput = document.getElementById('headline');
@@ -1015,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const buttonTextInput = document.getElementById('button_text');
     const buttonColorInput = document.getElementById('button_color');
     const backgroundColorInput = document.getElementById('background_color');
-    const overlayOpacityInput = document.getElementById('overlay_opacity');
+    const textColorInput = document.getElementById('text_color');
     
     // Preview elements
     const previewHeadline = document.getElementById('previewHeadline');
@@ -1023,6 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewButton = document.getElementById('previewButton');
     const previewMedia = document.getElementById('previewMedia');
     const previewContainer = document.getElementById('livePreview');
+    const previewParent = previewContainer?.parentElement;
     
     // File upload handlers
     const singleImageUpload = document.getElementById('single_image');
@@ -1033,28 +632,53 @@ document.addEventListener('DOMContentLoaded', function() {
     // Toggle sections based on ad type
     function toggleSections() {
         const selectedType = adType.value;
+        console.log('Selected ad type:', selectedType);
         
-        singleImageSection.style.display = 'none';
-        multiImageSection.style.display = 'none';
-        videoSection.style.display = 'none';
+        // Hide all sections first
+        if (singleImageSection) singleImageSection.style.display = 'none';
+        if (multiImageSection) multiImageSection.style.display = 'none';
+        if (videoSection) videoSection.style.display = 'none';
         
+        // Show the relevant section
         if (selectedType === 'single_image') {
-            singleImageSection.style.display = 'block';
+            if (singleImageSection) singleImageSection.style.display = 'block';
         } else if (selectedType === 'multi_image') {
-            multiImageSection.style.display = 'block';
+            if (multiImageSection) multiImageSection.style.display = 'block';
         } else if (selectedType === 'video') {
-            videoSection.style.display = 'block';
+            if (videoSection) videoSection.style.display = 'block';
+        }
+    }
+    
+    // Toggle link type fields
+    function toggleLinkType() {
+        if (!linkType) return;
+        
+        const selectedLinkType = linkType.value;
+        console.log('Selected link type:', selectedLinkType);
+        
+        if (selectedLinkType === 'external') {
+            if (externalUrlField) externalUrlField.classList.remove('hidden');
+            if (productLinkField) productLinkField.classList.add('hidden');
+        } else {
+            if (externalUrlField) externalUrlField.classList.add('hidden');
+            if (productLinkField) productLinkField.classList.remove('hidden');
         }
     }
     
     // Update preview
     function updatePreview() {
-        previewHeadline.textContent = headlineInput.value || 'Your Headline Here';
-        previewSubheadline.textContent = subheadlineInput.value || 'Your subheadline will appear here';
-        previewButton.innerHTML = (buttonTextInput.value || 'Shop Now') + ' <i class="fas fa-arrow-right"></i>';
+        if (previewHeadline) previewHeadline.textContent = headlineInput?.value || 'Your Headline Here';
+        if (previewSubheadline) previewSubheadline.textContent = subheadlineInput?.value || 'Your subheadline will appear here';
+        if (previewButton) previewButton.innerHTML = (buttonTextInput?.value || 'Shop Now') + ' <i class="fas fa-arrow-right"></i>';
         
-        previewButton.style.backgroundColor = buttonColorInput.value || '#7b2eda';
-        previewContainer.style.background = `linear-gradient(135deg, ${backgroundColorInput.value || '#7b2eda'} 0%, ${adjustBrightness(backgroundColorInput.value || '#7b2eda', 20)} 100%)`;
+        if (previewButton && buttonColorInput) {
+            previewButton.style.backgroundColor = buttonColorInput.value || '#7b2eda';
+            previewButton.style.color = '#ffffff';
+        }
+        
+        if (previewParent && backgroundColorInput) {
+            previewParent.style.background = `linear-gradient(135deg, ${backgroundColorInput.value || '#7b2eda'} 0%, ${adjustBrightness(backgroundColorInput.value || '#7b2eda', 20)} 100%)`;
+        }
     }
     
     function adjustBrightness(hex, percent) {
@@ -1064,10 +688,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // File name display
     function handleFileUpload(input) {
-        if (input.files.length > 0) {
+        if (input && input.files.length > 0) {
             const fileNames = Array.from(input.files).map(f => f.name).join(', ');
             const fileNameDisplay = document.createElement('div');
-            fileNameDisplay.className = 'file-name';
+            fileNameDisplay.className = 'mt-2 px-2 py-1 bg-[var(--card)] dark:bg-[#13141B] border border-[var(--border)] dark:border-[#2A2D3A] rounded-lg text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs break-all';
             fileNameDisplay.textContent = fileNames;
             
             const existing = input.parentElement.querySelector('.file-name');
@@ -1078,47 +702,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Event listeners
-    adType.addEventListener('change', toggleSections);
+    if (adType) {
+        adType.addEventListener('change', toggleSections);
+    }
     
+    if (linkType) {
+        linkType.addEventListener('change', toggleLinkType);
+    }
+    
+    // Add preview listeners
     [headlineInput, subheadlineInput, buttonTextInput, buttonColorInput, 
-     backgroundColorInput, overlayOpacityInput].forEach(input => {
+     backgroundColorInput, textColorInput].forEach(input => {
         if (input) {
             input.addEventListener('input', updatePreview);
         }
     });
     
-    singleImageUpload?.addEventListener('change', function() {
-        handleFileUpload(this);
-        if (this.files.length > 0) {
-            const file = this.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewMedia.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    if (singleImageUpload) {
+        singleImageUpload.addEventListener('change', function() {
+            handleFileUpload(this);
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (previewMedia) {
+                        previewMedia.innerHTML = `<img src="${e.target.result}" alt="Preview" class="w-full h-full object-cover">`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
     
-    multiImageUpload?.addEventListener('change', function() {
-        handleFileUpload(this);
-    });
+    if (multiImageUpload) {
+        multiImageUpload.addEventListener('change', function() {
+            handleFileUpload(this);
+        });
+    }
     
-    videoUpload?.addEventListener('change', function() {
-        handleFileUpload(this);
-        previewMedia.innerHTML = '<i class="fas fa-video"></i>';
-    });
+    if (videoUpload) {
+        videoUpload.addEventListener('change', function() {
+            handleFileUpload(this);
+            if (previewMedia) {
+                previewMedia.innerHTML = '<i class="fas fa-video text-xl sm:text-2xl text-white opacity-80"></i>';
+            }
+        });
+    }
     
-    videoPosterUpload?.addEventListener('change', function() {
-        handleFileUpload(this);
-    });
+    if (videoPosterUpload) {
+        videoPosterUpload.addEventListener('change', function() {
+            handleFileUpload(this);
+        });
+    }
     
     // Initialize
     toggleSections();
+    toggleLinkType();
     updatePreview();
     
+    // Handle Django template variables for existing ad
     {% if ad and ad.ad_type %}
-        adType.value = '{{ ad.ad_type }}';
-        toggleSections();
+        if (adType) {
+            adType.value = '{{ ad.ad_type }}';
+            toggleSections();
+        }
+    {% endif %}
+    
+    {% if ad and ad.link_type %}
+        if (linkType) {
+            linkType.value = '{{ ad.link_type }}';
+            toggleLinkType();
+        }
     {% endif %}
 });
 
@@ -1143,21 +797,24 @@ function updateImageCaption(imageId, caption) {
 }
 
 // Form validation
-document.getElementById('adForm').addEventListener('submit', function(e) {
-    const adType = document.getElementById('adType').value;
+document.getElementById('adForm')?.addEventListener('submit', function(e) {
+    const adType = document.getElementById('adType');
+    if (!adType) return;
     
-    if (!adType) {
+    const selectedType = adType.value;
+    
+    if (!selectedType) {
         e.preventDefault();
         alert('Please select an ad type');
         return;
     }
     
-    if (adType === 'single_image') {
+    if (selectedType === 'single_image') {
         const singleImage = document.getElementById('single_image');
         const hasCurrentImage = document.getElementById('currentSingleImage');
         
         {% if not ad %}
-        if (!singleImage.files.length && !hasCurrentImage) {
+        if ((!singleImage || !singleImage.files.length) && !hasCurrentImage) {
             e.preventDefault();
             alert('Please upload an image for single image ad');
             return;
@@ -1165,10 +822,10 @@ document.getElementById('adForm').addEventListener('submit', function(e) {
         {% endif %}
     }
     
-    if (adType === 'video') {
+    if (selectedType === 'video') {
         const video = document.getElementById('video');
         {% if not ad %}
-        if (!video.files.length) {
+        if (!video || !video.files.length) {
             e.preventDefault();
             alert('Please upload a video file');
             return;
