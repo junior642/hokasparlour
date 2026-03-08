@@ -224,8 +224,9 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer_name', 'phone_number', 'order_status', 'get_total_display', 'created_at')
-    list_filter = ('order_status', 'created_at')
+    list_display = ('id', 'customer_name', 'phone_number', 'order_status', 'payment_status', 'get_total_display', 'created_at')
+    list_filter = ('order_status', 'is_paid', 'created_at')
+    list_editable = ('order_status',)
     search_fields = ('customer_name', 'email', 'phone_number', 'id')
     readonly_fields = ('created_at', 'get_total_display', 'show_pickup_info')
     inlines = [OrderItemInline]
@@ -236,7 +237,7 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('customer_name', 'phone_number', 'email', 'delivery_address')
         }),
         ('Order Details', {
-            'fields': ('order_status', 'created_at', 'get_total_display')
+            'fields': ('order_status', 'is_paid', 'created_at', 'get_total_display')
         }),
         ('Pickup Information (Global - Set in Store Settings)', {
             'fields': ('show_pickup_info',),
@@ -246,7 +247,17 @@ class OrderAdmin(admin.ModelAdmin):
             'fields': ('expected_delivery_date', 'delivery_location')
         }),
     )
-    
+
+    def payment_status(self, obj):
+        if obj.is_paid:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✔ Paid</span>'
+            )
+        return format_html(
+            '<span style="color: red; font-weight: bold;">✘ Not Yet Paid</span>'
+        )
+    payment_status.short_description = 'Payment Status'
+
     def get_total_display(self, obj):
         return f"KSH {obj.get_total()}"
     get_total_display.short_description = 'Total Amount'
@@ -266,7 +277,6 @@ class OrderAdmin(admin.ModelAdmin):
             pickup_info['days']
         )
     show_pickup_info.short_description = 'Current Pickup Info'
-
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

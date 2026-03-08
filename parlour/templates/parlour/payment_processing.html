@@ -1,0 +1,93 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Processing Payment{% endblock %}
+
+{% block content %}
+<style>
+    .processing-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 60vh;
+        padding: 2rem;
+    }
+    .spinner {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #7b2eda;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        animation: spin 1.5s linear infinite;
+        margin-bottom: 2rem;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .processing-container h1 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+    .processing-container p {
+        font-size: 1.1rem;
+        color: #666;
+        max-width: 500px;
+    }
+    #status-message {
+        margin-top: 1.5rem;
+        font-weight: bold;
+        color: #555;
+    }
+</style>
+
+<div class="processing-container">
+    <div class="spinner"></div>
+    <h1>Processing Your Payment</h1>
+    <p>We've sent a payment request to your phone. Please enter your M-Pesa PIN to authorize the transaction. This page will update automatically.</p>
+    <div id="status-message">Waiting for confirmation...</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusUrl = "{% url 'check_payment_status' %}";
+        const successUrl = "{% url 'order_confirmation' 0 %}".replace('0', ''); // Base for success redirect
+        const failureUrl = "{% url 'payment_failed' %}";
+        let attempts = 0;
+        const maxAttempts = 60; // Poll for 2 minutes (60 attempts * 2 seconds)
+
+        function pollStatus() {
+            attempts++;
+            if (attempts > maxAttempts) {
+                document.getElementById('status-message').innerText = 'Timeout. Please check your phone or try again.';
+                return;
+            }
+
+            fetch(statusUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // On success, redirect to the final confirmation page
+                        window.location.href = data.redirect_url;
+                    } else if (data.status === 'failed' || data.status === 'cancelled') {
+                        // On failure, redirect to the failure page
+                        window.location.href = failureUrl;
+                    } else {
+                        // Otherwise, it's still pending, poll again after 2 seconds
+                        setTimeout(pollStatus, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling payment status:', error);
+                    document.getElementById('status-message').innerText = 'An error occurred. Please refresh the page.';
+                });
+        }
+
+        // Start polling
+        pollStatus();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="max-width:1100px;margin:40px auto;padding:0 20px;font-family:'Georgia',serif;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+        <div>
+            <h1 style="margin:0;font-size:32px;color:#1a1a2e;">📦 Delivery Dashboard</h1>
+            <p style="color:#666;margin:5px 0 0 0;">{{ orders.count }} active order{{ orders.count|pluralize }}</p>
+        </div>
+        <a href="/admin/" style="background:#667eea;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:14px;">← Admin Panel</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div style="padding:15px 20px;border-radius:8px;margin-bottom:20px;
+            background:{% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
+            color:{% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %};
+            border-left:4px solid {% if message.tags == 'success' %}#28a745{% else %}#dc3545{% endif %};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not orders %}
+    <div style="text-align:center;padding:60px;background:white;border-radius:16px;color:#999;">
+        <div style="font-size:48px;">🎉</div>
+        <p style="font-size:18px;">No pending deliveries!</p>
+    </div>
+    {% else %}
+
+    <!-- Search by Order ID -->
+    <div style="background:white;padding:20px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <form method="get" style="display:flex;gap:10px;align-items:center;">
+            <input type="number" name="order_id" placeholder="Enter Order ID to jump directly..."
+                value="{{ request.GET.order_id }}"
+                style="flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;outline:none;">
+            <button type="submit" style="background:#667eea;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:15px;">
+                🔍 Find Order
+            </button>
+        </form>
+        {% if request.GET.order_id %}
+            <script>window.location.href = "/admin/delivery/{{ request.GET.order_id }}/"; </script>
+        {% endif %}
+    </div>
+
+    <div style="display:grid;gap:16px;">
+        {% for order in orders %}
+        <div style="background:white;border-radius:12px;padding:20px 25px;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;border-left:4px solid {% if order.is_paid %}#28a745{% else %}#dc3545{% endif %};">
+            <div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                    <span style="font-size:18px;font-weight:700;color:#1a1a2e;">Order #{{ order.id }}</span>
+                    {% if order.is_paid %}
+                        <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;">✔ Paid</span>
+                    {% else %}
+                        <span style="background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;">✘ Not Paid</span>
+                    {% endif %}
+                    <span style="background:#e8f0fe;color:#667eea;padding:3px 10px;border-radius:12px;font-size:12px;">{{ order.order_status|title }}</span>
+                </div>
+                <div style="color:#555;font-size:14px;line-height:1.8;">
+                    <strong>{{ order.customer_name }}</strong> · {{ order.phone_number }}<br>
+                    {{ order.delivery_address }}<br>
+                    <span style="color:#999;">{{ order.created_at|date:"M d, Y · g:i A" }}</span>
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:10px;">KSH {{ order.get_total }}</div>
+                <a href="{% url 'delivery_detail' order.id %}"
+                    style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:10px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
+                    Manage Delivery →
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

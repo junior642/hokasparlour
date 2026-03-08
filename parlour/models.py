@@ -298,6 +298,7 @@ class Order(models.Model):
     email = models.EmailField()
     delivery_address = models.TextField()
     order_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    is_paid = models.BooleanField(default=False)
     expected_delivery_date = models.DateField(null=True, blank=True)
     delivery_location = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -624,6 +625,15 @@ class AdImpression(models.Model):
 
 
 class MpesaPayment(models.Model):
+    # Link to the final Order created after successful payment.
+    order = models.ForeignKey(
+        Order, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='mpesa_payments',
+        help_text="Link to the final Order created after successful payment."
+    )
     checkout_request_id = models.CharField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=20)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -640,6 +650,12 @@ class MpesaPayment(models.Model):
             ('cancelled', 'Cancelled'),
         ],
         default='pending'
+    )
+    # Stores a snapshot of the cart and customer details.
+    order_details = models.JSONField(
+        null=True, 
+        blank=True,
+        help_text="Stores a snapshot of the cart and customer details at the time of payment initiation."
     )
     session_key = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

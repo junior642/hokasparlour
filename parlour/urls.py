@@ -13,6 +13,8 @@ urlpatterns = [
     #path('mpesa-callback/', views.mpesa_callback, name='mpesa_callback'),
     path('lipana-webhook/', views.lipana_webhook, name='lipana_webhook'),
     path('check-payment-status/', views.check_payment_status, name='check_payment_status'),
+    path('payment-processing/<str:checkout_id>/', views.payment_processing, name='payment_processing'),
+    path('payment-failed/', views.payment_failed, name='payment_failed'),
     path('process-cash-order/', views.process_cash_order, name='process_cash_order'),
     path('order-confirmation/<int:order_id>/', views.order_confirmation, name='order_confirmation'),
     path('order-tracking/', views.order_tracking, name='order_tracking'),
@@ -49,6 +51,13 @@ urlpatterns = [
     path('ads/<int:ad_id>/toggle-status/', views.ad_toggle_status, name='ad_toggle_status'),
     path('ads/<int:ad_id>/images/add/', views.ad_image_add, name='ad_image_add'),
     path('ads/images/<int:image_id>/delete/', views.ad_image_delete, name='ad_image_delete'),
+
+
+
+    path('admin/delivery/', views.delivery_dashboard, name='delivery_dashboard'),
+    path('admin/delivery/<int:order_id>/', views.delivery_detail, name='delivery_detail'),
+    path('admin/delivery/stk-push/<int:order_id>/', views.delivery_stk_push, name='delivery_stk_push'),
+    path('admin/delivery/mark-delivered/<int:order_id>/', views.mark_delivered, name='mark_delivered'),
 
 
     # Product Management (Staff Only)

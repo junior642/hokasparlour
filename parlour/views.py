@@ -1,31 +1,18 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Product, Order, OrderItem, EmailOTP, StoreSettings
+from django.utils import timezone
+from django.db import models, transaction
+from django.db.models import F
+from .models import Product, Order, OrderItem, EmailOTP, StoreSettings, Advertisement, AdImpression, Category
 from .email_utils import send_order_confirmation_email
 import random
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.db import models  # Add this import for Q objects
-from .models import Product, Advertisement, AdImpression
-
-
-# views.py
-from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
-from .models import Product, Advertisement, AdImpression
-
-# views.py
-from django.shortcuts import render
-from django.utils import timezone
-from django.db import models
-from .models import Product, Advertisement, AdImpression
 import logging
-from .models import Category
 
 def home(request):
     from django.db.models import Sum
@@ -460,8 +447,10 @@ def checkout(request):
                     if len(parts) > 0:
                         profile.default_delivery_location = parts[0].strip()[:200]
                 profile.save()
-            except:
-                pass  # Profile doesn't exist or error saving
+            except Profile.DoesNotExist:
+                # If profile doesn't exist, it will be created automatically 
+                # by the signal upon user login, so we can pass here.
+                pass
         
         # Redirect based on payment method
         if payment_method == 'mpesa':
@@ -555,26 +544,20 @@ def process_cash_order(request):
     
     # Create order items and reduce stock
     for key, item in pending_order['cart'].items():
-        product = Product.objects.get(id=item['product_id'])
-        
-        # Convert price to Decimal safely
-        try:
-            price_value = Decimal(str(item['price']))
-        except (InvalidOperation, TypeError, ValueError):
-            price_value = Decimal('0.00')
-            messages.warning(request, f'Invalid price for {product.name}. Using 0.00.')
+        product = get_object_or_404(Product, id=item['product_id'])
         
         OrderItem.objects.create(
             order=order,
             product=product,
             quantity=item['quantity'],
-            price=price_value,  # Now it's a Decimal, not a string
+            price=product.price,  # Use the product's current price
             size=item['size']
         )
         
-        # Reduce stock quantity
-        product.stock_quantity -= item['quantity']
-        product.save()
+        # Safely reduce stock quantity to prevent race conditions
+        if product.stock_type == 'ready':
+            product.stock_quantity = F('stock_quantity') - item['quantity']
+            product.save(update_fields=['stock_quantity'])
     
     # Send confirmation email
     email_sent = send_order_confirmation_email(order)
@@ -602,54 +585,6 @@ def mpesa_payment(request):
         'pending_order': pending_order
     }
     return render(request, 'parlour/mpesa_payment.html', context)
-
-
-def confirm_mpesa_payment(request):
-    """Confirm M-Pesa payment and create order"""
-    if request.method == 'POST':
-        pending_order = request.session.get('pending_order')
-        
-        if not pending_order:
-            messages.error(request, 'No pending order found.')
-            return redirect('cart')
-        
-        # Create order
-        order = Order.objects.create(
-            customer_name=pending_order['customer_name'],
-            phone_number=pending_order['phone_number'],
-            email=pending_order['email'],
-            delivery_address=pending_order['delivery_address']
-        )
-        
-        # Create order items and reduce stock
-        for key, item in pending_order['cart'].items():
-            product = Product.objects.get(id=item['product_id'])
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=item['quantity'],
-                price=item['price'],
-                size=item['size']
-            )
-            # Reduce stock quantity
-            product.stock_quantity -= item['quantity']
-            product.save()
-        
-        # Send confirmation email
-        email_sent = send_order_confirmation_email(order)
-        
-        if email_sent:
-            messages.success(request, 'Payment confirmed! Order placed successfully. Confirmation email sent.')
-        else:
-            messages.warning(request, 'Payment confirmed! Order placed successfully. But confirmation email could not be sent.')
-        
-        # Clear session
-        request.session['cart'] = {}
-        del request.session['pending_order']
-        
-        return redirect('order_confirmation', order_id=order.id)
-    
-    return redirect('checkout')
 
 
 def order_confirmation(request, order_id):
@@ -978,92 +913,128 @@ def mpesa_payment(request):
                 checkout_request_id=checkout_request_id,
                 phone_number=phone,
                 amount=Decimal(str(amount)),
+                order_details=pending_order,  # <-- Save order details to the model
                 session_key=request.session.session_key,
                 status='pending'
             )
 
             request.session['checkout_request_id'] = checkout_request_id
-            stk_result = result
-            messages.success(request, f'STK Push sent to {phone}! Check your phone and enter your M-Pesa PIN.')
+            
+            # Redirect to the new processing page
+            return redirect('payment_processing', checkout_id=checkout_request_id)
         else:
             stk_error = result['message']
             messages.error(request, f'STK Push failed: {result["message"]}')
 
+    # For GET request or if STK push fails on POST
     context = {
         'pending_order': pending_order,
-        'stk_result': stk_result,
         'stk_error': stk_error,
     }
     return render(request, 'parlour/mpesa_payment.html', context)
 
 def check_payment_status(request):
-    """API endpoint to check payment status"""
+    """
+    API endpoint to check payment status.
+    This view is now idempotent and resilient to session loss.
+    """
     checkout_request_id = request.session.get('checkout_request_id')
     
     if not checkout_request_id:
-        return JsonResponse({'status': 'error', 'message': 'No payment session'})
+        return JsonResponse({'status': 'error', 'message': 'No payment session found.'})
     
     try:
         payment = MpesaPayment.objects.get(checkout_request_id=checkout_request_id)
         
+        # --- SUCCESS ---
         if payment.status == 'success':
-            # Auto-create order
-            pending_order = request.session.get('pending_order')
-            
-            if pending_order:
-                # Create order
-                order = Order.objects.create(
-                    customer_name=pending_order['customer_name'],
-                    phone_number=pending_order['phone_number'],
-                    email=pending_order['email'],
-                    delivery_address=pending_order['delivery_address']
-                )
+            # If order is already created (by webhook or another poll), just return success
+            if payment.order:
+                # Ensure session is cleaned up even if order was created by webhook
+                if 'pending_order' in request.session: del request.session['pending_order']
+                if 'cart' in request.session: request.session['cart'] = {}
+                if 'checkout_request_id' in request.session: del request.session['checkout_request_id']
                 
-                # Create order items and reduce stock
-                for key, item in pending_order['cart'].items():
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Payment confirmed. Order already processed.',
+                    'redirect_url': reverse('order_confirmation', args=[payment.order.id])
+                })
+
+            # If order does not exist, create it now.
+            # This is the primary order creation logic.
+            order_data = payment.order_details
+            if not order_data:
+                return JsonResponse({'status': 'error', 'message': 'Critical: Order details not found in payment record.'})
+
+            # Create the order
+            order = Order.objects.create(
+                customer_name=order_data['customer_name'],
+                phone_number=order_data['phone_number'],
+                email=order_data['email'],
+                delivery_address=order_data['delivery_address'],
+                is_paid=True  # Mark order as paid
+            )
+
+            # Link payment to the new order
+            payment.order = order
+            payment.save(update_fields=['order'])
+
+            # Create order items and reduce stock
+            for key, item in order_data['cart'].items():
+                try:
                     product = Product.objects.get(id=item['product_id'])
                     OrderItem.objects.create(
                         order=order,
                         product=product,
                         quantity=item['quantity'],
-                        price=Decimal(str(item['price'])),
+                        price=product.price,  # Use fresh price from DB
                         size=item['size']
                     )
-                    product.stock_quantity -= item['quantity']
-                    product.save()
-                
-                # Send confirmation email
-                send_order_confirmation_email(order)
-                
-                # Clear session
-                request.session['cart'] = {}
-                del request.session['pending_order']
-                del request.session['checkout_request_id']
-                
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Payment confirmed',
-                    'redirect_url': f'/order-confirmation/{order.id}/',
-                    'order_id': order.id
-                })
+                    # Safely reduce stock for 'ready' items
+                    if product.stock_type == 'ready':
+                        product.stock_quantity = F('stock_quantity') - item['quantity']
+                        product.save(update_fields=['stock_quantity'])
+                except Product.DoesNotExist:
+                    # Log if a product in the cart doesn't exist anymore
+                    logger.warning(f"Product with ID {item['product_id']} not found during order creation for Order #{order.id}.")
+                    continue
+
+            # Send confirmation email
+            send_order_confirmation_email(order)
+            
+            # Clear session data *after* successful processing
+            if 'pending_order' in request.session: del request.session['pending_order']
+            request.session['cart'] = {}
+            if 'checkout_request_id' in request.session: del request.session['checkout_request_id']
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Payment confirmed and order created.',
+                'redirect_url': reverse('order_confirmation', args=[order.id])
+            })
         
+        # --- FAILED ---
         elif payment.status == 'failed':
             return JsonResponse({
                 'status': 'failed',
-                'message': payment.result_desc or 'Payment failed'
+                'message': payment.result_desc or 'Payment failed at provider.',
+                'redirect_url': reverse('payment_failed')
             })
         
+        # --- CANCELLED ---
         elif payment.status == 'cancelled':
             return JsonResponse({
                 'status': 'cancelled',
-                'message': 'Payment was cancelled'
+                'message': 'Payment was cancelled by the user.',
+                'redirect_url': reverse('payment_failed')
             })
         
-        # Still pending
-        return JsonResponse({'status': 'pending', 'message': 'Waiting for payment'})
+        # --- PENDING ---
+        return JsonResponse({'status': 'pending', 'message': 'Waiting for payment confirmation...'})
         
     except MpesaPayment.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Payment not found'})
+        return JsonResponse({'status': 'error', 'message': 'Payment record not found. Please try again.'})
 
 
 def mpesa_callback(request):
@@ -1131,52 +1102,85 @@ def mpesa_callback(request):
 
 
 def confirm_mpesa_payment(request):
-    """Manual confirmation - fallback if auto-processing fails"""
-    if request.method == 'POST':
-        pending_order = request.session.get('pending_order')
-        
-        if not pending_order:
-            messages.error(request, 'No pending order found.')
-            return redirect('cart')
-        
-        # Create order
-        order = Order.objects.create(
-            customer_name=pending_order['customer_name'],
-            phone_number=pending_order['phone_number'],
-            email=pending_order['email'],
-            delivery_address=pending_order['delivery_address']
-        )
-        
-        # Create order items and reduce stock
-        for key, item in pending_order['cart'].items():
-            product = Product.objects.get(id=item['product_id'])
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                quantity=item['quantity'],
-                price=Decimal(str(item['price'])),
-                size=item['size']
+    """
+    Manual confirmation fallback if auto-processing via webhook/polling fails.
+    This is now idempotent and uses the secure order details from the payment model.
+    """
+    if request.method != 'POST':
+        return redirect('checkout')
+
+    checkout_request_id = request.session.get('checkout_request_id')
+    if not checkout_request_id:
+        messages.error(request, 'Your payment session has expired. Please try checking out again.')
+        return redirect('checkout')
+
+    try:
+        with transaction.atomic():
+            payment = MpesaPayment.objects.select_for_update().get(checkout_request_id=checkout_request_id)
+
+            # Idempotency: If order already exists, don't create another one.
+            if payment.order:
+                messages.info(request, f'Your order #{payment.order.id} has already been processed.')
+                return redirect('order_confirmation', order_id=payment.order.id)
+
+            order_data = payment.order_details
+            if not order_data:
+                messages.error(request, 'Critical error: Could not find the details for your order. Please contact support.')
+                return redirect('checkout')
+
+            # Create order since it doesn't exist
+            order = Order.objects.create(
+                customer_name=order_data['customer_name'],
+                phone_number=order_data['phone_number'],
+                email=order_data['email'],
+                delivery_address=order_data['delivery_address'],
+                is_paid=True  # Manually confirmed as paid
             )
-            product.stock_quantity -= item['quantity']
-            product.save()
-        
-        # Send confirmation email
-        email_sent = send_order_confirmation_email(order)
-        
-        if email_sent:
-            messages.success(request, 'Payment confirmed! Order placed. Confirmation email sent.')
-        else:
-            messages.warning(request, 'Payment confirmed! Order placed. But confirmation email could not be sent.')
-        
-        # Clear session
-        request.session['cart'] = {}
-        del request.session['pending_order']
-        if 'checkout_request_id' in request.session:
-            del request.session['checkout_request_id']
-        
-        return redirect('order_confirmation', order_id=order.id)
-    
-    return redirect('checkout')
+
+            # Link payment and update its status
+            payment.order = order
+            payment.status = 'success' # Mark as success since it's a manual confirmation
+            payment.result_desc = 'Manually confirmed by user.'
+            payment.save()
+
+            # Create order items and reduce stock
+            for key, item in order_data['cart'].items():
+                try:
+                    product = Product.objects.get(id=item['product_id'])
+                    OrderItem.objects.create(
+                        order=order,
+                        product=product,
+                        quantity=item['quantity'],
+                        price=product.price,  # Use fresh price
+                        size=item['size']
+                    )
+                    if product.stock_type == 'ready':
+                        product.stock_quantity = F('stock_quantity') - item['quantity']
+                        product.save(update_fields=['stock_quantity'])
+                except Product.DoesNotExist:
+                    logger.warning(f"Product ID {item['product_id']} not found for manually confirmed Order #{order.id}.")
+                    continue
+            
+            email_sent = send_order_confirmation_email(order)
+            if email_sent:
+                messages.success(request, 'Payment confirmed! Your order has been placed. A confirmation email has been sent.')
+            else:
+                messages.warning(request, 'Payment confirmed! Your order has been placed, but the confirmation email could not be sent.')
+            
+            # Clean up session
+            if 'cart' in request.session: request.session['cart'] = {}
+            if 'pending_order' in request.session: del request.session['pending_order']
+            if 'checkout_request_id' in request.session: del request.session['checkout_request_id']
+            
+            return redirect('order_confirmation', order_id=order.id)
+
+    except MpesaPayment.DoesNotExist:
+        messages.error(request, 'Could not find a matching payment record. Please try the checkout process again.')
+        return redirect('checkout')
+    except Exception as e:
+        logger.error(f"Error in manual confirm_mpesa_payment: {e}")
+        messages.error(request, 'An unexpected error occurred. Please contact support.')
+        return redirect('checkout')
 
 
 
@@ -1194,56 +1198,127 @@ from .email_utils import send_order_confirmation_email
 
 @csrf_exempt
 def lipana_webhook(request):
-    """Replaces mpesa_callback. Handles Lipana payment events."""
+    """
+    Handles Lipana payment events.
+    Primary, idempotent order creation mechanism for M-Pesa.
+    """
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-    # Verify signature
+    # 1. Verify signature
     signature = request.headers.get('X-Lipana-Signature', '')
     webhook_secret = os.getenv('LIPANA_WEBHOOK_SECRET', '')
     if webhook_secret and signature:
-        expected = hmac.new(
-            webhook_secret.encode(), request.body, hashlib.sha256
-        ).hexdigest()
+        expected = hmac.new(webhook_secret.encode(), request.body, hashlib.sha256).hexdigest()
         if not hmac.compare_digest(signature, expected):
+            logger.warning("Lipana webhook signature verification failed.")
             return JsonResponse({'error': 'Unauthorized'}, status=401)
 
     try:
         data = json.loads(request.body)
-        event = data.get('event')           # "payment.success" / "payment.failed"
+        logger.info(f"Lipana webhook payload: {json.dumps(data)}")
+
+        event = data.get('event')
         event_data = data.get('data', {})
-        checkout_request_id = event_data.get('checkoutRequestID')
 
-        try:
-            payment = MpesaPayment.objects.get(checkout_request_id=checkout_request_id)
+        # Lipana sends transaction_id (with underscore)
+        checkout_request_id = (
+            event_data.get('transaction_id') or
+            event_data.get('transactionId') or
+            event_data.get('checkoutRequestID') or
+            event_data.get('CheckoutRequestID') or
+            event_data.get('checkout_request_id') or
+            data.get('transactionId')
+        )
 
-            if event == 'payment.success':
+        if not checkout_request_id:
+            logger.error(f"Lipana webhook missing transaction ID. Full payload: {json.dumps(data)}")
+            return JsonResponse({'status': 'ok'})
+
+        logger.info(f"Lipana webhook: event={event}, checkout_request_id={checkout_request_id}")
+
+        with transaction.atomic():
+            try:
+                payment = MpesaPayment.objects.select_for_update().get(checkout_request_id=checkout_request_id)
+            except MpesaPayment.DoesNotExist:
+                logger.error(f"Lipana webhook: MpesaPayment not found for: {checkout_request_id}")
+                return JsonResponse({'status': 'ok'})
+
+            # 2. Handle events — Lipana uses 'transaction.*' not 'payment.*'
+            if event == 'transaction.success':
                 payment.status = 'success'
-                payment.mpesa_receipt_number = event_data.get('transactionId', '')
+                payment.mpesa_receipt_number = event_data.get('transaction_id', '')
                 payment.amount = Decimal(str(event_data.get('amount', payment.amount)))
                 ts = event_data.get('timestamp')
                 if ts:
-                    payment.transaction_date = timezone.datetime.fromisoformat(
-                        ts.replace('Z', '+00:00')
-                    )
+                    payment.transaction_date = timezone.datetime.fromisoformat(ts.replace('Z', '+00:00'))
 
-            elif event == 'payment.failed':
+                # Idempotency check — don't create order twice
+                if payment.order:
+                    logger.info(f"Webhook: Order already exists for {checkout_request_id}. Skipping.")
+                    payment.save()
+                    return JsonResponse({'status': 'ok'})
+
+                order_data = payment.order_details
+                if not order_data:
+                    logger.critical(f"CRITICAL: Payment success for {checkout_request_id} but no order_details found!")
+                    payment.save()
+                    return JsonResponse({'status': 'ok'})
+
+                # 3. Create Order
+                order = Order.objects.create(
+                    customer_name=order_data['customer_name'],
+                    phone_number=order_data['phone_number'],
+                    email=order_data['email'],
+                    delivery_address=order_data['delivery_address'],
+                    is_paid=True
+                )
+                payment.order = order
+
+                # 4. Create OrderItems and reduce stock
+                for key, item in order_data['cart'].items():
+                    try:
+                        product = Product.objects.get(id=item['product_id'])
+                        OrderItem.objects.create(
+                            order=order,
+                            product=product,
+                            quantity=item['quantity'],
+                            price=product.price,
+                            size=item['size']
+                        )
+                        if product.stock_type == 'ready':
+                            product.stock_quantity = F('stock_quantity') - item['quantity']
+                            product.save(update_fields=['stock_quantity'])
+                    except Product.DoesNotExist:
+                        logger.warning(f"Product ID {item['product_id']} not found for Order #{order.id}.")
+                        continue
+
+                # 5. Send confirmation email
+                send_order_confirmation_email(order)
+                logger.info(f"Webhook: Order #{order.id} created for {checkout_request_id}.")
+
+            elif event == 'transaction.failed':
                 payment.status = 'failed'
                 payment.result_desc = event_data.get('message', 'Payment failed')
 
-            elif event == 'payment.pending':
+            elif event == 'transaction.cancelled':
+                payment.status = 'cancelled'
+                payment.result_desc = event_data.get('message', 'Payment cancelled')
+
+            elif event == 'transaction.pending':
                 payment.status = 'pending'
+
+            else:
+                # Ignore unhandled events like payout.initiated
+                logger.info(f"Lipana webhook: Ignoring unhandled event '{event}'")
+                return JsonResponse({'status': 'ok'})
 
             payment.save()
 
-        except MpesaPayment.DoesNotExist:
-            print(f"No record for checkoutRequestID: {checkout_request_id}")
-
     except Exception as e:
-        print(f"Lipana webhook error: {e}")
+        logger.error(f"General error in Lipana webhook: {e}", exc_info=True)
 
-    return JsonResponse({'status': 'ok'})  # Always 200 so Lipana doesn't retry
-
+    return JsonResponse({'status': 'ok'})
 
 
 # parlour/views.py - Add these imports at the top
@@ -2332,3 +2407,113 @@ def order_detail(request, order_id):
         'pickup_info': order.get_pickup_info(),
     }
     return render(request, 'parlour/admin/order_detail.html', context)
+
+def payment_processing(request, checkout_id):
+    """
+    Page to show while waiting for M-Pesa payment confirmation.
+    It polls the check_payment_status endpoint.
+    """
+    context = {
+        'checkout_id': checkout_id
+    }
+    return render(request, 'parlour/payment_processing.html', context)
+
+def payment_failed(request):
+    """Page to show when a payment fails or is cancelled."""
+    return render(request, 'parlour/payment_failed.html')
+
+
+
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
+
+@staff_member_required
+def delivery_dashboard(request):
+    """List all orders for delivery management."""
+    orders = Order.objects.filter(
+        order_status__in=['pending', 'processing', 'dispatched']
+    ).prefetch_related('orderitem_set__product').order_by('-created_at')
+    return render(request, 'parlour/delivery_dashboard.html', {'orders': orders})
+
+
+@staff_member_required
+def delivery_detail(request, order_id):
+    """Show full order detail for delivery confirmation."""
+    order = get_object_or_404(Order, id=order_id)
+    items = order.orderitem_set.select_related('product').all()
+    payment = MpesaPayment.objects.filter(order=order).first()
+    context = {
+        'order': order,
+        'items': items,
+        'payment': payment,
+    }
+    return render(request, 'parlour/delivery_detail.html', context)
+
+
+@staff_member_required
+@require_POST
+def delivery_stk_push(request, order_id):
+    """Send STK push to customer for unpaid orders."""
+    order = get_object_or_404(Order, id=order_id)
+    if order.is_paid:
+        messages.error(request, 'Order is already paid.')
+        return redirect('delivery_detail', order_id=order_id)
+
+    result = stk_push(order.phone_number, order.get_total(), f"ORDER-{order.id}")
+    if result['success']:
+        # Create or update MpesaPayment record
+        MpesaPayment.objects.update_or_create(
+            order=order,
+            defaults={
+                'checkout_request_id': result['checkout_request_id'],
+                'phone_number': order.phone_number,
+                'amount': order.get_total(),
+                'status': 'pending',
+            }
+        )
+        messages.success(request, f'STK Push sent to {order.phone_number}. Waiting for payment...')
+    else:
+        messages.error(request, f'STK Push failed: {result["message"]}')
+    return redirect('delivery_detail', order_id=order_id)
+
+
+@staff_member_required
+@require_POST
+def mark_delivered(request, order_id):
+    """Mark order as delivered after verifying payment."""
+    order = get_object_or_404(Order, id=order_id)
+    payment = MpesaPayment.objects.filter(order=order).first()
+
+    if order.is_paid:
+        # Paid via M-Pesa — verify phone number matches
+        provided_phone = request.POST.get('mpesa_phone', '').strip()
+        from .lipana import format_phone
+        if not provided_phone:
+            messages.error(request, 'Please provide the M-Pesa phone number to confirm identity.')
+            return redirect('delivery_detail', order_id=order_id)
+
+        normalized_provided = format_phone(provided_phone)
+        normalized_order = format_phone(order.phone_number)
+
+        if normalized_provided != normalized_order:
+            messages.error(request, f'Phone number does not match our records. Please verify with the customer.')
+            return redirect('delivery_detail', order_id=order_id)
+
+        order.order_status = 'delivered'
+        order.save(update_fields=['order_status'])
+        messages.success(request, f'✅ Order #{order.id} marked as delivered. Identity confirmed via M-Pesa number.')
+
+    else:
+        # Not paid — check if cash payment confirmed
+        payment_method = request.POST.get('payment_method', '')
+        if payment_method == 'cash':
+            order.is_paid = True
+            order.order_status = 'delivered'
+            order.save(update_fields=['is_paid', 'order_status'])
+            messages.success(request, f'✅ Order #{order.id} marked as delivered and paid (cash).')
+        else:
+            messages.error(request, 'Order is not paid. Send STK Push or confirm cash payment.')
+            return redirect('delivery_detail', order_id=order_id)
+
+    return redirect('delivery_dashboard')    

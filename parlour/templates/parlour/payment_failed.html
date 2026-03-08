@@ -1,0 +1,72 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}Payment Failed{% endblock %}
+
+{% block content %}
+<style>
+    .failure-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 60vh;
+        padding: 2rem;
+        background-color: #fff7f7;
+        border: 1px solid #e53e3e;
+        border-radius: 8px;
+        margin: 2rem auto;
+        max-width: 700px;
+    }
+    .failure-icon {
+        color: #e53e3e;
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+    .failure-container h1 {
+        font-size: 2.5rem;
+        color: #c53030;
+        margin-bottom: 1rem;
+    }
+    .failure-container p {
+        font-size: 1.1rem;
+        color: #718096;
+        margin-bottom: 2rem;
+    }
+    .action-buttons a {
+        text-decoration: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 5px;
+        font-weight: bold;
+        margin: 0 0.5rem;
+        transition: background-color 0.3s;
+    }
+    .try-again-btn {
+        background-color: #7b2eda;
+        color: white;
+    }
+    .try-again-btn:hover {
+        background-color: #5a1d9a;
+    }
+    .back-home-btn {
+        background-color: #e2e8f0;
+        color: #4a5568;
+    }
+    .back-home-btn:hover {
+        background-color: #cbd5e0;
+    }
+</style>
+
+<div class="failure-container">
+    <div class="failure-icon">
+        <i class="fas fa-times-circle"></i>
+    </div>
+    <h1>Payment Unsuccessful</h1>
+    <p>We were unable to process your payment. This could be due to a timeout, cancellation, or insufficient funds.</p>
+    <div class="action-buttons">
+        <a href="{% url 'checkout' %}" class="try-again-btn">Try Again</a>
+        <a href="{% url 'home' %}" class="back-home-btn">Back to Home</a>
+    </div>
+</div>
+{% endblock %}
