@@ -68,6 +68,16 @@
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
+
+    <!-- PWA -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Hoka's Parlour">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+
     <style>
         /* -----------------------------------------------
            CUSTOM CSS VARIABLES (works alongside Tailwind)
@@ -613,6 +623,107 @@
         /* Block for child template extra styles */
         {% block extra_style %}{% endblock %}
     </style>
+
+    <!-- PWA Install Prompt -->
+<div id="pwa-banner" style="
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(102,126,234,0.4);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 16px;
+    max-width: 360px;
+    width: 90%;
+    font-family: Georgia, serif;
+">
+    <img src="/static/icons/icon-72x72.png" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
+    <div style="flex:1;">
+        <div style="font-weight:700;font-size:15px;">Install Hoka's Parlour</div>
+        <div style="font-size:12px;opacity:0.85;margin-top:2px;">Shop faster from your home screen!</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+        <button id="pwa-install-btn" style="
+            background:white;
+            color:#667eea;
+            border:none;
+            padding:8px 16px;
+            border-radius:8px;
+            font-weight:700;
+            font-size:13px;
+            cursor:pointer;
+            white-space:nowrap;
+        ">Install ✨</button>
+        <button id="pwa-dismiss-btn" style="
+            background:transparent;
+            color:white;
+            border:1px solid rgba(255,255,255,0.4);
+            padding:6px 16px;
+            border-radius:8px;
+            font-size:12px;
+            cursor:pointer;
+        ">Not now</button>
+    </div>
+</div>
+
+<script>
+    let deferredPrompt;
+    const banner = document.getElementById('pwa-banner');
+    const installBtn = document.getElementById('pwa-install-btn');
+    const dismissBtn = document.getElementById('pwa-dismiss-btn');
+
+    // Don't show if user already dismissed
+    if (localStorage.getItem('pwa-dismissed')) {
+        banner.style.display = 'none';
+    }
+
+    // Capture the install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Show banner after 3 seconds
+        if (!localStorage.getItem('pwa-dismissed') && !localStorage.getItem('pwa-installed')) {
+            setTimeout(() => {
+                banner.style.display = 'flex';
+            }, 3000);
+        }
+    });
+
+    // Install button clicked
+    installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        banner.style.display = 'none';
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            localStorage.setItem('pwa-installed', 'true');
+            console.log('PWA installed!');
+        }
+        deferredPrompt = null;
+    });
+
+    // Dismiss button clicked
+    dismissBtn.addEventListener('click', () => {
+        banner.style.display = 'none';
+        localStorage.setItem('pwa-dismissed', 'true');
+    });
+
+    // Hide banner once installed
+    window.addEventListener('appinstalled', () => {
+        banner.style.display = 'none';
+        localStorage.setItem('pwa-installed', 'true');
+    });
+</script>
+
+
 </head>
 <body class="font-sans antialiased">
     <!-- HEADER -->
@@ -886,5 +997,18 @@
     </script>
     
     {% block extra_scripts %}{% endblock %}
+
+
+
+    <!-- Register Service Worker -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.log('SW error:', err));
+    });
+  }
+</script>
 </body>
 </html>

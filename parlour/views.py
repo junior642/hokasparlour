@@ -1221,7 +1221,6 @@ def lipana_webhook(request):
         event = data.get('event')
         event_data = data.get('data', {})
 
-        # Lipana sends transaction_id (with underscore)
         checkout_request_id = (
             event_data.get('transaction_id') or
             event_data.get('transactionId') or
@@ -1244,7 +1243,6 @@ def lipana_webhook(request):
                 logger.error(f"Lipana webhook: MpesaPayment not found for: {checkout_request_id}")
                 return JsonResponse({'status': 'ok'})
 
-            # 2. Handle events — Lipana uses 'transaction.*' not 'payment.*'
             if event == 'transaction.success':
                 payment.status = 'success'
                 payment.mpesa_receipt_number = event_data.get('transaction_id', '')
@@ -1253,19 +1251,27 @@ def lipana_webhook(request):
                 if ts:
                     payment.transaction_date = timezone.datetime.fromisoformat(ts.replace('Z', '+00:00'))
 
-                # Idempotency check — don't create order twice
+                # ── ALWAYS mark linked order as paid first ──
+                if payment.order and not payment.order.is_paid:
+                    payment.order.is_paid = True
+                    payment.order.save(update_fields=['is_paid'])
+                    logger.info(f"Webhook: Order #{payment.order.id} marked as paid.")
+
+                # ── Save payment status immediately ──
+                payment.save()
+
+                # ── Idempotency: skip order CREATION if order already exists ──
                 if payment.order:
-                    logger.info(f"Webhook: Order already exists for {checkout_request_id}. Skipping.")
-                    payment.save()
+                    logger.info(f"Webhook: Order already exists for {checkout_request_id}. Skipping creation.")
                     return JsonResponse({'status': 'ok'})
 
+                # ── No order yet — create from order_details ──
                 order_data = payment.order_details
                 if not order_data:
                     logger.critical(f"CRITICAL: Payment success for {checkout_request_id} but no order_details found!")
-                    payment.save()
                     return JsonResponse({'status': 'ok'})
 
-                # 3. Create Order
+                # Create Order
                 order = Order.objects.create(
                     customer_name=order_data['customer_name'],
                     phone_number=order_data['phone_number'],
@@ -1274,8 +1280,9 @@ def lipana_webhook(request):
                     is_paid=True
                 )
                 payment.order = order
+                payment.save(update_fields=['order'])
 
-                # 4. Create OrderItems and reduce stock
+                # Create OrderItems and reduce stock
                 for key, item in order_data['cart'].items():
                     try:
                         product = Product.objects.get(id=item['product_id'])
@@ -1293,33 +1300,30 @@ def lipana_webhook(request):
                         logger.warning(f"Product ID {item['product_id']} not found for Order #{order.id}.")
                         continue
 
-                # 5. Send confirmation email
                 send_order_confirmation_email(order)
                 logger.info(f"Webhook: Order #{order.id} created for {checkout_request_id}.")
 
             elif event == 'transaction.failed':
                 payment.status = 'failed'
                 payment.result_desc = event_data.get('message', 'Payment failed')
+                payment.save()
 
             elif event == 'transaction.cancelled':
                 payment.status = 'cancelled'
                 payment.result_desc = event_data.get('message', 'Payment cancelled')
+                payment.save()
 
             elif event == 'transaction.pending':
                 payment.status = 'pending'
+                payment.save()
 
             else:
-                # Ignore unhandled events like payout.initiated
                 logger.info(f"Lipana webhook: Ignoring unhandled event '{event}'")
-                return JsonResponse({'status': 'ok'})
-
-            payment.save()
 
     except Exception as e:
         logger.error(f"General error in Lipana webhook: {e}", exc_info=True)
 
     return JsonResponse({'status': 'ok'})
-
 
 # parlour/views.py - Add these imports at the top
 from django.contrib.auth.decorators import login_required
@@ -2430,7 +2434,6 @@ from django.views.decorators.http import require_POST
 
 @staff_member_required
 def delivery_dashboard(request):
-    """List all orders for delivery management."""
     orders = Order.objects.filter(
         order_status__in=['pending', 'processing', 'dispatched']
     ).prefetch_related('orderitem_set__product').order_by('-created_at')
@@ -2439,22 +2442,19 @@ def delivery_dashboard(request):
 
 @staff_member_required
 def delivery_detail(request, order_id):
-    """Show full order detail for delivery confirmation."""
     order = get_object_or_404(Order, id=order_id)
     items = order.orderitem_set.select_related('product').all()
     payment = MpesaPayment.objects.filter(order=order).first()
-    context = {
+    return render(request, 'parlour/delivery_detail.html', {
         'order': order,
         'items': items,
         'payment': payment,
-    }
-    return render(request, 'parlour/delivery_detail.html', context)
+    })
 
 
 @staff_member_required
 @require_POST
 def delivery_stk_push(request, order_id):
-    """Send STK push to customer for unpaid orders."""
     order = get_object_or_404(Order, id=order_id)
     if order.is_paid:
         messages.error(request, 'Order is already paid.')
@@ -2462,52 +2462,54 @@ def delivery_stk_push(request, order_id):
 
     result = stk_push(order.phone_number, order.get_total(), f"ORDER-{order.id}")
     if result['success']:
-        # Create or update MpesaPayment record
-        MpesaPayment.objects.update_or_create(
-            order=order,
-            defaults={
-                'checkout_request_id': result['checkout_request_id'],
-                'phone_number': order.phone_number,
-                'amount': order.get_total(),
-                'status': 'pending',
-            }
+        # Create a fresh MpesaPayment linked to this order
+        MpesaPayment.objects.create(
+            checkout_request_id=result['checkout_request_id'],
+            phone_number=order.phone_number,
+            amount=order.get_total(),
+            status='pending',
+            order=order,                          # ← link to order directly
+            order_details={},                     # empty since order already exists
+            session_key=request.session.session_key or 'delivery',
         )
-        messages.success(request, f'STK Push sent to {order.phone_number}. Waiting for payment...')
+        messages.success(request, f'✅ STK Push sent to {order.phone_number}. Waiting for payment...')
     else:
         messages.error(request, f'STK Push failed: {result["message"]}')
     return redirect('delivery_detail', order_id=order_id)
 
-
 @staff_member_required
 @require_POST
 def mark_delivered(request, order_id):
-    """Mark order as delivered after verifying payment."""
     order = get_object_or_404(Order, id=order_id)
-    payment = MpesaPayment.objects.filter(order=order).first()
+
+    def format_phone(phone):
+        phone = phone.strip().replace(" ", "").replace("-", "")
+        if phone.startswith('+254'):
+            return phone
+        elif phone.startswith('254'):
+            return '+' + phone
+        elif phone.startswith('07') or phone.startswith('01'):
+            return '+254' + phone[1:]
+        elif phone.startswith('7') or phone.startswith('1'):
+            return '+254' + phone
+        return phone
 
     if order.is_paid:
-        # Paid via M-Pesa — verify phone number matches
         provided_phone = request.POST.get('mpesa_phone', '').strip()
-        from .lipana import format_phone
         if not provided_phone:
             messages.error(request, 'Please provide the M-Pesa phone number to confirm identity.')
             return redirect('delivery_detail', order_id=order_id)
 
-        normalized_provided = format_phone(provided_phone)
-        normalized_order = format_phone(order.phone_number)
-
-        if normalized_provided != normalized_order:
-            messages.error(request, f'Phone number does not match our records. Please verify with the customer.')
+        if format_phone(provided_phone) != format_phone(order.phone_number):
+            messages.error(request, 'Phone number does not match. Please verify with the customer.')
             return redirect('delivery_detail', order_id=order_id)
 
         order.order_status = 'delivered'
         order.save(update_fields=['order_status'])
-        messages.success(request, f'✅ Order #{order.id} marked as delivered. Identity confirmed via M-Pesa number.')
+        messages.success(request, f'✅ Order #{order.id} marked as delivered. Identity confirmed.')
 
     else:
-        # Not paid — check if cash payment confirmed
-        payment_method = request.POST.get('payment_method', '')
-        if payment_method == 'cash':
+        if request.POST.get('payment_method') == 'cash':
             order.is_paid = True
             order.order_status = 'delivered'
             order.save(update_fields=['is_paid', 'order_status'])
@@ -2516,4 +2518,9 @@ def mark_delivered(request, order_id):
             messages.error(request, 'Order is not paid. Send STK Push or confirm cash payment.')
             return redirect('delivery_detail', order_id=order_id)
 
-    return redirect('delivery_dashboard')    
+    return redirect('delivery_dashboard')
+
+@staff_member_required
+def delivery_payment_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    return JsonResponse({'is_paid': order.is_paid})    

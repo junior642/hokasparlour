@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.views.decorators.cache import never_cache
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -54,10 +56,15 @@ urlpatterns = [
 
 
 
-    path('admin/delivery/', views.delivery_dashboard, name='delivery_dashboard'),
-    path('admin/delivery/<int:order_id>/', views.delivery_detail, name='delivery_detail'),
-    path('admin/delivery/stk-push/<int:order_id>/', views.delivery_stk_push, name='delivery_stk_push'),
-    path('admin/delivery/mark-delivered/<int:order_id>/', views.mark_delivered, name='mark_delivered'),
+    path('hoka/delivery/', views.delivery_dashboard, name='delivery_dashboard'),
+    path('hoka/delivery/<int:order_id>/', views.delivery_detail, name='delivery_detail'),
+    path('hoka/delivery/stk-push/<int:order_id>/', views.delivery_stk_push, name='delivery_stk_push'),
+    path('hoka/delivery/mark-delivered/<int:order_id>/', views.mark_delivered, name='mark_delivered'),
+    path('hoka/delivery/payment-status/<int:order_id>/', views.delivery_payment_status, name='delivery_payment_status'),
+    path('sw.js', never_cache(TemplateView.as_view(
+        template_name='sw.js',
+        content_type='application/javascript'
+    )), name='sw'),
 
 
     # Product Management (Staff Only)

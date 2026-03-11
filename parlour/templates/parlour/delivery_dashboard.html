@@ -1,77 +1,205 @@
-{% extends 'base.html' %}
+{% extends 'parlour/base.html' %}
+{% block title %}Delivery Dashboard{% endblock %}
 {% block content %}
-<div style="max-width:1100px;margin:40px auto;padding:0 20px;font-family:'Georgia',serif;">
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 font-serif">
+    
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
-            <h1 style="margin:0;font-size:32px;color:#1a1a2e;">📦 Delivery Dashboard</h1>
-            <p style="color:#666;margin:5px 0 0 0;">{{ orders.count }} active order{{ orders.count|pluralize }}</p>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <span class="bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] p-2 rounded-xl">
+                    <i class="fas fa-truck-fast text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                </span>
+                Delivery Dashboard
+            </h1>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-5 h-5 bg-[var(--accent)] text-white rounded-full text-xs font-bold">
+                    {{ orders.count }}
+                </span>
+                active order{{ orders.count|pluralize }} ready for delivery
+            </p>
         </div>
-        <a href="/admin/" style="background:#667eea;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-size:14px;">← Admin Panel</a>
+        
+        <a href="/admin/" 
+           class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--accent)] dark:bg-[#8B3DFF] text-white rounded-xl font-semibold text-sm sm:text-base transition-all hover:bg-[var(--accent-light)] dark:hover:bg-[#6B1FCC] hover:-translate-y-0.5 hover:shadow-lg">
+            <i class="fas fa-arrow-left text-xs sm:text-sm"></i>
+            Admin Panel
+        </a>
     </div>
 
+    <!-- Messages -->
     {% if messages %}
+    <div class="space-y-3 mb-6 sm:mb-8">
         {% for message in messages %}
-        <div style="padding:15px 20px;border-radius:8px;margin-bottom:20px;
-            background:{% if message.tags == 'success' %}#d4edda{% else %}#f8d7da{% endif %};
-            color:{% if message.tags == 'success' %}#155724{% else %}#721c24{% endif %};
-            border-left:4px solid {% if message.tags == 'success' %}#28a745{% else %}#dc3545{% endif %};">
-            {{ message }}
+        <div class="flex items-start gap-3 p-4 rounded-xl border-l-4 animate-[slideIn_0.3s_ease]
+            {% if message.tags == 'success' %}
+                bg-green-50 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400
+            {% else %}
+                bg-red-50 dark:bg-red-900/20 border-red-500 text-red-700 dark:text-red-400
+            {% endif %}">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} text-lg mt-0.5"></i>
+            <div class="flex-1 text-sm sm:text-base">{{ message }}</div>
         </div>
         {% endfor %}
+    </div>
     {% endif %}
 
-    {% if not orders %}
-    <div style="text-align:center;padding:60px;background:white;border-radius:16px;color:#999;">
-        <div style="font-size:48px;">🎉</div>
-        <p style="font-size:18px;">No pending deliveries!</p>
-    </div>
-    {% else %}
-
-    <!-- Search by Order ID -->
-    <div style="background:white;padding:20px;border-radius:12px;margin-bottom:25px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-        <form method="get" style="display:flex;gap:10px;align-items:center;">
-            <input type="number" name="order_id" placeholder="Enter Order ID to jump directly..."
-                value="{{ request.GET.order_id }}"
-                style="flex:1;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;outline:none;">
-            <button type="submit" style="background:#667eea;color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:15px;">
-                🔍 Find Order
+    <!-- Jump to Order Search -->
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 mb-6 sm:mb-8 shadow-sm border border-gray-200 dark:border-gray-700">
+        <form onsubmit="jumpToOrder(event)" class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="number" id="orderIdInput" placeholder="Enter Order ID to jump directly..."
+                       class="w-full pl-9 pr-4 py-3 sm:py-3.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm sm:text-base focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all"
+                       style="border-color: var(--border);">
+            </div>
+            <button type="submit" 
+                    class="px-5 sm:px-6 py-3 sm:py-3.5 bg-[var(--accent)] dark:bg-[#8B3DFF] text-white rounded-xl font-semibold text-sm sm:text-base transition-all hover:bg-[var(--accent-light)] dark:hover:bg-[#6B1FCC] hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2">
+                <i class="fas fa-magnifying-glass"></i>
+                <span class="hidden sm:inline">Find</span> Order
             </button>
         </form>
-        {% if request.GET.order_id %}
-            <script>window.location.href = "/admin/delivery/{{ request.GET.order_id }}/"; </script>
-        {% endif %}
     </div>
 
-    <div style="display:grid;gap:16px;">
+    <script>
+        function jumpToOrder(e) {
+            e.preventDefault();
+            const id = document.getElementById('orderIdInput').value;
+            if (id) window.location.href = '/admin/delivery/' + id + '/';
+        }
+    </script>
+
+    <!-- Orders List -->
+    {% if not orders %}
+    <div class="text-center py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="text-5xl sm:text-6xl mb-4 animate-bounce">🎉</div>
+        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">All Clear!</h3>
+        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">No pending deliveries right now.</p>
+    </div>
+    {% else %}
+    <div class="space-y-4 sm:space-y-5">
         {% for order in orders %}
-        <div style="background:white;border-radius:12px;padding:20px 25px;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;border-left:4px solid {% if order.is_paid %}#28a745{% else %}#dc3545{% endif %};">
-            <div>
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-                    <span style="font-size:18px;font-weight:700;color:#1a1a2e;">Order #{{ order.id }}</span>
-                    {% if order.is_paid %}
-                        <span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;">✔ Paid</span>
-                    {% else %}
-                        <span style="background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;">✘ Not Paid</span>
-                    {% endif %}
-                    <span style="background:#e8f0fe;color:#667eea;padding:3px 10px;border-radius:12px;font-size:12px;">{{ order.order_status|title }}</span>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 lg:p-6 shadow-sm border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md hover:-translate-y-0.5 group"
+             style="border-left-width: 4px; border-left-color: {% if order.is_paid %}#10B981{% else %}#EF4444{% endif %};">
+            
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                <!-- Order Info -->
+                <div class="flex-1">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+                            Order #{{ order.id }}
+                        </h3>
+                        
+                        <!-- Status Badges -->
+                        <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold
+                            {% if order.is_paid %}
+                                bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
+                            {% else %}
+                                bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
+                            {% endif %}">
+                            <i class="fas fa-{% if order.is_paid %}check-circle{% else %}times-circle{% endif %} text-[8px] sm:text-xs"></i>
+                            {% if order.is_paid %}Paid{% else %}Not Paid{% endif %}
+                        </span>
+                        
+                        <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-full text-[10px] sm:text-xs font-semibold">
+                            <i class="fas fa-clock text-[8px] sm:text-xs"></i>
+                            {{ order.order_status|title }}
+                        </span>
+                    </div>
+                    
+                    <!-- Customer Details -->
+                    <div class="space-y-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-user text-[var(--accent)] dark:text-[#8B3DFF] w-4 text-xs"></i>
+                            <span class="font-medium text-gray-900 dark:text-white">{{ order.customer_name }}</span>
+                            <span class="text-gray-400">·</span>
+                            <i class="fas fa-phone text-[var(--accent)] dark:text-[#8B3DFF] text-xs"></i>
+                            <span>{{ order.phone_number }}</span>
+                        </div>
+                        
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-location-dot text-[var(--accent)] dark:text-[#8B3DFF] w-4 text-xs mt-0.5"></i>
+                            <span class="flex-1">{{ order.delivery_address }}</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-calendar text-[var(--accent)] dark:text-[#8B3DFF] w-4 text-xs"></i>
+                            <span class="text-gray-500 dark:text-gray-500">{{ order.created_at|date:"M d, Y · g:i A" }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div style="color:#555;font-size:14px;line-height:1.8;">
-                    <strong>{{ order.customer_name }}</strong> · {{ order.phone_number }}<br>
-                    {{ order.delivery_address }}<br>
-                    <span style="color:#999;">{{ order.created_at|date:"M d, Y · g:i A" }}</span>
+                
+                <!-- Order Total & Action -->
+                <div class="flex flex-row lg:flex-col items-center justify-between lg:items-end gap-3 lg:gap-2">
+                    <div class="text-right">
+                        <span class="text-xs text-gray-500 dark:text-gray-400 block">Total Amount</span>
+                        <span class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--accent)] dark:text-[#8B3DFF]">
+                            KSH {{ order.get_total }}
+                        </span>
+                    </div>
+                    
+                    <a href="{% url 'delivery_detail' order.id %}"
+                       class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] text-white rounded-xl font-semibold text-xs sm:text-sm transition-all hover:shadow-xl hover:-translate-y-1 hover:scale-105 group/btn">
+                        <span>Manage</span>
+                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                    </a>
                 </div>
             </div>
-            <div style="text-align:right;">
-                <div style="font-size:22px;font-weight:800;color:#1a1a2e;margin-bottom:10px;">KSH {{ order.get_total }}</div>
-                <a href="{% url 'delivery_detail' order.id %}"
-                    style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:10px 22px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;">
-                    Manage Delivery →
-                </a>
+            
+            <!-- Progress Bar (Optional - if you want to show delivery progress) -->
+            {% if order.order_status == 'processing' %}
+            <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <div class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-[var(--accent)] dark:bg-[#8B3DFF] rounded-full" style="width: 30%"></div>
+                    </div>
+                    <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Processing</span>
+                </div>
             </div>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
     {% endif %}
 </div>
+
+<!-- Custom Animation -->
+<style>
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effect for order cards */
+.hover\:shadow-md:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Custom scrollbar for the page (optional) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-light);
+}
+</style>
 {% endblock %}
