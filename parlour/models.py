@@ -407,6 +407,9 @@ class Profile(models.Model):
     delivery_address = models.TextField(blank=True)
     default_delivery_location = models.CharField(max_length=200, blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+
+    whatsapp_joined = models.BooleanField(default=False)
+    whatsapp_popup_dismissed_at = models.DateTimeField(null=True, blank=True)
     
     preferred_payment_method = models.CharField(
         max_length=20,

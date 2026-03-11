@@ -723,6 +723,217 @@
     });
 </script>
 
+{% if show_whatsapp_popup %}
+<div id="whatsapp-popup" style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+">
+    <div style="
+        background: white;
+        border-radius: 32px;
+        padding: 40px 32px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 30px 70px rgba(0,0,0,0.3);
+        position: relative;
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 1px solid rgba(255,255,255,0.1);
+    ">
+        <button onclick="dismissWhatsapp()" style="
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            background: #f0f0f0;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-weight: 500;
+            padding: 0;
+            line-height: 1;
+        " onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='#f0f0f0'">×</button>
+
+        <!-- WhatsApp Icon Circle -->
+        <div style="
+            width: 88px;
+            height: 88px;
+            background: linear-gradient(145deg, #25D366, #128C7E);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.3);
+        ">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="white" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));">
+                <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.985L2.25 21.75l5.422-1.56c1.473.818 3.133 1.251 4.83 1.253h.004c5.199 0 9.455-4.195 9.463-9.396.004-2.51-.97-4.872-2.857-6.759zM12.013 20.038h-.003c-1.51 0-2.992-.408-4.27-1.173l-.307-.183-3.217.926.987-3.117-.2-.319a8.26 8.26 0 0 1-1.279-4.428c.007-4.568 3.723-8.28 8.299-8.28 2.217 0 4.3.865 5.865 2.434a8.206 8.206 0 0 1 2.428 5.858c-.008 4.568-3.724 8.28-8.296 8.28zm4.554-6.203c-.25-.125-1.479-.73-1.708-.813-.23-.083-.397-.125-.564.125-.167.25-.646.813-.792.98-.146.167-.292.188-.542.063-.896-.417-1.52-.742-2.104-1.27-.792-.708-1.328-1.583-1.484-1.854-.156-.27-.017-.416.117-.55.12-.12.271-.313.406-.47.135-.156.188-.27.271-.448.083-.178.042-.333-.021-.478-.063-.146-.563-1.354-.771-1.854-.208-.5-.417-.417-.563-.417-.146 0-.313-.021-.48-.021s-.438.063-.667.313c-.229.25-.875.854-.875 2.083s.896 2.417 1.021 2.583c.125.167 1.745 2.666 4.229 3.583.604.208 1.062.333 1.427.417.604.125 1.155.104 1.588.063.485-.042 1.49-.604 1.698-1.188.208-.583.208-1.083.146-1.188-.063-.104-.229-.167-.479-.271z"/>
+            </svg>
+        </div>
+
+        <h2 style="
+            margin: 0 0 8px 0;
+            color: #1e293b;
+            font-size: 26px;
+            font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: -0.5px;
+        ">
+            Join Our WhatsApp 📱
+        </h2>
+        
+        <p style="
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 28px 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        ">
+            Be the first to know about exclusive offers and updates!
+        </p>
+
+        <!-- Benefits Grid -->
+        <div style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 32px;
+            text-align: left;
+        ">
+            <div style="background: #f8fafc; padding: 12px; border-radius: 16px;">
+                <div style="font-size: 24px; margin-bottom: 4px;">🎁</div>
+                <div style="font-weight: 600; color: #0f172a; font-size: 14px;">Exclusive Deals</div>
+                <div style="color: #64748b; font-size: 12px;">Members only</div>
+            </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 16px;">
+                <div style="font-size: 24px; margin-bottom: 4px;">🚀</div>
+                <div style="font-weight: 600; color: #0f172a; font-size: 14px;">Early Access</div>
+                <div style="color: #64748b; font-size: 12px;">New arrivals</div>
+            </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 16px;">
+                <div style="font-size: 24px; margin-bottom: 4px;">⚡</div>
+                <div style="font-weight: 600; color: #0f172a; font-size: 14px;">Flash Sales</div>
+                <div style="color: #64748b; font-size: 12px;">24h offers</div>
+            </div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 16px;">
+                <div style="font-size: 24px; margin-bottom: 4px;">💬</div>
+                <div style="font-weight: 600; color: #0f172a; font-size: 14px;">Direct Support</div>
+                <div style="color: #64748b; font-size: 12px;">Quick replies</div>
+            </div>
+        </div>
+
+        <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK_HERE" 
+           target="_blank"
+           onclick="joinWhatsapp()"
+           style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                background: linear-gradient(135deg, #25D366, #128C7E);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 50px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 18px;
+                margin-bottom: 16px;
+                transition: all 0.3s;
+                border: none;
+                width: 100%;
+                box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+        " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 15px 30px rgba(37, 211, 102, 0.5)'" 
+           onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 10px 25px rgba(37, 211, 102, 0.4)'">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.985L2.25 21.75l5.422-1.56c1.473.818 3.133 1.251 4.83 1.253h.004c5.199 0 9.455-4.195 9.463-9.396.004-2.51-.97-4.872-2.857-6.759zM12.013 20.038h-.003c-1.51 0-2.992-.408-4.27-1.173l-.307-.183-3.217.926.987-3.117-.2-.319a8.26 8.26 0 0 1-1.279-4.428c.007-4.568 3.723-8.28 8.299-8.28 2.217 0 4.3.865 5.865 2.434a8.206 8.206 0 0 1 2.428 5.858c-.008 4.568-3.724 8.28-8.296 8.28zm4.554-6.203c-.25-.125-1.479-.73-1.708-.813-.23-.083-.397-.125-.564.125-.167.25-.646.813-.792.98-.146.167-.292.188-.542.063-.896-.417-1.52-.742-2.104-1.27-.792-.708-1.328-1.583-1.484-1.854-.156-.27-.017-.416.117-.55.12-.12.271-.313.406-.47.135-.156.188-.27.271-.448.083-.178.042-.333-.021-.478-.063-.146-.563-1.354-.771-1.854-.208-.5-.417-.417-.563-.417-.146 0-.313-.021-.48-.021s-.438.063-.667.313c-.229.25-.875.854-.875 2.083s.896 2.417 1.021 2.583c.125.167 1.745 2.666 4.229 3.583.604.208 1.062.333 1.427.417.604.125 1.155.104 1.588.063.485-.042 1.49-.604 1.698-1.188.208-.583.208-1.083.146-1.188-.063-.104-.229-.167-.479-.271z"/>
+            </svg>
+            Join WhatsApp Group
+        </a>
+
+        <button onclick="dismissWhatsapp()" style="
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s;
+            font-weight: 500;
+            padding: 8px 16px;
+        " onmouseover="this.style.color='#64748b'" onmouseout="this.style.color='#94a3b8'">
+            Maybe later
+        </button>
+    </div>
+</div>
+
+<style>
+@keyframes slideUp {
+    from {
+        transform: translateY(30px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    #whatsapp-popup > div {
+        padding: 32px 20px !important;
+    }
+    
+    #whatsapp-popup h2 {
+        font-size: 24px !important;
+    }
+}
+</style>
+
+<script>
+function sendPopupAction(action) {
+    fetch('/clear-whatsapp-popup/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=' + action
+    });
+}
+
+function joinWhatsapp() {
+    sendPopupAction('joined');
+    document.getElementById('whatsapp-popup').style.display = 'none';
+}
+
+function dismissWhatsapp() {
+    sendPopupAction('dismiss');
+    document.getElementById('whatsapp-popup').style.display = 'none';
+}
+
+// Close on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        dismissWhatsapp();
+    }
+});
+</script>
+{% endif %}
+
 
 </head>
 <body class="font-sans antialiased">

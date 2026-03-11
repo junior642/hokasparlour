@@ -1,71 +1,79 @@
-<!-- Category Ad Banner -->
-<div class="mb-3 lg:mb-5 rounded-xl overflow-hidden relative group transition-all hover:shadow-lg"
-     style="background-color: {{ ad.background_color|default:'#7b2eda' }}; min-height: 200px;">
-
-    <!-- Background Image/Video with Parallax Effect on Hover -->
-    {% if ad.single_image %}
-    <img src="{{ ad.single_image.url }}" 
-         alt="{{ ad.headline }}"
-         class="w-full h-full object-cover max-h-28 sm:max-h-32 md:max-h-40 lg:max-h-48 xl:max-h-56 block transition-transform duration-700 group-hover:scale-105">
-    {% elif ad.ad_type == 'video' and ad.video %}
-    <video class="w-full h-full object-cover max-h-28 sm:max-h-32 md:max-h-40 lg:max-h-48 xl:max-h-56 block"
-           {% if ad.autoplay %}autoplay muted playsinline{% endif %}
-           {% if ad.loop %}loop{% endif %}
-           poster="{% if ad.video_poster %}{{ ad.video_poster.url }}{% endif %}">
-        <source src="{{ ad.video.url }}" type="video/mp4">
-    </video>
-    {% endif %}
-
-    <!-- Gradient Overlay (more sophisticated than solid) -->
-    <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent flex items-center"
-         style="background: linear-gradient(90deg, rgba(0,0,0,{{ ad.overlay_opacity|default:'0.7' }}) 0%, rgba(0,0,0,{{ ad.overlay_opacity|default:'0.3'|cut:' ' }}) 50%, transparent 100%);">
+<!-- Category Ad Banner with Right-Side Fill Text -->
+{% if ad %} <!-- Ensure ad exists before rendering -->
+<div class="mb-3 lg:mb-5 relative group transition-all hover:shadow-lg ad-container"
+     style="background-color: {{ ad.background_color|default:'#7b2eda' }};">
+    
+    <!-- Poster Container - Full Width -->
+    <div class="relative w-full h-full min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px] xl:min-h-[400px] rounded-xl overflow-hidden">
         
-        <!-- Content Container with Responsive Padding -->
-        <div class="w-full sm:w-3/4 md:w-2/3 lg:w-3/5 xl:w-1/2 px-3 sm:px-4 md:px-5 lg:px-6 xl:px-8 py-2 sm:py-3 md:py-4">
+        <!-- Background Image/Video -->
+        {% if ad.single_image %}
+        <img src="{{ ad.single_image.url }}" 
+             alt="{{ ad.headline|default:'Advertisement' }}"
+             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+        {% elif ad.ad_type == 'video' and ad.video %}
+        <video class="w-full h-full object-cover"
+               {% if ad.autoplay %}autoplay muted playsinline{% endif %}
+               {% if ad.loop %}loop{% endif %}
+               poster="{% if ad.video_poster %}{{ ad.video_poster.url }}{% endif %}">
+            <source src="{{ ad.video.url }}" type="video/mp4">
+        </video>
+        {% endif %}
+        
+        <!-- Semi-transparent overlay for better text visibility -->
+        <div class="absolute inset-0 bg-black/20"></div>
+        
+        <!-- RIGHT SIDE ONLY - Fill Text Stacked Vertically -->
+        <div class="absolute top-1/2 right-4 sm:right-6 md:right-8 -translate-y-1/2 text-white/40 text-[8px] sm:text-xs md:text-sm font-bold uppercase tracking-widest text-right z-20">
+            <div class="mb-2 sm:mb-3 pb-1 sm:pb-2 border-b border-white/20">ADVERTISE YOUR PRODUCT HERE</div>
+            <div>BOOK YOUR SPACE NOW</div>
+        </div>
+        
+        <!-- Subtle pattern overlay (optional) -->
+        <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(255,255,255,0.02)_50%,transparent_70%)]"></div>
+        
+        <!-- Clickable Link Overlay - Entire Poster is Clickable -->
+        {% if ad.get_button_url %}
+        <a href="{{ ad.get_button_url }}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
+        {% endif %}
+    </div>
+    
+    <!-- Button and Description Section - Separated Below Poster -->
+    <div class="mt-4 px-3 sm:px-4 pb-2">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             
-            <!-- Headline with Responsive Sizes -->
-            {% if ad.headline %}
-            <h3 class="font-extrabold leading-tight mb-0.5 sm:mb-1 md:mb-2 drop-shadow-lg"
-                style="color: {{ ad.text_color|default:'#ffffff' }}">
-                <span class="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl block">
+            <!-- Text Content -->
+            <div class="flex-1">
+                {% if ad.headline %}
+                <h3 class="font-bold text-gray-900 dark:text-white text-base sm:text-lg md:text-xl">
                     {{ ad.headline }}
-                </span>
-            </h3>
-            {% endif %}
-
-            <!-- Subheadline with Responsive Sizes -->
-            {% if ad.subheadline %}
-            <p class="opacity-90 mb-1 sm:mb-1.5 md:mb-2 lg:mb-3 drop-shadow"
-               style="color: {{ ad.text_color|default:'#ffffff' }}">
-                <span class="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg">
+                </h3>
+                {% endif %}
+                
+                {% if ad.subheadline %}
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     {{ ad.subheadline }}
-                </span>
-            </p>
-            {% endif %}
-
-            <!-- Button with Hover Effects -->
+                </p>
+                {% endif %}
+            </div>
+            
+            <!-- Action Button -->
             {% if ad.button_text %}
             <a href="{{ ad.get_button_url }}"
-               class="inline-flex items-center gap-1 sm:gap-1.5 md:gap-2 px-2 sm:px-3 md:px-4 lg:px-5 py-0.5 sm:py-1 md:py-1.5 lg:py-2 rounded-full text-white font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-105 active:scale-95"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-105 active:scale-95 group/btn whitespace-nowrap"
                style="background-color: {{ ad.button_color|default:'#7b2eda' }};">
-                <span class="text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base">
-                    {{ ad.button_text }}
-                </span>
-                <i class="fas fa-arrow-right text-[6px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm transition-transform duration-300 group-hover:translate-x-1"></i>
+                <span>{{ ad.button_text }}</span>
+                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
             </a>
             {% endif %}
         </div>
-        
-        <!-- Decorative Element - Optional Brand Icon on Larger Screens -->
-        <div class="hidden lg:block absolute right-4 bottom-2 opacity-10">
-            <i class="fas fa-tag text-6xl text-white"></i>
-        </div>
     </div>
     
-    <!-- Small Badge for Category (optional) -->
+    <!-- Category Badge (if applicable) - Now positioned top left to avoid conflict with right-side text -->
     {% if ad.product_category %}
-    <div class="absolute top-2 right-2 bg-white/20 backdrop-blur-sm text-white text-[8px] xs:text-[10px] px-2 py-0.5 rounded-full border border-white/30">
+    <div class="absolute top-3 left-3 bg-[var(--accent)]/90 backdrop-blur-sm text-white text-[10px] px-3 py-1 rounded-full border border-white/30 z-20">
         <i class="fas fa-tag mr-1"></i> {{ ad.product_category.name }}
     </div>
     {% endif %}
 </div>
+{% endif %}

@@ -65,6 +65,7 @@ urlpatterns = [
         template_name='sw.js',
         content_type='application/javascript'
     )), name='sw'),
+    path('clear-whatsapp-popup/', views.clear_whatsapp_popup, name='clear_whatsapp_popup'),
 
 
     # Product Management (Staff Only)

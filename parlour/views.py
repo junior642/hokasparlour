@@ -2524,3 +2524,23 @@ def mark_delivered(request, order_id):
 def delivery_payment_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     return JsonResponse({'is_paid': order.is_paid})    
+
+@require_POST
+def clear_whatsapp_popup(request):
+    from django.utils import timezone
+    request.session.pop('show_whatsapp_popup', None)
+    
+    action = request.POST.get('action', 'dismiss')  # 'joined' or 'dismiss'
+    
+    if request.user.is_authenticated:
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        if action == 'joined':
+            # Never show again
+            profile.whatsapp_joined = True
+            profile.whatsapp_popup_dismissed_at = None
+        else:
+            # Show again in 3 days
+            profile.whatsapp_popup_dismissed_at = timezone.now()
+        profile.save(update_fields=['whatsapp_joined', 'whatsapp_popup_dismissed_at'])
+    
+    return JsonResponse({'status': 'ok'})

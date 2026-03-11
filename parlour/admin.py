@@ -300,8 +300,8 @@ class EmailOTPAdmin(admin.ModelAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone_number', 'preferred_payment_method', 'has_complete_profile', 'created_at')
-    list_filter = ('preferred_payment_method', 'created_at')
+    list_display = ('user', 'phone_number', 'preferred_payment_method', 'has_complete_profile', 'whatsapp_status', 'created_at')
+    list_filter = ('preferred_payment_method', 'whatsapp_joined', 'created_at')
     search_fields = ('user__username', 'user__email', 'phone_number')
     readonly_fields = ('created_at', 'updated_at')
     
@@ -315,6 +315,9 @@ class ProfileAdmin(admin.ModelAdmin):
         ('Preferences', {
             'fields': ('preferred_payment_method',)
         }),
+        ('WhatsApp', {
+            'fields': ('whatsapp_joined', 'whatsapp_popup_dismissed_at'),
+        }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
@@ -326,6 +329,25 @@ class ProfileAdmin(admin.ModelAdmin):
     has_complete_profile.boolean = True
     has_complete_profile.short_description = 'Complete'
 
+    def whatsapp_status(self, obj):
+        if obj.whatsapp_joined:
+            return format_html(
+                '<span style="color:green;font-weight:bold;">✔ Joined</span>'
+            )
+        if obj.whatsapp_popup_dismissed_at:
+            from django.utils import timezone
+            from datetime import timedelta
+            next_popup = obj.whatsapp_popup_dismissed_at + timedelta(days=3)
+            remaining = next_popup - timezone.now()
+            if remaining.total_seconds() > 0:
+                hours = int(remaining.total_seconds() // 3600)
+                return format_html(
+                    '<span style="color:orange;">⏳ Remind in {}h</span>', hours
+                )
+        return format_html(
+            '<span style="color:red;">✘ Not Joined</span>'
+        )
+    whatsapp_status.short_description = 'WhatsApp'
 
 @admin.register(OrderHistory)
 class OrderHistoryAdmin(admin.ModelAdmin):
