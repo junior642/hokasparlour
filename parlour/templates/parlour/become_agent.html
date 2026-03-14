@@ -1,0 +1,105 @@
+{% extends 'parlour/base.html' %}
+{% block title %}Become an Agent — Hoka's Parlour{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:40px auto;padding:0 20px;font-family:Georgia,serif;">
+
+    <div style="text-align:center;margin-bottom:30px;">
+        <div style="font-size:48px;margin-bottom:10px;">🤝</div>
+        <h1 style="color:#1a1a2e;font-size:28px;margin:0 0 8px 0;">Become a Hoka's Agent</h1>
+        <p style="color:#666;font-size:15px;line-height:1.6;">
+            Share your unique referral code and earn rewards when people you refer shop with us!
+        </p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div style="padding:15px 20px;border-radius:8px;margin-bottom:20px;
+            {% if message.tags == 'success' %}background:#d4edda;color:#155724;border-left:4px solid #28a745;
+            {% else %}background:#f8d7da;color:#721c24;border-left:4px solid #dc3545;{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Benefits -->
+    <div style="background:#f8f9fa;border-radius:12px;padding:20px;margin-bottom:25px;">
+        <h3 style="margin:0 0 15px 0;color:#1a1a2e;font-size:16px;">✨ Agent Benefits</h3>
+        <div style="display:grid;gap:10px;">
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-size:20px;">🔗</span>
+                <div>
+                    <strong style="color:#333;">Unique Referral Link</strong>
+                    <p style="color:#666;font-size:13px;margin:2px 0 0 0;">Get your own referral code to share with friends and family</p>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-size:20px;">🏷️</span>
+                <div>
+                    <strong style="color:#333;">Help People Save</strong>
+                    <p style="color:#666;font-size:13px;margin:2px 0 0 0;">People who use your code get discount pricing on their first 5 products</p>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-size:20px;">📊</span>
+                <div>
+                    <strong style="color:#333;">Track Your Referrals</strong>
+                    <p style="color:#666;font-size:13px;margin:2px 0 0 0;">See how many people have joined using your code</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if agent %}
+        <!-- Already applied -->
+        <div style="background:white;border-radius:12px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,0.08);text-align:center;">
+            {% if agent.status == 'pending' %}
+            <div style="font-size:40px;margin-bottom:10px;">⏳</div>
+            <h3 style="color:#856404;margin:0 0 8px 0;">Application Under Review</h3>
+            <p style="color:#666;font-size:14px;">We've received your application and will review it shortly. You'll be notified once approved.</p>
+            {% elif agent.status == 'suspended' %}
+            <div style="font-size:40px;margin-bottom:10px;">⛔</div>
+            <h3 style="color:#721c24;margin:0 0 8px 0;">Account Suspended</h3>
+            <p style="color:#666;font-size:14px;">Your agent account has been suspended. Please contact us for more information.</p>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <!-- Application Form -->
+        <div style="background:white;border-radius:12px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <h3 style="margin:0 0 20px 0;color:#1a1a2e;font-size:18px;border-bottom:2px solid #667eea;padding-bottom:10px;">
+                📝 Application Form
+            </h3>
+            <form method="post">
+                {% csrf_token %}
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-weight:600;color:#333;margin-bottom:6px;">
+                        Phone Number <span style="color:red;">*</span>
+                    </label>
+                    <input type="text" name="phone_number" placeholder="e.g. 0712345678" required
+                        style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;box-sizing:border-box;outline:none;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-weight:600;color:#333;margin-bottom:6px;">
+                        M-Pesa Number (for payouts)
+                    </label>
+                    <input type="text" name="mpesa_number" placeholder="e.g. 0712345678"
+                        style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;box-sizing:border-box;outline:none;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-weight:600;color:#333;margin-bottom:6px;">
+                        Why do you want to become an agent? <span style="color:red;">*</span>
+                    </label>
+                    <textarea name="reason" rows="4" placeholder="Tell us a bit about yourself and how you plan to promote Hoka's Parlour..." required
+                        style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;box-sizing:border-box;outline:none;resize:vertical;"></textarea>
+                </div>
+                <button type="submit"
+                    style="width:100%;background:linear-gradient(135deg,#667eea,#764ba2);color:white;
+                    padding:14px;border:none;border-radius:10px;cursor:pointer;
+                    font-size:16px;font-weight:700;">
+                    Submit Application 🚀
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

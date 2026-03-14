@@ -11,3 +11,4 @@ class ParlourConfig(AppConfig):
             return
         from . import scheduler
         scheduler.start()
+        from . import signals  # ← register signals

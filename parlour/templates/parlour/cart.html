@@ -531,9 +531,19 @@
             </span>
             {% endif %}
         </div>
-        
+
+        <!-- Promo Banner -->
+        {% if promo_info %}
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;
+            padding:12px 20px;border-radius:10px;margin-bottom:20px;
+            display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <span>🏷️ Promo active — you're getting special discount pricing!</span>
+            <strong>{{ promo_info.remaining }} of 5 promo purchases remaining</strong>
+        </div>
+        {% endif %}
+
         {% if cart_items %}
-            <!-- Cart Table – Desktop & Mobile Responsive -->
+            <!-- Cart Table -->
             <table class="cart-table">
                 <thead>
                     <tr>
@@ -569,7 +579,21 @@
                                 </span>
                             </td>
                             <td data-label="Price" class="product-price">
-                                KSh {{ item.price|floatformat:0 }}
+                                {% if item.is_promo_price %}
+                                    <span style="text-decoration:line-through;color:#999;font-size:12px;display:block;">
+                                        KSh {{ item.original_price|floatformat:0 }}
+                                    </span>
+                                    <span style="color:#28a745;font-weight:700;">
+                                        KSh {{ item.price|floatformat:0 }} 🏷️
+                                    </span>
+                                {% else %}
+                                    {% if item.product.anchor_price %}
+                                    <span style="text-decoration:line-through;color:#999;font-size:12px;display:block;">
+                                        KSh {{ item.product.anchor_price|floatformat:0 }}
+                                    </span>
+                                    {% endif %}
+                                    <span>KSh {{ item.price|floatformat:0 }}</span>
+                                {% endif %}
                             </td>
                             <td data-label="Quantity">
                                 <div class="product-quantity">
@@ -589,9 +613,20 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
+
             <!-- Cart Summary -->
             <div class="cart-summary">
+                {% if promo_info %}
+                <div class="summary-row" style="background:#f0fff4;border-radius:8px;padding:10px 15px;margin-bottom:10px;">
+                    <span style="color:#28a745;">
+                        <i class="fas fa-tag" style="margin-right:8px;"></i>
+                        Promo discount applied:
+                    </span>
+                    <span style="color:#28a745;font-weight:600;">
+                        {{ promo_info.remaining }} purchases left
+                    </span>
+                </div>
+                {% endif %}
                 <div class="summary-row">
                     <span>
                         <i class="fas fa-boxes" style="color: var(--accent); margin-right: 8px;"></i>
@@ -614,7 +649,7 @@
                     <span class="total-amount">KSh {{ total|floatformat:0 }}</span>
                 </div>
             </div>
-            
+
             <!-- Cart Actions -->
             <div class="cart-actions">
                 <a href="{% url 'home' %}" class="continue-shopping">

@@ -74,4 +74,12 @@ urlpatterns = [
     path('edit-product/<int:product_id>/', views.edit_product, name='edit_product'),
     path('delete-product/<int:product_id>/', views.delete_product, name='delete_product'),
     path('delete-product-image/<int:image_id>/', views.delete_product_image, name='delete_product_image'),
+
+    path('ref/<str:referral_code>/', views.referral_landing, name='referral_landing'),
+    path('become-agent/', views.become_agent, name='become_agent'),
+    path('agent/dashboard/', views.agent_dashboard, name='agent_dashboard'),
+    path('agent/referrals/', views.agent_referrals, name='agent_referrals'),
+    path('validate-promo/', views.validate_promo_code, name='validate_promo_code'),
+    path('save-promo/', views.save_promo_code, name='save_promo_code'),
+    path('skip-promo/', views.skip_promo_code, name='skip_promo_code'),
 ]

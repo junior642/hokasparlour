@@ -123,7 +123,6 @@ class Color(models.Model):
         verbose_name_plural = 'Colors'
 
 class Product(models.Model):
-    
 
     STOCK_TYPE_CHOICES = [
         ('ready', 'Ready Stock'),
@@ -137,21 +136,37 @@ class Product(models.Model):
         decimal_places=2,
         help_text="Selling price (what the customer pays)"
     )
-    category = models.ForeignKey(
-    'Category', 
-    on_delete=models.SET_NULL, 
-    null=True, 
-    blank=True,
-    related_name='products'
-    )
 
-    colors = models.ManyToManyField(
-    'Color',
-    blank=True,
-    related_name='products',
-    help_text="Select all available colors for this product"
+    # ── Promo Pricing ─────────────────────────────────────────────
+    anchor_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Crossed-out 'original' price shown to all users. Auto-calculated as price × 1.20 if left blank."
     )
-    
+    discount_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Promo price for users with a valid agent code (first 5 products). Auto-calculated as price - (profit × 10%) if left blank."
+    )
+    # ─────────────────────────────────────────────────────────────
+
+    category = models.ForeignKey(
+        'Category',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products'
+    )
+    colors = models.ManyToManyField(
+        'Color',
+        blank=True,
+        related_name='products',
+        help_text="Select all available colors for this product"
+    )
     stock_type = models.CharField(
         max_length=20,
         choices=STOCK_TYPE_CHOICES,
@@ -167,7 +182,6 @@ class Product(models.Model):
         blank=True,
         help_text="[Ready Stock] How much YOU paid to buy this item for resale."
     )
-
     supplier_cost = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -187,65 +201,94 @@ class Product(models.Model):
         help_text="[Ready Stock] Number of items you currently have. Warehouse stock ignores this."
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        # Auto-calculate anchor_price if not manually set
+        if not self.anchor_price:
+            self.anchor_price = (self.price * Decimal('1.20')).quantize(Decimal('0.01'))
+
+        # Auto-calculate discount_price if not manually set
+        if not self.discount_price:
+            profit = self.get_profit_per_item()
+            if profit is not None:
+                self.discount_price = (self.price - (profit * Decimal('0.10'))).quantize(Decimal('0.01'))
+            else:
+                # No cost set — fallback to 5% off price
+                self.discount_price = (self.price * Decimal('0.95')).quantize(Decimal('0.01'))
+
+        super().save(*args, **kwargs)
+
+    # ── Pricing Helpers ───────────────────────────────────────────
+    def get_price_for_user(self, user):
+        """
+        Returns the correct price for a given user.
+        Promo users (with active agent code, < 5 purchases) get discount_price.
+        Everyone else gets normal price.
+        """
+        if user and user.is_authenticated:
+            try:
+                promo = user.promousage
+                if promo.is_active and promo.promo_purchases_count < 5:
+                    return self.discount_price or self.price
+            except Exception:
+                pass
+        return self.price
+
+    def get_display_prices(self, user=None):
+        """
+        Returns a dict with all price info for template rendering.
+        """
+        actual_price = self.get_price_for_user(user)
+        has_discount = self.anchor_price and self.anchor_price > actual_price
+
+        promo_remaining = None
+        if user and user.is_authenticated:
+            try:
+                promo = user.promousage
+                if promo.is_active:
+                    promo_remaining = 5 - promo.promo_purchases_count
+            except Exception:
+                pass
+
+        return {
+            'price': actual_price,
+            'anchor_price': self.anchor_price if has_discount else None,
+            'has_discount': has_discount,
+            'promo_remaining': promo_remaining,
+        }
+
     # ── Stock Logic ───────────────────────────────────────────────
     def is_in_stock(self):
-        """
-        Warehouse stock is always available (sourced on demand).
-        Ready stock depends on quantity on hand.
-        """
         if self.stock_type == 'warehouse':
             return True
         return self.stock_quantity > 0
 
     def reduce_stock(self, quantity):
-        """
-        Reduce stock when an order is placed.
-        Only applies to ready stock — warehouse stock is sourced on demand.
-        """
         if self.stock_type == 'ready':
             self.stock_quantity = max(0, self.stock_quantity - quantity)
             self.save(update_fields=['stock_quantity'])
-        # Warehouse: do nothing — stock doesn't deplete
 
     def restore_stock(self, quantity):
-        """
-        Restore stock if an order is cancelled.
-        Only applies to ready stock.
-        """
         if self.stock_type == 'ready':
             self.stock_quantity += quantity
             self.save(update_fields=['stock_quantity'])
 
     # ── Profit Logic ──────────────────────────────────────────────
     def get_cost(self):
-        """
-        Returns the relevant cost depending on stock type.
-        Ready stock  → purchase_cost (what you paid upfront)
-        Warehouse    → supplier_cost (what you pay per order)
-        """
         if self.stock_type == 'ready':
             return self.purchase_cost
         return self.supplier_cost
 
     def get_profit_per_item(self):
-        """
-        Profit = selling price - cost price.
-        Returns None if cost is not set.
-        """
         cost = self.get_cost()
         if cost is not None:
             return self.price - cost
         return None
 
     def get_profit_margin_percent(self):
-        """
-        Profit margin as a percentage of selling price.
-        e.g. sell at 2500, cost 1800 → margin = 28%
-        """
         profit = self.get_profit_per_item()
         if profit is not None and self.price > 0:
             return round((profit / self.price) * 100, 1)
@@ -253,21 +296,20 @@ class Product(models.Model):
 
     # ── Delivery Logic ────────────────────────────────────────────
     def get_delivery_info(self):
-        """Returns delivery info based on stock type."""
         from .models import StoreSettings
         settings = StoreSettings.get_settings()
         if self.stock_type == 'ready':
             return settings.get_ready_delivery_info()
         return settings.get_warehouse_delivery_info()
+
     # ── Images ───────────────────────────────────────────────────
     def get_all_images(self):
         images = [self.image] if self.image else []
         additional = list(self.additional_images.all())
         return images + [img.image for img in additional]
-    
+
     class Meta:
         ordering = ['-created_at']
-
 
 class ProductImage(models.Model):
     """Additional images for a product"""
@@ -410,6 +452,12 @@ class Profile(models.Model):
 
     whatsapp_joined = models.BooleanField(default=False)
     whatsapp_popup_dismissed_at = models.DateTimeField(null=True, blank=True)
+
+    # Add to existing Profile model
+    promo_popup_shown = models.BooleanField(
+        default=False,
+        help_text="True after the promo code popup has been shown once on signup"
+    )
     
     preferred_payment_method = models.CharField(
         max_length=20,
@@ -669,3 +717,137 @@ class MpesaPayment(models.Model):
     
     def __str__(self):
         return f"{self.checkout_request_id} - {self.status}"
+
+
+
+
+import random
+import string
+
+def generate_referral_code():
+    """Generate unique code like HOKA-AB12"""
+    chars = string.ascii_uppercase + string.digits
+    suffix = ''.join(random.choices(chars, k=4))
+    code = f"HOKA-{suffix}"
+    # Ensure uniqueness
+    while Agent.objects.filter(referral_code=code).exists():
+        suffix = ''.join(random.choices(chars, k=4))
+        code = f"HOKA-{suffix}"
+    return code
+
+
+class Agent(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('suspended', 'Suspended'),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='agent'
+    )
+    referral_code = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True,
+        help_text="Auto-generated on approval. e.g. HOKA-AB12"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
+    phone_number = models.CharField(max_length=20)
+    mpesa_number = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="M-Pesa number for commission payouts"
+    )
+    reason = models.TextField(
+        blank=True,
+        help_text="Why do you want to become an agent?"
+    )
+    total_referrals = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Agent: {self.user.username} ({self.referral_code or 'pending'})"
+
+    def save(self, *args, **kwargs):
+        # Auto-generate referral code when approved
+        if self.status == 'approved' and not self.referral_code:
+            self.referral_code = generate_referral_code()
+            from django.utils import timezone
+            self.approved_at = timezone.now()
+        super().save(*args, **kwargs)
+
+    def get_referral_link(self):
+        return f"https://hokasparlour.adcent.online/ref/{self.referral_code}/"
+
+    def total_users_referred(self):
+        return PromoUsage.objects.filter(agent=self).count()
+
+
+class PromoUsage(models.Model):
+    """Tracks which user used which agent's promo code."""
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='promousage'
+    )
+    agent = models.ForeignKey(
+        Agent,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='promo_usages'
+    )
+    promo_purchases_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of products bought at promo price so far"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="False when 5 products have been purchased"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} → {self.agent.referral_code if self.agent else 'no agent'} ({self.promo_purchases_count}/5)"
+
+    def remaining_promo_purchases(self):
+        return max(0, 5 - self.promo_purchases_count)
+
+    def use_promo(self, quantity):
+        """
+        Called when a promo user places an order.
+        Increments counter and deactivates if limit reached.
+        """
+        self.promo_purchases_count += quantity
+        if self.promo_purchases_count >= 5:
+            self.promo_purchases_count = min(self.promo_purchases_count, 5)
+            self.is_active = False
+        self.save(update_fields=['promo_purchases_count', 'is_active'])
+        # Update agent's referral count
+        if self.agent:
+            Agent.objects.filter(pk=self.agent.pk).update(
+                total_referrals=models.F('total_referrals') + quantity
+            )        
+
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def handle_new_user(sender, instance, created, **kwargs):
+    """
+    Fires when any new user is created — manual or Google OAuth.
+    Sets up profile and promo popup flag.
+    """
+    if created:
+        # Create profile if it doesn't exist
+        profile, _ = Profile.objects.get_or_create(user=instance)
+        # promo_popup_shown defaults to False — popup will show on first visit            

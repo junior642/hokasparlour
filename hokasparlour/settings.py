@@ -71,7 +71,7 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-SITE_ID = 1
+SITE_ID = 2
 LOGOUT_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
@@ -99,6 +99,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'parlour.context_processors.whatsapp_popup', 
+                'parlour.context_processors.promo_popup',
             ],
         },
     },

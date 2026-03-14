@@ -116,14 +116,59 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+
+    /* Slideshow Styles */
+    .ad-slideshow-container {
+        position: relative;
+        width: 100%;
+        margin-bottom: 2rem;
+    }
+    
+    .ad-slide {
+        display: none;
+        width: 100%;
+    }
+    
+    .ad-slide.active {
+        display: block;
+    }
+    
+    .ad-content-item.hidden {
+        display: none;
+    }
+    
+    .carousel-prev,
+    .carousel-next {
+        position: absolute;
+        z-index: 30;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .carousel-prev:hover,
+    .carousel-next:hover {
+        background: rgba(255, 255, 255, 0.5);
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    @media (max-width: 640px) {
+        .carousel-prev,
+        .carousel-next {
+            width: 2rem;
+            height: 2rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 
 {% include 'includes/search.html' %}
-{% include 'includes/ad_section.html' %}
 
+<!-- Main Hero Ad Slideshow -->
+{% if ads %}
+    {% include 'includes/ad_slideshow.html' with ads=ads slideshow_id="default" %}
+{% endif %}
 <!-- Filter Toggle Button (visible on mobile/tablet) -->
 <div class="flex items-center justify-between mb-4 lg:hidden">
     <button class="filter-toggle-btn" id="filterToggleBtn">
@@ -210,14 +255,11 @@
                 <i class="fas fa-ad"></i>
                 Manage Ads
             </a>
-
-             <a href="{% url 'delivery_dashboard' %}" 
+            <a href="{% url 'delivery_dashboard' %}" 
                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
-                <i class="fas fa-ad"></i>
+                <i class="fas fa-truck"></i>
                 Delivery Dashboard
             </a>
-
-           
         </div>
         {% endif %}
     </div>
@@ -294,14 +336,35 @@
                 <i class="fas fa-ad"></i>
                 Manage Ads
             </a>
-
             <a href="{% url 'delivery_dashboard' %}" 
                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
-                <i class="fas fa-ad"></i>
+                <i class="fas fa-truck"></i>
                 Delivery Dashboard
             </a>
+
+<!-- Agent Links (authenticated users) -->
+        {% if user.is_authenticated %}
+        <div class="mt-4 pt-4 border-t border-[var(--border)] flex flex-col gap-2">
+            {% if user.agent.status == 'approved' %}
+                <a href="{% url 'agent_dashboard' %}"
+                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                    <i class="fas fa-users"></i>
+                    Agent Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'become_agent' %}"
+                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                    <i class="fas fa-handshake"></i>
+                    Become an Agent
+                </a>
+            {% endif %}
+        </div>    
+        {% endif %}    
+            
         </div>
         {% endif %}
+
+        
     </aside>
     
     <!-- PRODUCTS SECTION -->
@@ -352,12 +415,18 @@
                     {% endif %}
                 </div>
 
-                <!-- Category Ad (if any) -->
-                {% for ad in section.ads %}
-                    {% with ad=ad %}
-                        {% include 'includes/category_ad.html' %}
-                    {% endwith %}
-                {% endfor %}
+              <!-- For category ads (multiple ads in a section) -->
+{% if section.ads|length > 0 %}
+    {% if section.ads|length == 1 %}
+        <!-- Single ad - display normally -->
+        {% with ad=section.ads.0 %}
+            {% include 'includes/category_ad.html' %}
+        {% endwith %}
+    {% else %}
+        <!-- Multiple ads - use slideshow with unique ID -->
+        {% include 'includes/ad_slideshow.html' with ads=section.ads slideshow_id="category" %}
+    {% endif %}
+{% endif %}
 
                 <!-- Products Grid -->
                 <div class="grid grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 lg:gap-6">
@@ -396,6 +465,7 @@
     </section>
 </div>
 
+<!-- Create the ad_slideshow.html include file -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Mobile filter toggle functionality

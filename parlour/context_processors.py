@@ -25,3 +25,25 @@ def whatsapp_popup(request):
     
     except Exception:
         return {'show_whatsapp_popup': False}
+
+
+
+def promo_popup(request):
+    """Show promo code popup once on first signup."""
+    if not request.user.is_authenticated:
+        return {'show_promo_popup': False}
+    
+    # Only show if flagged as new signup in session
+    if not request.session.get('new_signup'):
+        return {'show_promo_popup': False}
+
+    try:
+        profile = request.user.profile
+        # Don't show if already seen or already has promo
+        if profile.promo_popup_shown:
+            return {'show_promo_popup': False}
+        if hasattr(request.user, 'promousage'):
+            return {'show_promo_popup': False}
+        return {'show_promo_popup': True}
+    except Exception:
+        return {'show_promo_popup': False}        

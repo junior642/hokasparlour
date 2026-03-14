@@ -101,6 +101,8 @@ class ProductAdmin(admin.ModelAdmin):
         'stock_type',
         'delivery_badge',
         'price',
+        'anchor_price',
+        'discount_price',
         'cost_display',
         'profit_display',
         'margin_display',
@@ -125,6 +127,15 @@ class ProductAdmin(admin.ModelAdmin):
         ('Basic Information', {
             'fields': ('name', 'category', 'stock_type', 'price', 'stock_quantity')
         }),
+        ('Pricing', {
+            'fields': ('anchor_price', 'discount_price'),
+            'description': (
+                '• <strong>Anchor Price</strong>: Shown crossed out to all users. '
+                'Leave blank to auto-calculate as price × 1.20.<br>'
+                '• <strong>Discount Price</strong>: Charged to promo users for their first 5 products. '
+                'Leave blank to auto-calculate as price - (profit × 10%).'
+            ),
+        }),
         ('Cost & Profitability', {
             'fields': (
                 'purchase_cost',
@@ -142,7 +153,7 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
-    filter_horizontal = ('colors',) 
+    filter_horizontal = ('colors',)
 
     # ── List display helpers ───────────────────────────────────────
 
@@ -206,6 +217,7 @@ class ProductAdmin(admin.ModelAdmin):
         return obj.get_delivery_type()
     delivery_type_display.short_description = 'Delivery Type'
 
+    
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
@@ -528,3 +540,113 @@ class MpesaPaymentAdmin(admin.ModelAdmin):
             bg, text, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
+
+
+
+from .models import Agent, PromoUsage
+
+@admin.register(Agent)
+class AgentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'referral_code', 'status_badge', 'phone_number', 'total_referrals', 'referral_link', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('user__username', 'user__email', 'referral_code', 'phone_number')
+    readonly_fields = ('referral_code', 'created_at', 'approved_at', 'total_referrals', 'referral_link')
+    ordering = ('-created_at',)
+    list_editable = ('status',) if False else ()  # handled via actions
+
+    fieldsets = (
+        ('Agent Info', {
+            'fields': ('user', 'phone_number', 'mpesa_number', 'reason')
+        }),
+        ('Status', {
+            'fields': ('status', 'referral_code', 'approved_at')
+        }),
+        ('Stats', {
+            'fields': ('total_referrals', 'referral_link'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    actions = ['approve_agents', 'suspend_agents']
+
+    def approve_agents(self, request, queryset):
+        for agent in queryset.filter(status='pending'):
+            agent.status = 'approved'
+            agent.save()  # triggers referral_code generation in model.save()
+        self.message_user(request, f'✅ {queryset.count()} agent(s) approved and referral codes generated.')
+    approve_agents.short_description = '✅ Approve selected agents'
+
+    def suspend_agents(self, request, queryset):
+        queryset.update(status='suspended')
+        self.message_user(request, f'⛔ {queryset.count()} agent(s) suspended.')
+    suspend_agents.short_description = '⛔ Suspend selected agents'
+
+    def status_badge(self, obj):
+        colors = {
+            'pending':   ('#ffc107', 'black'),
+            'approved':  ('#28a745', 'white'),
+            'suspended': ('#dc3545', 'white'),
+        }
+        bg, text = colors.get(obj.status, ('#999', 'white'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 12px;'
+            'border-radius:12px;font-size:11px;font-weight:600;">{}</span>',
+            bg, text, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+
+    def referral_link(self, obj):
+        if obj.referral_code:
+            link = obj.get_referral_link()
+            return format_html(
+                '<a href="{}" target="_blank" style="color:#667eea;">{}</a>',
+                link, link
+            )
+        return '—'
+    referral_link.short_description = 'Referral Link'
+
+
+@admin.register(PromoUsage)
+class PromoUsageAdmin(admin.ModelAdmin):
+    list_display = ('user', 'agent', 'promo_purchases_count', 'promo_status', 'remaining', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('user__username', 'user__email', 'agent__referral_code')
+    readonly_fields = ('user', 'agent', 'promo_purchases_count', 'is_active', 'created_at')
+    ordering = ('-created_at',)
+
+    fieldsets = (
+        ('Usage Info', {
+            'fields': ('user', 'agent', 'promo_purchases_count', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def promo_status(self, obj):
+        if obj.is_active:
+            return format_html(
+                '<span style="background:#28a745;color:white;padding:3px 12px;'
+                'border-radius:12px;font-size:11px;">🟢 Active</span>'
+            )
+        return format_html(
+            '<span style="background:#6c757d;color:white;padding:3px 12px;'
+            'border-radius:12px;font-size:11px;">⚫ Expired</span>'
+        )
+    promo_status.short_description = 'Promo Status'
+
+    def remaining(self, obj):
+        r = obj.remaining_promo_purchases()
+        color = '#28a745' if r > 0 else '#dc3545'
+        return format_html(
+            '<strong style="color:{};">{} / 5</strong>', color, r
+        )
+    remaining.short_description = 'Remaining'    

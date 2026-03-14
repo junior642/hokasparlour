@@ -168,17 +168,51 @@
             </p>
             
             <!-- Price Card -->
-            <div class="bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-xl p-4 lg:p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[#B48AFF]">
-                <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] font-medium">Price</span>
-                <div class="flex items-baseline gap-3 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
-                    <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#8B3DFF]">KSh {{ product.price|floatformat:0 }}</span>
-                    {% if product.old_price %}
-                        <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">KSh {{ product.old_price|floatformat:0 }}</span>
-                        <span class="bg-[#FF6B9D] text-white px-2 py-1 rounded-full text-sm font-semibold">-{{ product.discount_percentage }}%</span>
-                    {% endif %}
-                    <small class="text-[var(--text-secondary)] dark:text-[#B0B7C3]">KES</small>
-                </div>
+<div class="bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-xl p-4 lg:p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[#B48AFF]">
+    <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] font-medium">Price</span>
+    <div class="flex items-baseline gap-3 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
+
+        {% if user_promo and user_promo.is_active and product.discount_price %}
+            <!-- Promo user: anchor → normal → discount -->
+            {% if product.anchor_price %}
+            <span class="text-sm text-gray-400 line-through">
+                KSh {{ product.anchor_price|floatformat:0 }}
+            </span>
+            {% endif %}
+            <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
+                KSh {{ product.price|floatformat:0 }}
+            </span>
+            <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-green-500">
+                KSh {{ product.discount_price|floatformat:0 }}
+            </span>
+            <span class="bg-green-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
+                🏷️ Promo
+            </span>
+            <div class="w-full text-right">
+                <span class="text-xs text-green-600 font-medium">
+                    {{ user_promo.remaining_promo_purchases }} of 5 promo purchases remaining
+                </span>
             </div>
+
+        {% else %}
+            <!-- Normal user: anchor → normal price -->
+            {% if product.anchor_price %}
+            <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
+                KSh {{ product.anchor_price|floatformat:0 }}
+            </span>
+            <span class="bg-[#FF6B9D] text-white px-2 py-1 rounded-full text-sm font-semibold">
+                Sale
+            </span>
+            {% endif %}
+            <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#8B3DFF]">
+                KSh {{ product.price|floatformat:0 }}
+            </span>
+
+        {% endif %}
+
+        <small class="text-[var(--text-secondary)] dark:text-[#B0B7C3]">KES</small>
+    </div>
+</div>
             
             <!-- Stock Status -->
             {% if product.is_in_stock %}

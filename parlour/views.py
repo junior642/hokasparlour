@@ -9,13 +9,16 @@ from django.conf import settings
 from django.utils import timezone
 from django.db import models, transaction
 from django.db.models import F
-from .models import Product, Order, OrderItem, EmailOTP, StoreSettings, Advertisement, AdImpression, Category
+from .models import Product, Order, OrderItem, EmailOTP, StoreSettings, Advertisement, AdImpression, Category, Agent
 from .email_utils import send_order_confirmation_email
 import random
 import logging
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import Agent, PromoUsage
 
 def home(request):
     from django.db.models import Sum
+    import json
 
     # ── Base product queryset ─────────────────────────────────────
     products = Product.objects.all()
@@ -43,11 +46,18 @@ def home(request):
         total_sold=Sum('orderitem__quantity')
     ).order_by('-total_sold')[:8]
 
+    # ── User promo status ─────────────────────────────────────────
+    user_promo = None
+    if request.user.is_authenticated:
+        try:
+            user_promo = request.user.promousage
+        except Exception:
+            pass
+
     # ── Active ads helper ─────────────────────────────────────────
     now = timezone.now()
 
     def get_active_ads(queryset):
-        """Filter ads by date range and device."""
         queryset = queryset.filter(
             models.Q(start_date__isnull=True) | models.Q(start_date__lte=now)
         ).filter(
@@ -75,7 +85,6 @@ def home(request):
         session_key = request.session.session_key
 
     def record_impressions(ads_list):
-        """Record impressions for a list of ads."""
         for ad in ads_list:
             try:
                 AdImpression.objects.create(
@@ -93,8 +102,8 @@ def home(request):
         is_active=True,
         ad_category='main',
     ).order_by('order', '-created_at')
-    final_ads = get_active_ads(main_ads_qs)
-    record_impressions(final_ads)
+    main_ads = get_active_ads(main_ads_qs)
+    record_impressions(main_ads)
 
     # ── Category sections with their own ads ──────────────────────
     category_sections = []
@@ -105,7 +114,6 @@ def home(request):
         if not cat_products.exists():
             continue
 
-        # Ads targeting this specific category (non-main)
         cat_ads_qs = Advertisement.objects.filter(
             is_active=True,
             product_category=cat,
@@ -129,15 +137,35 @@ def home(request):
             'ads': [],
         })
 
+    # ── Prepare slideshow data for templates ──────────────────────
+    slideshow_data = []
+    for ad in main_ads:
+        slideshow_data.append({
+            'id': ad.id,
+            'headline': ad.headline,
+            'subheadline': ad.subheadline,
+            'button_text': ad.button_text,
+            'button_url': ad.get_button_url(),
+            'button_color': ad.button_color,
+            'image_url': ad.single_image.url if ad.single_image else None,
+            'video_url': ad.video.url if ad.video else None,
+            'video_poster': ad.video_poster.url if ad.video_poster else None,
+            'ad_type': ad.ad_type,
+            'background_color': ad.background_color,
+            'product_category': ad.product_category.name if ad.product_category else None,
+        })
+
     context = {
         'products': products,
         'categories': categories,
         'selected_category': int(category) if category else None,
         'min_price': min_price,
         'max_price': max_price,
-        'ads': final_ads,                        # main hero ads
-        'category_sections': category_sections,  # per-category sections + ads
+        'ads': main_ads,
+        'slideshow_data': json.dumps(slideshow_data),
+        'category_sections': category_sections,
         'top_selling': top_selling,
+        'user_promo': user_promo,               # ← added
     }
     return render(request, 'parlour/home.html', context)
 
@@ -162,12 +190,24 @@ def product_detail(request, product_id):
     ).exclude(
         id=product.id
     ).order_by('-created_at')[:4]
+
+    # ── Pricing info ──────────────────────────────────────────────
+    user_promo = None
+    if request.user.is_authenticated:
+        try:
+            user_promo = request.user.promousage
+        except Exception:
+            pass
+
+    prices = product.get_display_prices(request.user)
     
     context = {
         'product': product,
         'sizes': sizes,
         'all_images': all_images,
         'recommended_products': recommended_products,
+        'user_promo': user_promo,       # promo usage object
+        'prices': prices,               # dict with price, anchor_price, has_discount, promo_remaining
     }
     return render(request, 'parlour/product_detail.html', context)
 
@@ -346,25 +386,30 @@ def add_to_cart(request, product_id):
         product = get_object_or_404(Product, id=product_id)
         quantity = int(request.POST.get('quantity', 1))
         size = request.POST.get('size', '')
-        
+
+        # ── Get correct price for this user ──
+        price = product.get_price_for_user(request.user)
+
         cart = request.session.get('cart', {})
         cart_key = f"{product_id}_{size}"
-        
+
         if cart_key in cart:
             cart[cart_key]['quantity'] += quantity
         else:
             cart[cart_key] = {
                 'product_id': product_id,
                 'name': product.name,
-                'price': str(product.price),
+                'price': str(price),
+                'original_price': str(product.price),
+                'is_promo_price': price < product.price,
                 'quantity': quantity,
                 'size': size
             }
-        
+
         request.session['cart'] = cart
         messages.success(request, f'{product.name} added to cart!')
         return redirect('cart')
-    
+
     return redirect('home')
 
 
@@ -372,24 +417,40 @@ def cart(request):
     cart = request.session.get('cart', {})
     cart_items = []
     total = 0
-    
+
+    # Get promo info for display
+    promo_info = None
+    if request.user.is_authenticated:
+        try:
+            promo = request.user.promousage
+            if promo.is_active:
+                promo_info = {
+                    'remaining': promo.remaining_promo_purchases(),
+                    'count': promo.promo_purchases_count,
+                }
+        except Exception:
+            pass
+
     for key, item in cart.items():
         product = Product.objects.get(id=item['product_id'])
         subtotal = float(item['price']) * item['quantity']
         total += subtotal
-        
+
         cart_items.append({
             'key': key,
             'product': product,
             'quantity': item['quantity'],
             'size': item['size'],
             'price': item['price'],
+            'original_price': item.get('original_price', item['price']),
+            'is_promo_price': item.get('is_promo_price', False),
             'subtotal': subtotal
         })
-    
+
     context = {
         'cart_items': cart_items,
-        'total': total
+        'total': total,
+        'promo_info': promo_info,
     }
     return render(request, 'parlour/cart.html', context)
 
@@ -402,6 +463,7 @@ def remove_from_cart(request, cart_key):
         messages.success(request, 'Item removed from cart!')
     return redirect('cart')
 
+@login_required
 
 def checkout(request):
     cart = request.session.get('cart', {})
@@ -424,6 +486,20 @@ def checkout(request):
                 messages.error(request, f'Sorry, only {product.stock_quantity} units of {product.name} available in stock.')
                 return redirect('cart')
         
+                # ── Calculate total using cart prices (already promo-adjusted) ──
+        order_total = sum(float(item['price']) * item['quantity'] for item in cart.values())
+
+        # ── Update promo counter if user has active promo ──
+        if request.user.is_authenticated:
+            try:
+                promo = request.user.promousage
+                if promo.is_active:
+                    # Count total products in this order
+                    total_products = sum(item['quantity'] for item in cart.values())
+                    promo.use_promo(total_products)
+            except Exception:
+                pass
+
         # Store order details in session for payment processing
         request.session['pending_order'] = {
             'customer_name': customer_name,
@@ -432,9 +508,8 @@ def checkout(request):
             'delivery_address': delivery_address,
             'payment_method': payment_method,
             'cart': cart,
-            'total': sum(float(item['price']) * item['quantity'] for item in cart.values())
+            'total': order_total
         }
-        
         # If user is authenticated, save the entered details to their profile
         if request.user.is_authenticated:
             try:
@@ -594,7 +669,8 @@ def order_confirmation(request, order_id):
     }
     return render(request, 'parlour/order_confirmation.html', context)
 
-
+@login_required
+@staff_member_required
 def order_tracking(request):
     order = None
     
@@ -849,12 +925,38 @@ def verify_otp(request):
                 user.is_active = True
                 user.save()
 
-                # Clear session
+                # Clear pending signup session
                 del request.session['pending_signup']
 
                 # Log the user in
                 login(request, user)
-                messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
+
+                # ── Referral code handling ────────────────────────────
+                referral_code = request.session.pop('referral_code', None)
+                if referral_code:
+                    try:
+                        agent = Agent.objects.get(referral_code=referral_code, status='approved')
+                        PromoUsage.objects.create(
+                            user=user,
+                            agent=agent,
+                            promo_purchases_count=0,
+                            is_active=True
+                        )
+                        # Mark popup as shown since code already applied
+                        profile, _ = Profile.objects.get_or_create(user=user)
+                        profile.promo_popup_shown = True
+                        profile.save(update_fields=['promo_popup_shown'])
+                        messages.success(request, "🎉 Account verified! Promo code applied — enjoy discount pricing on your first 5 products!")
+                    except Agent.DoesNotExist:
+                        # Invalid referral code — still show popup
+                        request.session['new_signup'] = True
+                        messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
+                else:
+                    # No referral code — show promo popup on home page
+                    request.session['new_signup'] = True
+                    messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
+                # ─────────────────────────────────────────────────────
+
                 return redirect('home')
 
             except IntegrityError as e:
@@ -866,6 +968,7 @@ def verify_otp(request):
             messages.error(request, '❌ Invalid OTP. Please try again.')
 
     return render(request, 'parlour/verify_otp.html', {'email': pending.get('email')})
+
 
 def user_logout(request):
     logout(request)
@@ -2544,3 +2647,149 @@ def clear_whatsapp_popup(request):
         profile.save(update_fields=['whatsapp_joined', 'whatsapp_popup_dismissed_at'])
     
     return JsonResponse({'status': 'ok'})
+
+
+
+# ── Referral Landing ──────────────────────────────────────────
+def referral_landing(request, referral_code):
+    """
+    When someone clicks an agent's referral link.
+    Save the code in session then redirect to signup.
+    """
+    try:
+        agent = Agent.objects.get(referral_code=referral_code, status='approved')
+        request.session['referral_code'] = referral_code
+        messages.success(request, f'🎉 You were referred! Sign up to get your promo discount.')
+    except Agent.DoesNotExist:
+        messages.error(request, 'Invalid referral link.')
+    return redirect('signup')
+
+
+# ── Promo Code Popup Actions ──────────────────────────────────
+def validate_promo_code(request):
+    """AJAX endpoint to validate a promo code."""
+    code = request.POST.get('code', '').strip().upper()
+    try:
+        agent = Agent.objects.get(referral_code=code, status='approved')
+        return JsonResponse({
+            'valid': True,
+            'message': f'✅ Valid code! You get discount pricing on your first 5 products.'
+        })
+    except Agent.DoesNotExist:
+        return JsonResponse({
+            'valid': False,
+            'message': '❌ Invalid promo code. Please check and try again.'
+        })
+
+
+@require_POST
+def save_promo_code(request):
+    """Save the promo code after user enters it in the popup."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'Not logged in'})
+
+    # Check if user already used a promo code
+    if hasattr(request.user, 'promousage'):
+        return JsonResponse({'status': 'error', 'message': 'Promo already applied'})
+
+    code = request.POST.get('code', '').strip().upper()
+    try:
+        agent = Agent.objects.get(referral_code=code, status='approved')
+        PromoUsage.objects.create(
+            user=request.user,
+            agent=agent,
+            promo_purchases_count=0,
+            is_active=True
+        )
+        # Mark popup as shown
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        profile.promo_popup_shown = True
+        profile.save(update_fields=['promo_popup_shown'])
+
+        return JsonResponse({
+            'status': 'success',
+            'message': '🎉 Promo code applied! You get discount pricing on your first 5 products.'
+        })
+    except Agent.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': '❌ Invalid promo code.'})
+
+
+@require_POST
+def skip_promo_code(request):
+    """User skipped the promo popup."""
+    if request.user.is_authenticated:
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        profile.promo_popup_shown = True
+        profile.save(update_fields=['promo_popup_shown'])
+    return JsonResponse({'status': 'ok'})    
+
+
+@login_required
+def become_agent(request):
+    # Redirect if already an agent
+    try:
+        agent = request.user.agent
+        if agent.status == 'approved':
+            return redirect('agent_dashboard')
+        # Pending or suspended — show status
+        return render(request, 'parlour/become_agent.html', {'agent': agent})
+    except Agent.DoesNotExist:
+        pass
+
+    if request.method == 'POST':
+        phone_number = request.POST.get('phone_number', '').strip()
+        mpesa_number = request.POST.get('mpesa_number', '').strip()
+        reason = request.POST.get('reason', '').strip()
+
+        if not phone_number or not reason:
+            messages.error(request, 'Please fill in all required fields.')
+            return render(request, 'parlour/become_agent.html')
+
+        Agent.objects.create(
+            user=request.user,
+            phone_number=phone_number,
+            mpesa_number=mpesa_number,
+            reason=reason,
+            status='pending'
+        )
+        messages.success(request, '✅ Application submitted! We will review and get back to you.')
+        return redirect('become_agent')
+
+    return render(request, 'parlour/become_agent.html')
+
+
+@login_required
+def agent_dashboard(request):
+    try:
+        agent = request.user.agent
+    except Agent.DoesNotExist:
+        return redirect('become_agent')
+
+    if agent.status != 'approved':
+        messages.warning(request, 'Your agent account is not approved yet.')
+        return redirect('become_agent')
+
+    referrals = PromoUsage.objects.filter(agent=agent).select_related('user').order_by('-created_at')
+
+    context = {
+        'agent': agent,
+        'referrals': referrals,
+        'total_referrals': referrals.count(),
+        'active_referrals': referrals.filter(is_active=True).count(),
+        'completed_referrals': referrals.filter(is_active=False).count(),
+    }
+    return render(request, 'parlour/agent_dashboard.html', context)
+
+
+@login_required
+def agent_referrals(request):
+    try:
+        agent = request.user.agent
+    except Agent.DoesNotExist:
+        return redirect('become_agent')
+
+    if agent.status != 'approved':
+        return redirect('become_agent')
+
+    referrals = PromoUsage.objects.filter(agent=agent).select_related('user').order_by('-created_at')
+    return render(request, 'parlour/agent_referrals.html', {'agent': agent, 'referrals': referrals})

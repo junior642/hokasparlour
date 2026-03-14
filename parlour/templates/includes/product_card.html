@@ -17,6 +17,13 @@
             {{ product.category.name }}
         </span>
         {% endif %}
+
+        <!-- Promo badge -->
+        {% if user_promo and user_promo.is_active %}
+        <span class="absolute top-1 right-1 lg:top-3 lg:right-3 bg-green-500 text-white px-1.5 lg:px-3 py-0.5 lg:py-1 rounded-full text-[8px] lg:text-xs font-semibold z-10">
+            🏷️ Promo
+        </span>
+        {% endif %}
     </div>
 
     <!-- Product Name -->
@@ -30,8 +37,36 @@
     </p>
 
     <!-- Price -->
-    <div class="text-xs lg:text-2xl font-extrabold text-[var(--accent)] my-0.5 lg:my-2 leading-none">
-        KSh {{ product.price|floatformat:0 }}
+    <div class="my-0.5 lg:my-2 leading-none">
+        {% if user_promo and user_promo.is_active and product.discount_price %}
+            <!-- Promo user: show anchor, original and discount price -->
+            <div class="flex items-center gap-1 flex-wrap">
+                {% if product.anchor_price %}
+                <span class="text-[8px] lg:text-sm text-gray-400 line-through">
+                    KSh {{ product.anchor_price|floatformat:0 }}
+                </span>
+                {% endif %}
+                <span class="text-[9px] lg:text-sm text-gray-400 line-through">
+                    KSh {{ product.price|floatformat:0 }}
+                </span>
+            </div>
+            <div class="text-xs lg:text-2xl font-extrabold text-green-500">
+                KSh {{ product.discount_price|floatformat:0 }}
+            </div>
+            <div class="text-[7px] lg:text-xs text-green-600 font-medium">
+                🏷️ {{ user_promo.remaining_promo_purchases }} promo purchase{{ user_promo.remaining_promo_purchases|pluralize }} left
+            </div>
+        {% else %}
+            <!-- Normal user: show anchor and normal price -->
+            {% if product.anchor_price %}
+            <span class="text-[8px] lg:text-sm text-gray-400 line-through block">
+                KSh {{ product.anchor_price|floatformat:0 }}
+            </span>
+            {% endif %}
+            <div class="text-xs lg:text-2xl font-extrabold text-[var(--accent)]">
+                KSh {{ product.price|floatformat:0 }}
+            </div>
+        {% endif %}
     </div>
 
     <!-- Stock -->

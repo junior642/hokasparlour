@@ -1,0 +1,380 @@
+<!-- Advertisement Section - Full Width Slideshow with Content Below -->
+{% if ads %}
+{% with slideshow_id=slideshow_id|default:"default" %}
+<div class="w-full mb-10 relative z-10" id="ad-section-{{ slideshow_id }}">
+    <div class="relative w-full rounded-3xl overflow-hidden bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-2xl transition-all duration-300" id="adsSlideshow-{{ slideshow_id }}">
+        <!-- Slides Container -->
+        <div class="relative w-full min-h-[280px] sm:min-h-[380px] lg:min-h-[500px] xl:min-h-[600px] overflow-hidden" id="slidesContainer-{{ slideshow_id }}">
+            {% for ad in ads %}
+                <!-- Single Image Ad Slide -->
+                {% if ad.ad_type == 'single_image' and ad.single_image %}
+                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active opacity-100 visible scale-100 pointer-events-auto relative{% endif %}" 
+                     data-ad-id="{{ ad.id }}" 
+                     data-index="{{ forloop.counter0 }}" 
+                     data-slideshow="{{ slideshow_id }}">
+                    {% if ad.button_url %}
+                    <a href="{% url 'ad_click' ad.id %}" class="block w-full h-full" target="_blank" rel="noopener">
+                    {% endif %}
+                        <div class="relative w-full h-[280px] sm:h-[330px] md:h-[400px] lg:h-[480px] xl:h-[580px] 2xl:h-[650px] overflow-hidden">
+                            <img src="{{ ad.single_image.url }}" 
+                                 alt="{{ ad.title }}"
+                                 loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                                 class="w-full h-full object-cover transition-transform duration-700 hover:scale-105">
+                            
+                            <!-- Gradient Overlay -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                        </div>
+                    {% if ad.button_url %}
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Multi-Image Carousel Ad Slide -->
+                {% elif ad.ad_type == 'multi_image' %}
+                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active opacity-100 visible scale-100 pointer-events-auto relative{% endif %}" 
+                     data-ad-id="{{ ad.id }}" 
+                     data-index="{{ forloop.counter0 }}" 
+                     data-slideshow="{{ slideshow_id }}">
+                    <div class="relative w-full h-[280px] sm:h-[330px] md:h-[400px] lg:h-[480px] xl:h-[580px] 2xl:h-[650px] overflow-hidden">
+                        {% with first_image=ad.get_images.0 %}
+                            {% if first_image %}
+                            <img src="{{ first_image.image.url }}" 
+                                 alt="{{ ad.title }}"
+                                 loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                                 class="w-full h-full object-cover transition-transform duration-700 hover:scale-105">
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                        
+                        <!-- Modern Multi-image indicator badge -->
+                        <div class="absolute top-6 right-6 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm z-20 animate-fadeInDown">
+                            <i class="fas fa-images mr-2"></i> {{ ad.get_images.count }} images
+                        </div>
+                        
+                        {% if ad.button_url %}
+                        <a href="{% url 'ad_click' ad.id %}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Video Ad Slide -->
+                {% elif ad.ad_type == 'video' and ad.video %}
+                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active opacity-100 visible scale-100 pointer-events-auto relative{% endif %}" 
+                     data-ad-id="{{ ad.id }}" 
+                     data-index="{{ forloop.counter0 }}" 
+                     data-slideshow="{{ slideshow_id }}">
+                    <div class="relative w-full h-[280px] sm:h-[330px] md:h-[400px] lg:h-[480px] xl:h-[580px] 2xl:h-[650px] overflow-hidden video-wrapper">
+                        {% if ad.video_poster %}
+                        <img src="{{ ad.video_poster.url }}" 
+                             alt="{{ ad.title }}"
+                             loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                             class="w-full h-full object-cover transition-transform duration-700 hover:scale-105">
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-play-circle text-6xl text-gray-400 dark:text-gray-600 mb-3"></i>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Video Advertisement</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+                        
+                        <!-- Modern Video indicator badge -->
+                        <div class="absolute top-6 right-6 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-sm z-20 animate-fadeInDown">
+                            <i class="fas fa-play mr-2"></i> Video Ad
+                        </div>
+                        
+                        {% if ad.button_url %}
+                        <a href="{% url 'ad_click' ad.id %}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Arrow Navigation on Poster -->
+            <div class="absolute top-1/2 -translate-y-1/2 z-30 flex justify-between w-full px-3 sm:px-6 pointer-events-none">
+                <button class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-md text-purple-600 cursor-pointer flex items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/30 pointer-events-auto border-2 border-white/50 hover:scale-110 hover:bg-white hover:shadow-xl hover:shadow-purple-500/40 hover:text-purple-700 active:scale-95 dark:bg-gray-800/90 dark:text-purple-400 dark:border-purple-500/30" 
+                        id="prevSlideBtn-{{ slideshow_id }}" 
+                        data-slideshow="{{ slideshow_id }}" 
+                        aria-label="Previous slide">
+                    <i class="fas fa-chevron-left text-sm sm:text-xl"></i>
+                </button>
+                <button class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-md text-purple-600 cursor-pointer flex items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/30 pointer-events-auto border-2 border-white/50 hover:scale-110 hover:bg-white hover:shadow-xl hover:shadow-purple-500/40 hover:text-purple-700 active:scale-95 dark:bg-gray-800/90 dark:text-purple-400 dark:border-purple-500/30" 
+                        id="nextSlideBtn-{{ slideshow_id }}" 
+                        data-slideshow="{{ slideshow_id }}" 
+                        aria-label="Next slide">
+                    <i class="fas fa-chevron-right text-sm sm:text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Timer Progress Bar -->
+        <div class="w-full h-1 bg-gray-200/50 dark:bg-gray-700/50 relative overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-purple-600 to-purple-400 w-0 transition-[width] duration-100 absolute top-0 left-0 rounded-r" id="timerBar-{{ slideshow_id }}"></div>
+        </div>
+        
+        <!-- Content Below Slideshow (shows current ad's content) -->
+        <div class="px-4 py-4 sm:px-6 sm:py-5 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700" id="adContentContainer-{{ slideshow_id }}">
+            {% for ad in ads %}
+            <div class="ad-content-item {% if not forloop.first %}hidden{% endif %}" data-ad-id="{{ ad.id }}" data-slideshow="{{ slideshow_id }}">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                    <!-- Text Content -->
+                    <div class="flex-1 space-y-1 sm:space-y-1.5">
+                        {% if ad.headline %}
+                        <h3 class="font-bold text-lg sm:text-xl md:text-2xl lg:text-3xl leading-tight bg-gradient-to-r from-gray-800 to-gray-900 dark:from-gray-100 dark:to-gray-200 bg-clip-text text-transparent">
+                            {{ ad.headline }}
+                        </h3>
+                        {% endif %}
+                        
+                        {% if ad.subheadline %}
+                        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-2xl leading-relaxed">
+                            {{ ad.subheadline }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Modern Button - PURPLE -->
+                    {% if ad.button_text and ad.button_url %}
+                    <a href="{% url 'ad_click' ad.id %}" 
+                       class="group inline-flex items-center gap-2 sm:gap-3 px-5 py-2.5 sm:px-6 sm:py-3 rounded-full text-white font-semibold text-sm sm:text-base transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 whitespace-nowrap bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-md shadow-purple-500/30 relative overflow-hidden"
+                       target="_blank" rel="noopener">
+                        <span class="relative z-10">{{ ad.button_text }}</span>
+                        <i class="fas fa-arrow-right text-xs sm:text-sm transition-transform duration-300 group-hover:translate-x-1.5 relative z-10"></i>
+                        <!-- Ripple effect -->
+                        <span class="absolute inset-0 bg-white/20 transform scale-0 rounded-full transition-transform duration-600 group-hover:scale-150 opacity-0 group-hover:opacity-100"></span>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add custom animations to your base template's head or tailwind config -->
+<style>
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fadeInDown {
+        animation: fadeInDown 0.5s ease;
+    }
+    
+    /* Custom transition duration */
+    .duration-800 {
+        transition-duration: 800ms;
+    }
+    
+    .duration-600 {
+        transition-duration: 600ms;
+    }
+    
+    /* Ensure active slide is visible */
+    .ad-slide.active {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: scale(1) !important;
+        pointer-events: auto !important;
+        position: relative !important;
+    }
+    
+    .ad-slide {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(1.05);
+        pointer-events: none;
+        position: absolute;
+    }
+</style>
+
+<script>
+    (function() {
+        'use strict';
+        
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSlideshow);
+        } else {
+            initSlideshow();
+        }
+        
+        function initSlideshow() {
+            const slideshowId = '{{ slideshow_id }}';
+            
+            console.log('Initializing slideshow with ID:', slideshowId); // Debug log
+            
+            // Get elements for this specific slideshow
+            const section = document.getElementById(`ad-section-${slideshowId}`);
+            
+            if (!section) {
+                console.log('Section not found for ID:', slideshowId);
+                return;
+            }
+            
+            const slides = section.querySelectorAll('.ad-slide');
+            const contentItems = section.querySelectorAll('.ad-content-item');
+            const prevBtn = document.getElementById(`prevSlideBtn-${slideshowId}`);
+            const nextBtn = document.getElementById(`nextSlideBtn-${slideshowId}`);
+            const timerBar = document.getElementById(`timerBar-${slideshowId}`);
+            
+            console.log('Slides found:', slides.length); // Debug log
+            console.log('Content items found:', contentItems.length); // Debug log
+            console.log('Prev button:', prevBtn); // Debug log
+            console.log('Next button:', nextBtn); // Debug log
+            
+            if (!slides.length) {
+                console.log('No slides found');
+                return;
+            }
+            
+            let currentIndex = 0;
+            let totalSlides = slides.length;
+            let isPlaying = true;
+            let slideDuration = 30000; // 30 seconds
+            let progressInterval = null;
+            
+            // Add event listeners
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Prev button clicked');
+                    prevSlide();
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Next button clicked');
+                    nextSlide();
+                });
+            }
+            
+            // Add touch support for mobile
+            const slidesContainer = document.getElementById(`slidesContainer-${slideshowId}`);
+            if (slidesContainer) {
+                let touchStartX = 0;
+                let touchEndX = 0;
+                
+                slidesContainer.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+                
+                slidesContainer.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    handleSwipe();
+                }, { passive: true });
+                
+                function handleSwipe() {
+                    const swipeThreshold = 50;
+                    const diff = touchEndX - touchStartX;
+                    
+                    if (Math.abs(diff) > swipeThreshold) {
+                        if (diff > 0) {
+                            prevSlide();
+                        } else {
+                            nextSlide();
+                        }
+                    }
+                }
+            }
+            
+            // Make sure only first slide is visible
+            showSlide(0);
+            
+            // Start the slideshow
+            startTimer();
+            
+            function showSlide(index) {
+                console.log('Showing slide:', index, 'of', totalSlides); // Debug log
+                
+                // Update slides
+                slides.forEach((slide, i) => {
+                    if (i === index) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+                
+                // Update content items
+                contentItems.forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.remove('hidden');
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                });
+                
+                currentIndex = index;
+                
+                // Reset timer bar
+                resetTimerBar();
+            }
+            
+            function nextSlide() {
+                const nextIndex = (currentIndex + 1) % totalSlides;
+                showSlide(nextIndex);
+            }
+            
+            function prevSlide() {
+                const prevIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                showSlide(prevIndex);
+            }
+            
+            function startTimer() {
+                if (!isPlaying) return;
+                
+                stopTimer();
+                
+                let startTime = Date.now();
+                progressInterval = setInterval(() => {
+                    if (!isPlaying) return;
+                    
+                    const elapsed = Date.now() - startTime;
+                    const progress = (elapsed / slideDuration) * 100;
+                    
+                    if (timerBar) {
+                        timerBar.style.width = Math.min(progress, 100) + '%';
+                    }
+                    
+                    if (elapsed >= slideDuration) {
+                        nextSlide();
+                        startTime = Date.now();
+                    }
+                }, 50);
+            }
+            
+            function stopTimer() {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+            }
+            
+            function resetTimerBar() {
+                if (timerBar) {
+                    timerBar.style.width = '0%';
+                }
+                if (isPlaying) {
+                    startTimer();
+                }
+            }
+        }
+    })();
+</script>
+{% endwith %}
+{% endif %}

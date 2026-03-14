@@ -1,79 +1,156 @@
-<!-- Category Ad Banner with Right-Side Fill Text -->
-{% if ad %} <!-- Ensure ad exists before rendering -->
-<div class="mb-3 lg:mb-5 relative group transition-all hover:shadow-lg ad-container"
-     style="background-color: {{ ad.background_color|default:'#7b2eda' }};">
+<!-- Ad Slideshow Component -->
+{% if ads %}
+<div class="mb-3 lg:mb-5 relative group transition-all ad-slideshow-container"
+     style="background-color: {{ ads.0.background_color|default:'#7b2eda' }};">
     
-    <!-- Poster Container - Full Width -->
-    <div class="relative w-full h-full min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px] xl:min-h-[400px] rounded-xl overflow-hidden">
-        
-        <!-- Background Image/Video -->
-        {% if ad.single_image %}
-        <img src="{{ ad.single_image.url }}" 
-             alt="{{ ad.headline|default:'Advertisement' }}"
-             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-        {% elif ad.ad_type == 'video' and ad.video %}
-        <video class="w-full h-full object-cover"
-               {% if ad.autoplay %}autoplay muted playsinline{% endif %}
-               {% if ad.loop %}loop{% endif %}
-               poster="{% if ad.video_poster %}{{ ad.video_poster.url }}{% endif %}">
-            <source src="{{ ad.video.url }}" type="video/mp4">
-        </video>
-        {% endif %}
-        
-        <!-- Semi-transparent overlay for better text visibility -->
-        <div class="absolute inset-0 bg-black/20"></div>
-        
-        <!-- RIGHT SIDE ONLY - Fill Text Stacked Vertically -->
-        <div class="absolute top-1/2 right-4 sm:right-6 md:right-8 -translate-y-1/2 text-white/40 text-[8px] sm:text-xs md:text-sm font-bold uppercase tracking-widest text-right z-20">
-            <div class="mb-2 sm:mb-3 pb-1 sm:pb-2 border-b border-white/20">ADVERTISE YOUR PRODUCT HERE</div>
-            <div>BOOK YOUR SPACE NOW</div>
+    <!-- Slides Container -->
+    <div class="relative w-full">
+        <!-- All Ad Slides -->
+        {% for ad in ads %}
+        <div class="ad-slide {% if forloop.first %}active{% endif %}" data-ad-id="{{ ad.id }}" data-index="{{ forloop.counter0 }}">
+            <!-- Poster Container - Full Width -->
+            <div class="relative w-full h-full min-h-[200px] sm:min-h-[250px] md:min-h-[300px] lg:min-h-[350px] xl:min-h-[400px] rounded-xl overflow-hidden">
+                
+                <!-- Background Image/Video -->
+                {% if ad.single_image %}
+                <img src="{{ ad.single_image.url }}" 
+                     alt="{{ ad.headline|default:'Advertisement' }}"
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                {% elif ad.ad_type == 'video' and ad.video %}
+                <video class="w-full h-full object-cover"
+                       {% if ad.autoplay %}autoplay muted playsinline{% endif %}
+                       {% if ad.loop %}loop{% endif %}
+                       poster="{% if ad.video_poster %}{{ ad.video_poster.url }}{% endif %}">
+                    <source src="{{ ad.video.url }}" type="video/mp4">
+                </video>
+                {% endif %}
+                
+                <!-- Semi-transparent overlay for better text visibility -->
+                <div class="absolute inset-0 bg-black/20"></div>
+                
+                <!-- RIGHT SIDE ONLY - Fill Text Stacked Vertically -->
+                <div class="absolute top-1/2 right-4 sm:right-6 md:right-8 -translate-y-1/2 text-white/40 text-[8px] sm:text-xs md:text-sm font-bold uppercase tracking-widest text-right z-20">
+                    <div class="mb-2 sm:mb-3 pb-1 sm:pb-2 border-b border-white/20">ADVERTISE YOUR PRODUCT HERE</div>
+                    <div>BOOK YOUR SPACE NOW</div>
+                </div>
+                
+                <!-- Subtle pattern overlay (optional) -->
+                <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(255,255,255,0.02)_50%,transparent_70%)]"></div>
+                
+                <!-- Clickable Link Overlay - Entire Poster is Clickable -->
+                {% if ad.get_button_url %}
+                <a href="{{ ad.get_button_url }}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
+                {% endif %}
+                
+                <!-- Category Badge (if applicable) -->
+                {% if ad.product_category %}
+                <div class="absolute top-3 left-3 bg-[var(--accent)]/90 backdrop-blur-sm text-white text-[10px] px-3 py-1 rounded-full border border-white/30 z-20">
+                    <i class="fas fa-tag mr-1"></i> {{ ad.product_category.name }}
+                </div>
+                {% endif %}
+            </div>
         </div>
+        {% endfor %}
         
-        <!-- Subtle pattern overlay (optional) -->
-        <div class="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(255,255,255,0.02)_50%,transparent_70%)]"></div>
-        
-        <!-- Clickable Link Overlay - Entire Poster is Clickable -->
-        {% if ad.get_button_url %}
-        <a href="{{ ad.get_button_url }}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
+        <!-- Navigation Arrows - Only show if more than one ad -->
+        {% if ads|length > 1 %}
+        <button class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/30 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white z-30 hover:bg-white/50 hover:scale-110 transition-all carousel-prev"
+                aria-label="Previous advertisement">
+            <i class="fas fa-chevron-left text-xs sm:text-sm"></i>
+        </button>
+        <button class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-white/30 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white z-30 hover:bg-white/50 hover:scale-110 transition-all carousel-next"
+                aria-label="Next advertisement">
+            <i class="fas fa-chevron-right text-xs sm:text-sm"></i>
+        </button>
         {% endif %}
     </div>
     
     <!-- Button and Description Section - Separated Below Poster -->
-    <div class="mt-4 px-3 sm:px-4 pb-2">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            
-            <!-- Text Content -->
-            <div class="flex-1">
-                {% if ad.headline %}
-                <h3 class="font-bold text-gray-900 dark:text-white text-base sm:text-lg md:text-xl">
-                    {{ ad.headline }}
-                </h3>
-                {% endif %}
+    <div class="mt-4 px-3 sm:px-4 pb-2" id="adContentContainer-{{ forloop.counter }}">
+        {% for ad in ads %}
+        <div class="ad-content-item {% if not forloop.first %}hidden{% endif %}" data-ad-id="{{ ad.id }}">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 
-                {% if ad.subheadline %}
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {{ ad.subheadline }}
-                </p>
+                <!-- Text Content -->
+                <div class="flex-1">
+                    {% if ad.headline %}
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base sm:text-lg md:text-xl">
+                        {{ ad.headline }}
+                    </h3>
+                    {% endif %}
+                    
+                    {% if ad.subheadline %}
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {{ ad.subheadline }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Button -->
+                {% if ad.button_text %}
+                <a href="{{ ad.get_button_url }}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-105 active:scale-95 group/btn whitespace-nowrap"
+                   style="background-color: {{ ad.button_color|default:'#7b2eda' }};">
+                    <span>{{ ad.button_text }}</span>
+                    <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                </a>
                 {% endif %}
             </div>
-            
-            <!-- Action Button -->
-            {% if ad.button_text %}
-            <a href="{{ ad.get_button_url }}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white font-semibold text-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-105 active:scale-95 group/btn whitespace-nowrap"
-               style="background-color: {{ ad.button_color|default:'#7b2eda' }};">
-                <span>{{ ad.button_text }}</span>
-                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
-            </a>
-            {% endif %}
         </div>
+        {% endfor %}
     </div>
-    
-    <!-- Category Badge (if applicable) - Now positioned top left to avoid conflict with right-side text -->
-    {% if ad.product_category %}
-    <div class="absolute top-3 left-3 bg-[var(--accent)]/90 backdrop-blur-sm text-white text-[10px] px-3 py-1 rounded-full border border-white/30 z-20">
-        <i class="fas fa-tag mr-1"></i> {{ ad.product_category.name }}
-    </div>
-    {% endif %}
 </div>
+
+<script>
+    (function() {
+        'use strict';
+        
+        // Find the most recent slideshow container
+        const containers = document.querySelectorAll('.ad-slideshow-container');
+        const container = containers[containers.length - 1]; // Get the last one (most recently added)
+        
+        if (container) {
+            const slides = container.querySelectorAll('.ad-slide');
+            const contentItems = container.querySelectorAll('.ad-content-item');
+            const prevBtn = container.querySelector('.carousel-prev');
+            const nextBtn = container.querySelector('.carousel-next');
+            
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+            
+            if (totalSlides > 1 && prevBtn && nextBtn) {
+                
+                function showSlide(index) {
+                    // Update slides
+                    slides.forEach((slide, i) => {
+                        slide.classList.toggle('active', i === index);
+                    });
+                    
+                    // Update content items
+                    contentItems.forEach((item, i) => {
+                        item.classList.toggle('hidden', i !== index);
+                    });
+                    
+                    currentIndex = index;
+                }
+                
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    let newIndex = currentIndex - 1;
+                    if (newIndex < 0) newIndex = totalSlides - 1;
+                    showSlide(newIndex);
+                });
+                
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    let newIndex = currentIndex + 1;
+                    if (newIndex >= totalSlides) newIndex = 0;
+                    showSlide(newIndex);
+                });
+            }
+        }
+    })();
+</script>
 {% endif %}
