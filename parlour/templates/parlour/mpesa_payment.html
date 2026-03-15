@@ -485,85 +485,298 @@
     }
 
     /* -----------------------------------------------
-       RESPONSIVE
+       PAYMENT DIVIDER STYLES (Keep Tailwind classes separate)
+    ----------------------------------------------- */
+    .payment-divider-card {
+        background: var(--card);
+        padding: 0.75rem 1rem;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .payment-divider-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--accent-soft);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .payment-highlight-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0.25rem 0.75rem;
+        background: var(--accent);
+        color: white;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .payment-info-chip {
+        background: var(--surface);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    /* -----------------------------------------------
+       RESPONSIVE - ONLY MOBILE VIEW CHANGED
+       Large screen view remains exactly as before
     ----------------------------------------------- */
     @media (max-width: 768px) {
         .mpesa-container {
-            padding: 1.8rem;
-            margin: 1rem;
+            padding: 1.2rem !important;  /* Reduced from 3rem for mobile */
+            margin: 1rem !important;      /* Adjusted margin for mobile */
+        }
+
+        .container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
         }
 
         .mpesa-icon-wrapper {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1rem;
         }
 
         .mpesa-icon {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
         }
 
-        .mpesa-header h2 {
-            font-size: 1.8rem;
-        }
-
-        .order-total {
-            font-size: 2.5rem;
-            padding: 1.2rem;
-        }
-
-        .customer-info-row {
-            flex-direction: column;
-            gap: 0.3rem;
-        }
-
-        .customer-info-label {
-            flex: none;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .step-item {
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: flex-start;
-        }
-
-        .step-number {
-            margin-bottom: 0.2rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .mpesa-container {
-            padding: 1.2rem;
+        .mpesa-header {
+            margin-bottom: 1.2rem;
         }
 
         .mpesa-header h2 {
             font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .mpesa-header p {
+            font-size: 0.9rem;
         }
 
         .order-total {
-            font-size: 2rem;
+            font-size: 2.2rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .order-total small {
+            font-size: 0.8rem;
+        }
+
+        .customer-info {
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .customer-info h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .customer-info-row {
+            flex-direction: column;
+            gap: 0.2rem;
+            margin-bottom: 0.6rem;
+            padding-bottom: 0.6rem;
+        }
+
+        .customer-info-label {
+            flex: none;
+            font-size: 0.8rem;
+        }
+
+        .customer-info-label i {
+            width: 16px;
+        }
+
+        .customer-info-value {
+            font-size: 0.9rem;
+            padding-left: 1.6rem;
         }
 
         .stk-section {
-            padding: 1.5rem;
+            padding: 1.2rem;
+            margin: 1.2rem 0;
         }
 
         .stk-section h3 {
             font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stk-section p {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
         }
 
         .stk-push-btn {
-            padding: 1rem;
+            padding: 0.9rem;
+            font-size: 0.95rem;
+        }
+
+        .steps-section {
+            padding: 1.2rem;
+            margin: 1rem 0;
+        }
+
+        .steps-section h3 {
             font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-item {
+            gap: 0.8rem;
+            padding: 0.6rem 0;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            font-size: 0.8rem;
+        }
+
+        .step-content {
+            font-size: 0.85rem;
+        }
+
+        .step-content strong {
+            font-size: 0.8rem;
+            padding: 0.15rem 0.5rem;
         }
 
         .info-box {
+            padding: 1rem;
+            margin: 1rem 0;
             flex-direction: column;
             align-items: flex-start;
+            gap: 0.8rem;
+        }
+
+        .info-box i {
+            font-size: 1.1rem;
+        }
+
+        .info-box-content strong {
+            font-size: 0.9rem;
+        }
+
+        .info-box-content p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .confirm-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+        }
+
+        .confirm-section h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .confirm-section p {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+        }
+
+        .alert {
+            padding: 0.9rem 1rem;
+            margin-bottom: 1rem;
+            gap: 0.8rem;
+        }
+
+        .alert i {
+            font-size: 1rem;
+        }
+
+        .alert-content strong {
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .alert-content p {
+            font-size: 0.85rem;
+        }
+
+        /* Payment divider mobile styles */
+        .payment-divider-card {
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        .payment-divider-icon {
+            width: 28px;
+            height: 28px;
+        }
+
+        .payment-highlight-badge {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+        }
+
+        .payment-info-chip {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .mpesa-container {
+            padding: 1rem !important;
+            margin: 0.5rem !important;
+            border-radius: 24px;
+        }
+
+        .mpesa-header h2 {
+            font-size: 1.3rem;
+        }
+
+        .order-total {
+            font-size: 1.8rem;
+            padding: 0.8rem;
+        }
+
+        .customer-info-value {
+            padding-left: 1.4rem;
+        }
+
+        .stk-push-btn {
+            padding: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .payment-divider-card .flex {
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+        
+        .payment-divider-card .hidden.sm\\:block {
+            display: none !important;
         }
     }
 
@@ -594,6 +807,18 @@
 
     .dark-mode .alert-error {
         background: rgba(239, 68, 68, 0.05);
+    }
+
+    .dark-mode .payment-divider-card {
+        background: var(--surface);
+    }
+
+    .dark-mode .payment-divider-icon {
+        background: var(--accent-soft);
+    }
+
+    .dark-mode .payment-info-chip {
+        background: var(--card);
     }
 </style>
 {% endblock %}
@@ -650,63 +875,63 @@
             </div>
         </div>
 
-     <!-- Payment Information Divider -->
-<div class="relative my-6 sm:my-8 md:my-10">
-    <!-- Decorative Line with Gradient -->
-    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-        <div class="w-full border-t border-dashed border-[var(--border)] dark:border-gray-700"></div>
-    </div>
-    
-    <!-- Content Card - Centered with Background -->
-    <div class="relative flex justify-center">
-        <div class="bg-[var(--card)] dark:bg-gray-800 px-3 sm:px-4 md:px-6 py-3 sm:py-4 rounded-2xl shadow-sm border border-[var(--border)] dark:border-gray-700 max-w-2xl mx-auto">
-            
-            <!-- M-Pesa Icon and Header -->
-            <div class="flex items-center justify-center gap-2 mb-2 sm:mb-3">
-                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-full flex items-center justify-center">
-                    <i class="fas fa-mobile-alt text-[var(--accent)] dark:text-[#8B3DFF] text-sm sm:text-base"></i>
-                </div>
-                <span class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-white uppercase tracking-wider">M-Pesa Express</span>
+        <!-- Payment Information Divider -->
+        <div class="relative my-4 sm:my-6 md:my-8">
+            <!-- Decorative Line with Gradient -->
+            <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                <div class="w-full border-t border-dashed border-[var(--border)] dark:border-gray-700"></div>
             </div>
             
-            <!-- Main Instruction -->
-            <p class="text-center text-[var(--text)] dark:text-white text-xs sm:text-sm md:text-base font-medium mb-2">
-                📱 Click <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--accent)] text-white rounded-full text-xs sm:text-sm font-bold whitespace-nowrap">Send Payment Request</span> 
-                to get an M-Pesa prompt on your phone
-            </p>
-            
-            <!-- Payment Details -->
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-2">
-                <div class="flex items-center gap-1.5">
-                    <i class="fas fa-building text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs"></i>
-                    <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-gray-400">Pay to:</span>
-                    <span class="text-[10px] sm:text-xs font-bold text-[var(--text)] dark:text-white bg-[var(--surface)] dark:bg-gray-700 px-2 py-0.5 rounded-full">LIPANA TECHNOLOGIES</span>
+            <!-- Content Card - Centered with Background -->
+            <div class="relative flex justify-center">
+                <div class="payment-divider-card">
+                    
+                    <!-- M-Pesa Icon and Header -->
+                    <div class="flex items-center justify-center gap-2 mb-2">
+                        <div class="payment-divider-icon">
+                            <i class="fas fa-mobile-alt text-[var(--accent)] dark:text-[#8B3DFF] text-xs sm:text-sm"></i>
+                        </div>
+                        <span class="text-xs sm:text-sm font-semibold text-[var(--text)] dark:text-white uppercase tracking-wider">M-Pesa Express</span>
+                    </div>
+                    
+                    <!-- Main Instruction -->
+                    <p class="text-center text-[var(--text)] dark:text-white text-xs sm:text-sm font-medium mb-2">
+                        📱 Click <span class="payment-highlight-badge">Send Payment Request</span> 
+                        to get an M-Pesa prompt on your phone
+                    </p>
+                    
+                    <!-- Payment Details -->
+                    <div class="flex flex-col xs:flex-row items-center justify-center gap-2 sm:gap-3 mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-building text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs"></i>
+                            <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-gray-400">Pay to:</span>
+                            <span class="payment-info-chip">LIPANA TECHNOLOGIES</span>
+                        </div>
+                        
+                        <div class="hidden xs:block w-1 h-1 bg-[var(--border)] dark:bg-gray-600 rounded-full"></div>
+                        
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-hashtag text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs"></i>
+                            <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-gray-400">Account:</span>
+                            <span class="payment-info-chip">Hokasparlour</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Help Text -->
+                    <p class="text-center text-[var(--text-soft)] dark:text-gray-400 text-[9px] sm:text-xs mt-2 flex items-center justify-center gap-1">
+                        <i class="fas fa-info-circle text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                        No prompt? Click "Pay with Cash on Delivery" below
+                    </p>
+                    
+                    <!-- Decorative Wave Pattern -->
+                    <div class="absolute -bottom-1 left-0 right-0 flex justify-center opacity-20">
+                        <svg width="120" height="8" viewBox="0 0 120 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 4L15 0L30 8L45 0L60 8L75 0L90 8L105 0L120 4" stroke="var(--accent)" stroke-width="2"/>
+                        </svg>
+                    </div>
                 </div>
-                
-                <div class="hidden sm:block w-1 h-1 bg-[var(--border)] dark:bg-gray-600 rounded-full"></div>
-                
-                <div class="flex items-center gap-1.5">
-                    <i class="fas fa-hashtag text-[var(--accent)] dark:text-[#8B3DFF] text-[10px] sm:text-xs"></i>
-                    <span class="text-[10px] sm:text-xs text-[var(--text-soft)] dark:text-gray-400">Account:</span>
-                    <span class="text-[10px] sm:text-xs font-bold text-[var(--text)] dark:text-white bg-[var(--surface)] dark:bg-gray-700 px-2 py-0.5 rounded-full">Hokasparlour</span>
-                </div>
-            </div>
-            
-            <!-- Help Text -->
-            <p class="text-center text-[var(--text-soft)] dark:text-gray-400 text-[9px] sm:text-xs mt-2 flex items-center justify-center gap-1">
-                <i class="fas fa-info-circle text-[var(--accent)] dark:text-[#8B3DFF]"></i>
-                No prompt? Follow the manual payment steps below
-            </p>
-            
-            <!-- Decorative Wave Pattern -->
-            <div class="absolute -bottom-1 left-0 right-0 flex justify-center opacity-20">
-                <svg width="120" height="8" viewBox="0 0 120 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 4L15 0L30 8L45 0L60 8L75 0L90 8L105 0L120 4" stroke="var(--accent)" stroke-width="2"/>
-                </svg>
             </div>
         </div>
-    </div>
-</div>
         
         <!-- STK Push Status Messages -->
         {% if stk_result %}
@@ -746,78 +971,17 @@
             </form>
         </div>
         
-        <!-- Manual Payment Steps -->
-        <div class="steps-section">
-            <h3>
-                <i class="fas fa-list-ol"></i>
-                Pay Manually
-            </h3>
-            <ol class="steps-list">
-                <li class="step-item">
-                    <span class="step-number">1</span>
-                    <span class="step-content">Go to <strong>M-Pesa</strong> on your phone</span>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">2</span>
-                    <span class="step-content">Select <strong>"Lipa na M-Pesa"</strong></span>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">3</span>
-                    <span class="step-content">Select <strong>"Buy Goods and services"</strong></span>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">4</span>
-                    <span class="step-content">Till No: <strong>4126792</strong></span>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">5</span>
-                    <span class="step-content">Account Name : <strong>Getrine Hoka  ochunyi{{ pending_order.phone_number|slice:"-4:" }}</strong></span>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">6</span>
-                    <span class="step-content">Amount: <strong>KSh {{ pending_order.total|floatformat:0 }}</strong></span>
-                </li>
-                <li class="step-item">
-                    <span class="step-number">7</span>
-                    <span class="step-content">Enter your <strong>M-Pesa PIN</strong> and confirm</span>
-                </li>
-            </ol>
-        </div>
-        
-        <!-- Important Note -->
-        <div class="info-box">
-            <i class="fas fa-info-circle"></i>
-            <div class="info-box-content">
-                <strong>Important</strong>
-                <p>After completing payment on your phone, click <strong style="color: var(--accent);">"I Have Paid"</strong> below to confirm your order.</p>
-            </div>
-        </div>
-        
-        <!-- Confirmation Section -->
-        <div class="confirm-section">
-            <h3>
-                <i class="fas fa-check-circle"></i>
-                Completed Payment?
-            </h3>
-            <p>Once you receive the M-Pesa confirmation SMS, click below</p>
-            
-            <form method="post" action="{% url 'confirm_mpesa_payment' %}">
-                {% csrf_token %}
-                <div class="action-buttons">
-                    <a href="{% url 'checkout' %}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i>
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-check"></i>
-                        I Have Paid
-                    </button>
-                </div>
-            </form>
-        </div>
+        <!-- Cash on Delivery Option -->
+        <div class="mt-4 text-center">
+            <p class="text-[var(--text-soft)] text-sm mb-3">If you haven't received any prompt, you can:</p>
+            <a href="{% url 'checkout' %}" class="btn btn-secondary w-full">
+                <i class="fas fa-hand-holding-usd"></i>
+                Pay with Cash on Delivery
+            </a>
+        </div> 
+       
     </div>
 </div>
-
 
 <script>
 let paymentCheckInterval;
@@ -878,7 +1042,7 @@ function checkPaymentStatus() {
 }
 
 function showLoadingIndicator() {
-    const sttkSection = document.querySelector('.stk-section');
+    const stkSection = document.querySelector('.stk-section');
     if (stkSection) {
         const loadingDiv = document.createElement('div');
         loadingDiv.id = 'payment-loading';
@@ -944,7 +1108,7 @@ function showTimeoutMessage() {
             <i class="fas fa-clock"></i>
             <div class="alert-content">
                 <strong>Payment Pending</strong>
-                <p>We're still waiting for payment confirmation. If you've completed payment, click "I Have Paid" below. Otherwise, please try again.</p>
+                <p>We're still waiting for payment confirmation. If you've completed payment, please wait. Otherwise, try again.</p>
             </div>
         `;
     }

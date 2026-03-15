@@ -985,6 +985,47 @@ document.addEventListener('keydown', function(e) {
             margin-bottom:16px;color:#666;
         "></div>
 
+        <!-- Invited by card — shown after valid code -->
+        <div id="invited-by-card" style="
+            display:none;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:white;border-radius:12px;
+            padding:16px;margin-bottom:16px;
+            text-align:left;
+        ">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                <div style="
+                    width:44px;height:44px;
+                    background:rgba(255,255,255,0.2);
+                    border-radius:50%;
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:20px;flex-shrink:0;
+                ">👤</div>
+                <div>
+                    <div style="font-size:12px;opacity:0.8;">You were invited by</div>
+                    <div id="inviter-name" style="font-size:18px;font-weight:700;"></div>
+                </div>
+            </div>
+            <!-- WhatsApp join suggestion -->
+            <div style="
+                background:rgba(255,255,255,0.15);
+                border-radius:8px;padding:10px 12px;
+                display:flex;align-items:center;gap:10px;
+            ">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;">
+                    <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.985L2.25 21.75l5.422-1.56c1.473.818 3.133 1.251 4.83 1.253h.004c5.199 0 9.455-4.195 9.463-9.396.004-2.51-.97-4.872-2.857-6.759zM12.013 20.038h-.003c-1.51 0-2.992-.408-4.27-1.173l-.307-.183-3.217.926.987-3.117-.2-.319a8.26 8.26 0 0 1-1.279-4.428c.007-4.568 3.723-8.28 8.299-8.28 2.217 0 4.3.865 5.865 2.434a8.206 8.206 0 0 1 2.428 5.858c-.008 4.568-3.724 8.28-8.296 8.28zm4.554-6.203c-.25-.125-1.479-.73-1.708-.813-.23-.083-.397-.125-.564.125-.167.25-.646.813-.792.98-.146.167-.292.188-.542.063-.896-.417-1.52-.742-2.104-1.27-.792-.708-1.328-1.583-1.484-1.854-.156-.27-.017-.416.117-.55.12-.12.271-.313.406-.47.135-.156.188-.27.271-.448.083-.178.042-.333-.021-.478-.063-.146-.563-1.354-.771-1.854-.208-.5-.417-.417-.563-.417-.146 0-.313-.021-.48-.021s-.438.063-.667.313c-.229.25-.875.854-.875 2.083s.896 2.417 1.021 2.583c.125.167 1.745 2.666 4.229 3.583.604.208 1.062.333 1.427.417.604.125 1.155.104 1.588.063.485-.042 1.49-.604 1.698-1.188.208-.583.208-1.083.146-1.188-.063-.104-.229-.167-.479-.271z"/>
+                </svg>
+                <div>
+                    <div style="font-size:12px;opacity:0.85;margin-bottom:2px;">Want more exclusive offers?</div>
+                    <a href="https://chat.whatsapp.com/YOUR_GROUP_LINK_HERE" target="_blank"
+                        onclick="joinWhatsappFromPromo()"
+                        style="color:white;font-weight:700;font-size:13px;text-decoration:underline;">
+                        Join our WhatsApp Group →
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Apply Button -->
         <button id="apply-btn" onclick="applyPromo()" style="
             display:none;width:100%;
@@ -1031,19 +1072,25 @@ function validatePromo() {
     .then(data => {
         const feedback = document.getElementById('promo-feedback');
         const applyBtn = document.getElementById('apply-btn');
+        const invitedCard = document.getElementById('invited-by-card');
+        const inviterName = document.getElementById('inviter-name');
+
         feedback.textContent = data.message;
         feedback.style.color = data.valid ? 'green' : 'red';
+
         if (data.valid) {
             validCode = code;
             applyBtn.style.display = 'block';
+            inviterName.textContent = data.agent_name;
+            invitedCard.style.display = 'block';
         } else {
             validCode = null;
             applyBtn.style.display = 'none';
+            invitedCard.style.display = 'none';
         }
     });
 }
 
-// Allow pressing Enter to validate
 document.getElementById('promo-input').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') validatePromo();
 });
@@ -1065,7 +1112,6 @@ function applyPromo() {
             document.getElementById('promo-feedback').style.color = 'green';
             setTimeout(() => {
                 document.getElementById('promo-popup').style.display = 'none';
-                // Clear session flag
                 fetch('/skip-promo/', {
                     method:'POST',
                     headers:{'X-CSRFToken':'{{ csrf_token }}'}
@@ -1080,8 +1126,18 @@ function skipPromo() {
     fetch('/skip-promo/', {
         method: 'POST',
         headers: {'X-CSRFToken': '{{ csrf_token }}'}
-    }).then(() => {
-        // Also clear new_signup session
+    });
+}
+
+function joinWhatsappFromPromo() {
+    // Mark whatsapp as joined so popup never shows again
+    fetch('/clear-whatsapp-popup/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=joined'
     });
 }
 </script>
@@ -1105,26 +1161,33 @@ function skipPromo() {
             <!-- Desktop Navigation -->
             <nav class="desktop-nav">
                 <a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a>
-                <a href="{% url 'cart' %}" class="cart-link">
+               <a href="{% url 'cart' %}" class="cart-link">
                     <i class="fas fa-bag-shopping"></i> Cart
-                    <span class="cart-count">0</span>
+                    {% if cart_count %}
+                        <span class="cart-count">{{ cart_count }}</span>
+                    {% endif %}
                 </a>
                 <a href="/profile/orders/"><i class="fas fa-truck"></i> Track Order</a>
+
+                <a href="{% url 'profile' %}" class="profile-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
                 
                 {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
                     {% if user.is_staff %}
                         <a href="/admin/"><i class="fas fa-shield"></i> Admin</a>
-                        <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> Track Order</a>
+                        <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> A.Track Order</a>
                     {% endif %}
+                    
+                    <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    
                 {% else %}
                     <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
                     <a href="{% url 'signup' %}"><i class="fas fa-user-plus"></i> Sign Up</a>
                 {% endif %}
 
-                <a href="{% url 'profile' %}" class="profile-link">
-                    <i class="fas fa-user"></i> Profile
-                </a>
+
                 
                 
                 <!-- Theme Toggle Button (desktop) -->
@@ -1134,6 +1197,10 @@ function skipPromo() {
             </nav>
         </div>
     </header>
+
+    <div id="offline-banner" style="display:none;">
+    <i class="fas fa-wifi"></i> You are offline — some features may not be available
+</div>
 
     <!-- MOBILE NAVIGATION OVERLAY -->
     <div class="nav-overlay" id="navOverlay"></div>
@@ -1159,25 +1226,33 @@ function skipPromo() {
             </a>
             <a href="{% url 'cart' %}" class="cart-link-mobile">
                 <i class="fas fa-bag-shopping"></i> Cart
-                <span class="mobile-cart-count">0</span>
+                    {% if cart_count %}
+                        <span class="cart-count">{{ cart_count }}</span>
+                    {% endif %}
             </a>
-            <a href="{% url 'order_tracking' %}">
+            <a href="/profile/orders/">
                 <i class="fas fa-truck"></i> Track Order
             </a>
             
             {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-                
-                <a href="{% url 'profile' %}" class="profile-link">
-                    <i class="fas fa-user"></i> Profile
-                </a>
+
                 {% if user.is_staff %}
                     <a href="/admin/">
                         <i class="fas fa-shield"></i> Admin
                     </a>
+                    <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> A.Track Order</a>
                 {% endif %}
+
+                <a href="{% url 'profile' %}" class="profile-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+
+                <a href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+                
+                
+                
             {% else %}
                 <a href="{% url 'login' %}">
                     <i class="fas fa-sign-in-alt"></i> Login
@@ -1375,6 +1450,62 @@ function skipPromo() {
         .catch(err => console.log('SW error:', err));
     });
   }
+</script>
+
+<script>
+    const offlineBanner = document.getElementById('offline-banner');
+
+    // Create the popup element once
+    const popup = document.createElement('div');
+    popup.id = 'online-popup';
+    popup.innerHTML = '<i class="fas fa-wifi"></i> You are back online!';
+    popup.style.cssText = `
+        display: none;
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #4caf50;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 30px;
+        font-size: 15px;
+        font-weight: 500;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 9999;
+        transition: opacity 0.4s ease;
+        opacity: 0;
+    `;
+    document.body.appendChild(popup);
+
+    function showOnlinePopup() {
+        popup.style.display = 'block';
+        // Fade in
+        setTimeout(() => popup.style.opacity = '1', 10);
+
+        // Fade out after 3 seconds then hide
+        setTimeout(() => {
+            popup.style.opacity = '0';
+            setTimeout(() => popup.style.display = 'none', 400);
+        }, 3000);
+    }
+
+    function updateOnlineStatus() {
+        if (!navigator.onLine) {
+            banner.style.display = 'block';
+        } else {
+            banner.style.display = 'none';
+            showOnlinePopup();
+        }
+    }
+
+    // Check on load — but don't show popup on initial load if already online
+    if (!navigator.onLine) {
+        banner.style.display = 'block';
+    }
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
 </script>
 </body>
 </html>

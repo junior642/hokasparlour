@@ -415,7 +415,7 @@
                     {% endif %}
                 </div>
 
-              <!-- For category ads (multiple ads in a section) -->
+  <!-- For category ads (multiple ads in a section) -->
 {% if section.ads|length > 0 %}
     {% if section.ads|length == 1 %}
         <!-- Single ad - display normally -->
@@ -424,7 +424,13 @@
         {% endwith %}
     {% else %}
         <!-- Multiple ads - use slideshow with unique ID -->
-        {% include 'includes/ad_slideshow.html' with ads=section.ads slideshow_id="category" %}
+        {% if section.category %}
+            {% with cat_id=section.category.id %}
+                {% include 'includes/ad_slideshow.html' with ads=section.ads slideshow_id=cat_id %}
+            {% endwith %}
+        {% else %}
+            {% include 'includes/ad_slideshow.html' with ads=section.ads slideshow_id="uncategorized" %}
+        {% endif %}
     {% endif %}
 {% endif %}
 

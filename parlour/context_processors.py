@@ -47,3 +47,9 @@ def promo_popup(request):
         return {'show_promo_popup': True}
     except Exception:
         return {'show_promo_popup': False}        
+
+
+def cart_count(request):
+    cart = request.session.get('cart', {})
+    count = sum(item['quantity'] for item in cart.values())
+    return {'cart_count': count}        

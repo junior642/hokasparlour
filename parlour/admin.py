@@ -550,16 +550,16 @@ class AgentAdmin(admin.ModelAdmin):
     list_display = ('user', 'referral_code', 'status_badge', 'phone_number', 'total_referrals', 'referral_link', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('user__username', 'user__email', 'referral_code', 'phone_number')
-    readonly_fields = ('referral_code', 'created_at', 'approved_at', 'total_referrals', 'referral_link')
+    readonly_fields = ('created_at', 'approved_at', 'total_referrals', 'referral_link')  # ← referral_code removed so admin can edit it
     ordering = ('-created_at',)
-    list_editable = ('status',) if False else ()  # handled via actions
 
     fieldsets = (
         ('Agent Info', {
             'fields': ('user', 'phone_number', 'mpesa_number', 'reason')
         }),
         ('Status', {
-            'fields': ('status', 'referral_code', 'approved_at')
+            'fields': ('status', 'referral_code', 'approved_at'),
+            'description': 'Referral code is auto-generated from username on approval. Admin can change it anytime.'
         }),
         ('Stats', {
             'fields': ('total_referrals', 'referral_link'),
@@ -574,15 +574,17 @@ class AgentAdmin(admin.ModelAdmin):
     actions = ['approve_agents', 'suspend_agents']
 
     def approve_agents(self, request, queryset):
+        count = 0
         for agent in queryset.filter(status='pending'):
             agent.status = 'approved'
-            agent.save()  # triggers referral_code generation in model.save()
-        self.message_user(request, f'✅ {queryset.count()} agent(s) approved and referral codes generated.')
+            agent.save()  # triggers username-based referral_code generation
+            count += 1
+        self.message_user(request, f'✅ {count} agent(s) approved and referral codes generated from their usernames.')
     approve_agents.short_description = '✅ Approve selected agents'
 
     def suspend_agents(self, request, queryset):
-        queryset.update(status='suspended')
-        self.message_user(request, f'⛔ {queryset.count()} agent(s) suspended.')
+        count = queryset.update(status='suspended')
+        self.message_user(request, f'⛔ {count} agent(s) suspended.')
     suspend_agents.short_description = '⛔ Suspend selected agents'
 
     def status_badge(self, obj):
@@ -609,7 +611,6 @@ class AgentAdmin(admin.ModelAdmin):
         return '—'
     referral_link.short_description = 'Referral Link'
 
-
 @admin.register(PromoUsage)
 class PromoUsageAdmin(admin.ModelAdmin):
     list_display = ('user', 'agent', 'promo_purchases_count', 'promo_status', 'remaining', 'created_at')
@@ -635,11 +636,13 @@ class PromoUsageAdmin(admin.ModelAdmin):
         if obj.is_active:
             return format_html(
                 '<span style="background:#28a745;color:white;padding:3px 12px;'
-                'border-radius:12px;font-size:11px;">🟢 Active</span>'
+                'border-radius:12px;font-size:11px;">{}</span>',
+                '🟢 Active'  # ← pass as argument, not inline
             )
         return format_html(
             '<span style="background:#6c757d;color:white;padding:3px 12px;'
-            'border-radius:12px;font-size:11px;">⚫ Expired</span>'
+            'border-radius:12px;font-size:11px;">{}</span>',
+            '⚫ Expired'
         )
     promo_status.short_description = 'Promo Status'
 
@@ -647,6 +650,7 @@ class PromoUsageAdmin(admin.ModelAdmin):
         r = obj.remaining_promo_purchases()
         color = '#28a745' if r > 0 else '#dc3545'
         return format_html(
-            '<strong style="color:{};">{} / 5</strong>', color, r
+            '<strong style="color:{};">{} / 5</strong>',
+            color, r
         )
-    remaining.short_description = 'Remaining'    
+    remaining.short_description = 'Remaining'

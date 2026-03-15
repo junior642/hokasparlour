@@ -102,6 +102,93 @@
     }
 
     /* -----------------------------------------------
+       MOBILE DROPDOWN STYLES
+    ----------------------------------------------- */
+    .mobile-profile-dropdown {
+        display: none;
+        margin-bottom: 1rem;
+    }
+
+    .dropdown-toggle {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dropdown-toggle:hover {
+        background: var(--accent-dark);
+    }
+
+    .dropdown-toggle i {
+        transition: transform 0.3s ease;
+    }
+
+    .dropdown-toggle.active i {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        display: none;
+        box-shadow: var(--shadow);
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        color: var(--accent);
+    }
+
+    .dropdown-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .dropdown-item.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .dropdown-item.active i {
+        color: white;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0.5rem 0;
+    }
+
+    /* -----------------------------------------------
        MAIN CONTENT – ORDERS TABLE
     ----------------------------------------------- */
     .orders-main-card {
@@ -416,7 +503,8 @@
     }
 
     /* -----------------------------------------------
-       RESPONSIVE
+       RESPONSIVE - ONLY MOBILE VIEW CHANGED
+       Large screen view remains exactly as before
     ----------------------------------------------- */
     @media (max-width: 992px) {
         .order-container {
@@ -434,9 +522,25 @@
 
     @media (max-width: 768px) {
         .order-container {
-            padding: 0 1.2rem;
+            padding: 0 1rem !important;
+            margin: 1rem auto !important;
         }
-        
+
+        .container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+
+        /* Hide sidebar on mobile */
+        .orders-sidebar {
+            display: none !important;
+        }
+
+        /* Show mobile dropdown */
+        .mobile-profile-dropdown {
+            display: block !important;
+        }
+
         /* Hide table on mobile, show cards */
         .orders-table {
             display: none;
@@ -445,13 +549,73 @@
         .order-summary-card {
             display: block;
         }
-        
-        .orders-header h4 {
-            font-size: 1.3rem;
+
+        .orders-header {
+            padding: 1rem 1.2rem !important;
         }
         
+        .orders-header h4 {
+            font-size: 1.2rem;
+        }
+        
+        .orders-body {
+            padding: 1.2rem !important;
+        }
+
+        .order-summary-card {
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 16px;
+        }
+
+        .order-summary-header {
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.8rem;
+        }
+
+        .order-summary-id {
+            font-size: 1rem;
+        }
+
+        .order-summary-items strong {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .order-summary-item {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .order-summary-total {
+            margin-top: 0.8rem;
+            padding-top: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .order-summary-total span:last-child {
+            font-size: 1rem;
+        }
+
+        .order-date {
+            margin-bottom: 0.8rem !important;
+        }
+
+        .order-date-main {
+            font-size: 0.9rem;
+        }
+
+        .order-date-time {
+            font-size: 0.75rem;
+        }
+
+        .order-status {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
         .empty-state {
-            padding: 2rem 1rem;
+            padding: 2rem 1rem !important;
         }
         
         .empty-state i {
@@ -461,24 +625,106 @@
         .empty-state h5 {
             font-size: 1.2rem;
         }
+
+        .empty-state p {
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .shop-btn {
+            padding: 0.8rem 2rem;
+            font-size: 0.95rem;
+        }
     }
 
     @media (max-width: 480px) {
         .order-container {
-            padding: 0 1rem;
+            padding: 0 0.75rem !important;
         }
         
         .orders-header {
-            padding: 1rem 1.2rem;
+            padding: 0.8rem 1rem !important;
+        }
+        
+        .orders-header h4 {
+            font-size: 1.1rem;
         }
         
         .orders-body {
-            padding: 1.2rem;
+            padding: 1rem !important;
         }
-        
+
+        .order-summary-card {
+            padding: 0.8rem;
+        }
+
+        .order-summary-id {
+            font-size: 0.95rem;
+        }
+
+        .order-summary-item {
+            font-size: 0.85rem;
+        }
+
+        .order-summary-total {
+            font-size: 0.9rem;
+        }
+
+        .order-summary-total span:last-child {
+            font-size: 0.95rem;
+        }
+
+        .order-date-main {
+            font-size: 0.85rem;
+        }
+
         .shop-btn {
             width: 100%;
             justify-content: center;
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-toggle {
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .order-container {
+            padding: 0 0.5rem !important;
+        }
+
+        .orders-header h4 {
+            font-size: 1rem;
+        }
+
+        .order-summary-card {
+            padding: 0.7rem;
+        }
+
+        .order-summary-id {
+            font-size: 0.9rem;
+        }
+
+        .order-status {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+        }
+
+        .order-summary-item {
+            font-size: 0.8rem;
+        }
+
+        .dropdown-toggle {
+            padding: 0.7rem 0.9rem;
+            font-size: 0.9rem;
         }
     }
 
@@ -495,13 +741,50 @@
     .dark-mode .orders-table th {
         background: var(--surface);
     }
+
+    .dark-mode .order-summary-card {
+        background: var(--card);
+    }
+
+    .dark-mode .dropdown-menu {
+        background: var(--surface);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="order-container">
+    <!-- Mobile Profile Dropdown -->
+    <div class="mobile-profile-dropdown">
+        <button class="dropdown-toggle" id="profileDropdownToggle" onclick="toggleDropdown()">
+            <span>
+                <i class="fas fa-user-circle"></i>
+                Order History
+            </span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu" id="profileDropdownMenu">
+            <a href="{% url 'profile' %}" class="dropdown-item">
+                <i class="fas fa-user"></i> Profile Overview
+            </a>
+            <a href="{% url 'edit_profile' %}" class="dropdown-item">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+            <a href="{% url 'order_history' %}" class="dropdown-item active">
+                <i class="fas fa-shopping-bag"></i> Order History
+            </a>
+            <a href="{% url 'change_password' %}" class="dropdown-item">
+                <i class="fas fa-lock"></i> Change Password
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'cart' %}" class="dropdown-item">
+                <i class="fas fa-shopping-cart"></i> My Cart
+            </a>
+        </div>
+    </div>
+
     <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-        <!-- Sidebar -->
+        <!-- Sidebar (Hidden on mobile) -->
         <div style="flex: 1; min-width: 280px;">
             <div class="orders-sidebar">
                 <div class="sidebar-card">
@@ -689,4 +972,37 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleDropdown() {
+    const toggle = document.getElementById('profileDropdownToggle');
+    const menu = document.getElementById('profileDropdownMenu');
+    
+    toggle.classList.toggle('active');
+    menu.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const toggle = document.getElementById('profileDropdownToggle');
+    const menu = document.getElementById('profileDropdownMenu');
+    
+    if (toggle && menu && !toggle.contains(event.target) && !menu.contains(event.target)) {
+        toggle.classList.remove('active');
+        menu.classList.remove('show');
+    }
+});
+
+// Close dropdown on window resize if larger than mobile
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+        const menu = document.getElementById('profileDropdownMenu');
+        const toggle = document.getElementById('profileDropdownToggle');
+        if (menu && toggle) {
+            menu.classList.remove('show');
+            toggle.classList.remove('active');
+        }
+    }
+});
+</script>
 {% endblock %}

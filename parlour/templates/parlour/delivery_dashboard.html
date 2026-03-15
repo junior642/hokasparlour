@@ -4,168 +4,445 @@
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 font-serif">
     
-    <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
-        <div>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <span class="bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] p-2 rounded-xl">
-                    <i class="fas fa-truck-fast text-[var(--accent)] dark:text-[#8B3DFF]"></i>
-                </span>
-                Delivery Dashboard
-            </h1>
-            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
-                <span class="inline-flex items-center justify-center w-5 h-5 bg-[var(--accent)] text-white rounded-full text-xs font-bold">
+    <!-- Header Section with Enhanced Styling -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10">
+        <div class="relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-lg opacity-20 blur-lg"></div>
+            <div class="relative">
+                <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                    <span class="bg-gradient-to-br from-[var(--accent-soft)] to-transparent dark:from-[rgba(139,61,255,0.15)] dark:to-transparent p-3 rounded-2xl">
+                        <i class="fas fa-truck-fast text-[var(--accent)] dark:text-[#8B3DFF] text-2xl sm:text-3xl"></i>
+                    </span>
+                    Delivery Dashboard
+                </h1>
+            </div>
+            <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-3 flex items-center gap-3">
+                <span class="inline-flex items-center justify-center px-3 py-1 bg-[var(--accent)] dark:bg-[#8B3DFF] text-white rounded-full text-xs font-bold shadow-lg shadow-[var(--accent-soft)] dark:shadow-[rgba(139,61,255,0.3)]">
                     {{ orders.count }}
                 </span>
-                active order{{ orders.count|pluralize }} ready for delivery
+                <span class="flex items-center gap-1">
+                    <i class="fas fa-circle text-[8px] text-green-500 animate-pulse"></i>
+                    active order{{ orders.count|pluralize }} ready for delivery
+                </span>
             </p>
         </div>
         
         <a href="/admin/" 
-           class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-[var(--accent)] dark:bg-[#8B3DFF] text-white rounded-xl font-semibold text-sm sm:text-base transition-all hover:bg-[var(--accent-light)] dark:hover:bg-[#6B1FCC] hover:-translate-y-0.5 hover:shadow-lg">
-            <i class="fas fa-arrow-left text-xs sm:text-sm"></i>
-            Admin Panel
+           class="group relative inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-semibold text-sm sm:text-base transition-all hover:-translate-y-1 border-2 border-gray-200 dark:border-gray-700 hover:border-[var(--accent)] dark:hover:border-[#8B3DFF] shadow-lg hover:shadow-xl">
+            <i class="fas fa-arrow-left text-xs sm:text-sm group-hover:-translate-x-1 transition-transform"></i>
+            <span>Admin Panel</span>
+            <div class="absolute inset-0 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] opacity-0 group-hover:opacity-10 transition-opacity"></div>
         </a>
     </div>
 
-    <!-- Messages -->
+    <!-- Messages with Enhanced Styling -->
     {% if messages %}
-    <div class="space-y-3 mb-6 sm:mb-8">
+    <div class="space-y-3 mb-8">
         {% for message in messages %}
-        <div class="flex items-start gap-3 p-4 rounded-xl border-l-4 animate-[slideIn_0.3s_ease]
+        <div class="group relative flex items-start gap-4 p-5 rounded-xl overflow-hidden animate-[slideIn_0.3s_ease] backdrop-blur-sm
             {% if message.tags == 'success' %}
-                bg-green-50 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400
+                bg-gradient-to-r from-green-50 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/10 border-l-4 border-green-500 dark:border-green-400
             {% else %}
-                bg-red-50 dark:bg-red-900/20 border-red-500 text-red-700 dark:text-red-400
+                bg-gradient-to-r from-red-50 to-rose-50/50 dark:from-red-900/20 dark:to-rose-900/10 border-l-4 border-red-500 dark:border-red-400
             {% endif %}">
-            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} text-lg mt-0.5"></i>
-            <div class="flex-1 text-sm sm:text-base">{{ message }}</div>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} text-xl {% if message.tags == 'success' %}text-green-600 dark:text-green-400{% else %}text-red-600 dark:text-red-400{% endif %}"></i>
+            <div class="flex-1 text-sm sm:text-base {% if message.tags == 'success' %}text-green-800 dark:text-green-200{% else %}text-red-800 dark:text-red-200{% endif %} font-medium">{{ message }}</div>
+            <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Jump to Order Search -->
-    <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 mb-6 sm:mb-8 shadow-sm border border-gray-200 dark:border-gray-700">
-        <form onsubmit="jumpToOrder(event)" class="flex flex-col sm:flex-row gap-3">
-            <div class="flex-1 relative">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                <input type="number" id="orderIdInput" placeholder="Enter Order ID to jump directly..."
-                       class="w-full pl-9 pr-4 py-3 sm:py-3.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm sm:text-base focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all"
-                       style="border-color: var(--border);">
+    <!-- Enhanced Jump to Order Search -->
+    <div class="relative group mb-8">
+        <!-- Background decoration -->
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-2xl opacity-20 group-hover:opacity-30 blur transition-opacity"></div>
+        
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="p-2 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.1)] rounded-lg">
+                    <i class="fas fa-magnifying-glass text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Order Search</h2>
+                <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">Ctrl + K</span>
             </div>
-            <button type="submit" 
-                    class="px-5 sm:px-6 py-3 sm:py-3.5 bg-[var(--accent)] dark:bg-[#8B3DFF] text-white rounded-xl font-semibold text-sm sm:text-base transition-all hover:bg-[var(--accent-light)] dark:hover:bg-[#6B1FCC] hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2">
-                <i class="fas fa-magnifying-glass"></i>
-                <span class="hidden sm:inline">Find</span> Order
-            </button>
-        </form>
+            
+            <form onsubmit="searchOrderById(event)" class="flex flex-col sm:flex-row gap-3">
+                <div class="flex-1 relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="number" id="orderIdInput" placeholder="Enter Order ID to search..."
+                           class="w-full pl-11 pr-12 py-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm sm:text-base focus:border-[var(--accent)] dark:focus:border-[#8B3DFF] focus:outline-none focus:ring-4 focus:ring-[var(--accent-soft)] dark:focus:ring-[rgba(139,61,255,0.08)] transition-all"
+                           style="border-color: var(--border);"
+                           autocomplete="off">
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hidden sm:block">
+                        ↵
+                    </div>
+                </div>
+                <button type="submit" 
+                        class="group/btn relative px-8 py-4 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] text-white rounded-xl font-semibold text-sm sm:text-base transition-all hover:-translate-y-1 hover:shadow-xl overflow-hidden">
+                    <span class="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700"></span>
+                    <span class="relative flex items-center gap-2">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <span class="hidden sm:inline">Search</span> Order
+                    </span>
+                </button>
+            </form>
+
+            <!-- Search Results Container -->
+            <div id="searchResultsContainer" class="hidden mt-4">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
     </div>
 
-    <script>
-        function jumpToOrder(e) {
-            e.preventDefault();
-            const id = document.getElementById('orderIdInput').value;
-            if (id) window.location.href = '/admin/delivery/' + id + '/';
-        }
-    </script>
-
-    <!-- Orders List -->
+    <!-- Orders List with Enhanced Cards -->
     {% if not orders %}
-    <div class="text-center py-12 sm:py-16 lg:py-20 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-        <div class="text-5xl sm:text-6xl mb-4 animate-bounce">🎉</div>
-        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">All Clear!</h3>
-        <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">No pending deliveries right now.</p>
+    <div class="relative group">
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-2xl opacity-20 group-hover:opacity-30 blur transition-opacity"></div>
+        <div class="relative text-center py-16 sm:py-20 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-[var(--accent-soft)]/20 to-transparent dark:from-[rgba(139,61,255,0.05)] dark:to-transparent"></div>
+            <div class="relative">
+                <div class="text-7xl sm:text-8xl mb-6 animate-bounce">🎉</div>
+                <h3 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">All Clear!</h3>
+                <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6">No pending deliveries right now.</p>
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.1)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-full text-sm">
+                    <i class="fas fa-check-circle"></i>
+                    <span>All orders delivered</span>
+                </div>
+            </div>
+        </div>
     </div>
     {% else %}
     <div class="space-y-4 sm:space-y-5">
         {% for order in orders %}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 lg:p-6 shadow-sm border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md hover:-translate-y-0.5 group"
-             style="border-left-width: 4px; border-left-color: {% if order.is_paid %}#10B981{% else %}#EF4444{% endif %};">
-            
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                
-                <!-- Order Info -->
-                <div class="flex-1">
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                        <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-                            Order #{{ order.id }}
-                        </h3>
-                        
-                        <!-- Status Badges -->
-                        <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold
-                            {% if order.is_paid %}
-                                bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
-                            {% else %}
-                                bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400
-                            {% endif %}">
-                            <i class="fas fa-{% if order.is_paid %}check-circle{% else %}times-circle{% endif %} text-[8px] sm:text-xs"></i>
-                            {% if order.is_paid %}Paid{% else %}Not Paid{% endif %}
-                        </span>
-                        
-                        <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-full text-[10px] sm:text-xs font-semibold">
-                            <i class="fas fa-clock text-[8px] sm:text-xs"></i>
-                            {{ order.order_status|title }}
-                        </span>
-                    </div>
-                    
-                    <!-- Customer Details -->
-                    <div class="space-y-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-user text-[var(--accent)] dark:text-[#8B3DFF] w-4 text-xs"></i>
-                            <span class="font-medium text-gray-900 dark:text-white">{{ order.customer_name }}</span>
-                            <span class="text-gray-400">·</span>
-                            <i class="fas fa-phone text-[var(--accent)] dark:text-[#8B3DFF] text-xs"></i>
-                            <span>{{ order.phone_number }}</span>
-                        </div>
-                        
-                        <div class="flex items-start gap-2">
-                            <i class="fas fa-location-dot text-[var(--accent)] dark:text-[#8B3DFF] w-4 text-xs mt-0.5"></i>
-                            <span class="flex-1">{{ order.delivery_address }}</span>
-                        </div>
-                        
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-calendar text-[var(--accent)] dark:text-[#8B3DFF] w-4 text-xs"></i>
-                            <span class="text-gray-500 dark:text-gray-500">{{ order.created_at|date:"M d, Y · g:i A" }}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Order Total & Action -->
-                <div class="flex flex-row lg:flex-col items-center justify-between lg:items-end gap-3 lg:gap-2">
-                    <div class="text-right">
-                        <span class="text-xs text-gray-500 dark:text-gray-400 block">Total Amount</span>
-                        <span class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[var(--accent)] dark:text-[#8B3DFF]">
-                            KSH {{ order.get_total }}
-                        </span>
-                    </div>
-                    
-                    <a href="{% url 'delivery_detail' order.id %}"
-                       class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] text-white rounded-xl font-semibold text-xs sm:text-sm transition-all hover:shadow-xl hover:-translate-y-1 hover:scale-105 group/btn">
-                        <span>Manage</span>
-                        <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
-                    </a>
-                </div>
+        <div class="group relative transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+            <!-- Status stripe -->
+            <div class="absolute left-0 top-0 bottom-0 w-2 rounded-l-2xl"
+                 style="background: {% if order.is_paid %}linear-gradient(135deg, #10B981, #059669){% else %}linear-gradient(135deg, #EF4444, #DC2626){% endif %};">
             </div>
             
-            <!-- Progress Bar (Optional - if you want to show delivery progress) -->
-            {% if order.order_status == 'processing' %}
-            <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-2">
-                    <div class="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-[var(--accent)] dark:bg-[#8B3DFF] rounded-full" style="width: 30%"></div>
+            <!-- Main card -->
+            <div class="relative bg-white dark:bg-gray-800 rounded-2xl pl-6 pr-4 sm:pr-5 lg:pr-6 py-5 shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <!-- Background gradient effect -->
+                <div class="absolute inset-0 bg-gradient-to-r from-[var(--accent-soft)]/5 to-transparent dark:from-[rgba(139,61,255,0.02)] dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                
+                <!-- Content -->
+                <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    
+                    <!-- Order Info -->
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+                                Order #{{ order.id }}
+                            </h3>
+                            
+                            <!-- Status Badges with improved styling -->
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold shadow-sm
+                                {% if order.is_paid %}
+                                    bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800
+                                {% else %}
+                                    bg-gradient-to-r from-red-100 to-rose-100 dark:from-red-900/30 dark:to-rose-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800
+                                {% endif %}">
+                                <i class="fas fa-{% if order.is_paid %}check-circle{% else %}times-circle{% endif %} text-xs"></i>
+                                {% if order.is_paid %}Paid{% else %}Not Paid{% endif %}
+                            </span>
+                            
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[var(--accent-soft)] to-transparent dark:from-[rgba(139,61,255,0.15)] dark:to-transparent text-[var(--accent)] dark:text-[#8B3DFF] rounded-full text-xs font-semibold border border-[var(--accent-soft)] dark:border-[rgba(139,61,255,0.2)]">
+                                <i class="fas fa-clock text-xs"></i>
+                                {{ order.order_status|title }}
+                            </span>
+                        </div>
+                        
+                        <!-- Customer Details with Icons -->
+                        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.15)] flex items-center justify-center">
+                                    <i class="fas fa-user text-[10px] text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                                </div>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ order.customer_name }}</span>
+                                <span class="text-gray-300 dark:text-gray-600">•</span>
+                                <div class="w-6 h-6 rounded-full bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.15)] flex items-center justify-center">
+                                    <i class="fas fa-phone text-[10px] text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                                </div>
+                                <span>{{ order.phone_number }}</span>
+                            </div>
+                            
+                            <div class="flex items-start gap-2">
+                                <div class="w-6 h-6 rounded-full bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.15)] flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-location-dot text-[10px] text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                                </div>
+                                <span class="flex-1 leading-relaxed">{{ order.delivery_address }}</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.15)] flex items-center justify-center">
+                                    <i class="fas fa-calendar text-[10px] text-[var(--accent)] dark:text-[#8B3DFF]"></i>
+                                </div>
+                                <span class="text-gray-500 dark:text-gray-500">{{ order.created_at|date:"M d, Y · g:i A" }}</span>
+                            </div>
+                        </div>
                     </div>
-                    <span class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Processing</span>
+                    
+                    <!-- Order Total & Action -->
+                    <div class="flex flex-row lg:flex-col items-center justify-between lg:items-end gap-4 lg:gap-3 pt-3 lg:pt-0 border-t lg:border-t-0 border-gray-100 dark:border-gray-700">
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Total Amount</span>
+                            <div class="relative">
+                                <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] bg-clip-text text-transparent">
+                                    KSH {{ order.get_total }}
+                                </span>
+                                <div class="absolute -inset-1 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-full opacity-20 blur-md"></div>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'delivery_detail' order.id %}"
+                           class="group/btn relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] text-white rounded-xl font-semibold text-sm transition-all hover:-translate-y-1 hover:shadow-xl overflow-hidden">
+                            <span class="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700"></span>
+                            <span class="relative flex items-center gap-2">
+                                <span>Manage</span>
+                                <i class="fas fa-arrow-right text-xs transition-transform duration-300 group-hover/btn:translate-x-1"></i>
+                            </span>
+                        </a>
+                    </div>
                 </div>
+                
+                <!-- Progress Bar for Processing Orders -->
+                {% if order.order_status == 'processing' %}
+                <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center gap-3">
+                        <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-full animate-pulse" style="width: 30%"></div>
+                        </div>
+                        <span class="text-xs font-medium text-[var(--accent)] dark:text-[#8B3DFF]">Processing</span>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
     {% endif %}
 </div>
 
-<!-- Custom Animation -->
+<!-- JavaScript for Search Functionality -->
+<script>
+// Order data from Django template
+const ordersData = [
+    {% for order in orders %}
+    {
+        id: {{ order.id }},
+        customer_name: "{{ order.customer_name|escapejs }}",
+        phone_number: "{{ order.phone_number|escapejs }}",
+        delivery_address: "{{ order.delivery_address|escapejs }}",
+        order_status: "{{ order.order_status|escapejs }}",
+        is_paid: {% if order.is_paid %}true{% else %}false{% endif %},
+        total: "{{ order.get_total|escapejs }}",
+        created_at: "{{ order.created_at|date:'Y-m-d H:i:s'|escapejs }}",
+        created_at_display: "{{ order.created_at|date:'M d, Y · g:i A'|escapejs }}",
+        url: "{% url 'delivery_detail' order.id %}"
+    },
+    {% endfor %}
+];
+
+function searchOrderById(e) {
+    e.preventDefault();
+    
+    const searchInput = document.getElementById('orderIdInput');
+    const searchContainer = document.getElementById('searchResultsContainer');
+    const orderId = parseInt(searchInput.value);
+    
+    // Clear previous results
+    searchContainer.innerHTML = '';
+    
+    // Validate input
+    if (!searchInput.value || isNaN(orderId)) {
+        showSearchResult(searchContainer, {
+            type: 'error',
+            message: 'Please enter a valid Order ID',
+            icon: 'exclamation-circle'
+        });
+        return;
+    }
+    
+    // Search for the order
+    const foundOrder = ordersData.find(order => order.id === orderId);
+    
+    if (foundOrder) {
+        const statusClass = foundOrder.is_paid ? 'green' : 'red';
+        const statusIcon = foundOrder.is_paid ? 'check-circle' : 'times-circle';
+        const statusText = foundOrder.is_paid ? 'Paid' : 'Not Paid';
+        
+        const resultHTML = `
+            <div class="relative group/search-result animate-[slideIn_0.3s_ease]">
+                <div class="absolute -inset-0.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] rounded-xl opacity-20 group-hover/search-result:opacity-30 blur transition-opacity"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] flex items-center justify-center flex-shrink-0 shadow-lg">
+                            <i class="fas fa-check text-white text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">Order #${foundOrder.id} Found!</h4>
+                                <button onclick="clearSearch()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <i class="fas fa-user text-[var(--accent)] dark:text-[#8B3DFF] w-4"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">${foundOrder.customer_name}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <i class="fas fa-phone text-[var(--accent)] dark:text-[#8B3DFF] w-4"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">${foundOrder.phone_number}</span>
+                                    </div>
+                                    <div class="flex items-start gap-2 text-sm">
+                                        <i class="fas fa-location-dot text-[var(--accent)] dark:text-[#8B3DFF] w-4 mt-1"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">${foundOrder.delivery_address}</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <i class="fas fa-tag text-[var(--accent)] dark:text-[#8B3DFF] w-4"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">KSH ${foundOrder.total}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <i class="fas fa-clock text-[var(--accent)] dark:text-[#8B3DFF] w-4"></i>
+                                        <span class="text-gray-700 dark:text-gray-300">${foundOrder.created_at_display}</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold
+                                            ${foundOrder.is_paid ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}">
+                                            <i class="fas fa-${statusIcon} text-xs"></i>
+                                            ${statusText}
+                                        </span>
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-[var(--accent-soft)] dark:bg-[rgba(139,61,255,0.15)] text-[var(--accent)] dark:text-[#8B3DFF] rounded-full text-xs font-semibold">
+                                            <i class="fas fa-info-circle text-xs"></i>
+                                            ${foundOrder.order_status}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                <a href="${foundOrder.url}" 
+                                   class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] dark:from-[#8B3DFF] dark:to-[#6B1FCC] text-white rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                                    <i class="fas fa-arrow-right"></i>
+                                    Manage Order
+                                </a>
+                                <button onclick="clearSearch()" 
+                                        class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-all hover:bg-gray-200 dark:hover:bg-gray-600">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        searchContainer.innerHTML = resultHTML;
+        searchContainer.classList.remove('hidden');
+        searchContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+    } else {
+        showSearchResult(searchContainer, {
+            type: 'error',
+            message: `Order #${orderId} not found`,
+            suggestion: 'Try a different ID or check completed orders',
+            icon: 'exclamation-triangle'
+        });
+    }
+}
+
+function showSearchResult(container, { type, message, suggestion = '', icon = 'info-circle' }) {
+    const config = {
+        error: {
+            bg: 'bg-red-50 dark:bg-red-900/20',
+            border: 'border-red-500',
+            text: 'text-red-700 dark:text-red-400',
+            icon: 'text-red-500'
+        },
+        warning: {
+            bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+            border: 'border-yellow-500',
+            text: 'text-yellow-700 dark:text-yellow-400',
+            icon: 'text-yellow-500'
+        }
+    };
+    
+    const style = config[type] || config.warning;
+    
+    const resultHTML = `
+        <div class="relative group/search-result animate-[slideIn_0.3s_ease]">
+            <div class="absolute -inset-0.5 bg-gradient-to-r from-gray-400 to-gray-500 dark:from-gray-600 dark:to-gray-700 rounded-xl opacity-20 blur"></div>
+            <div class="relative bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-xl ${style.bg} flex items-center justify-center flex-shrink-0 border ${style.border}">
+                        <i class="fas fa-${icon} ${style.icon} text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-lg font-bold ${style.text}">${message}</h4>
+                            <button onclick="clearSearch()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        ${suggestion ? `<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">${suggestion}</p>` : ''}
+                        <button onclick="clearSearch()" 
+                                class="text-sm text-[var(--accent)] dark:text-[#8B3DFF] hover:underline font-medium">
+                            Clear search
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = resultHTML;
+    container.classList.remove('hidden');
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('orderIdInput');
+    const searchContainer = document.getElementById('searchResultsContainer');
+    
+    searchInput.value = '';
+    searchContainer.innerHTML = '';
+    searchContainer.classList.add('hidden');
+    searchInput.focus();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('orderIdInput').focus();
+    }
+});
+
+// Real-time validation
+document.getElementById('orderIdInput').addEventListener('input', function(e) {
+    const container = document.getElementById('searchResultsContainer');
+    if (!e.target.value) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+    }
+});
+
+// Enter key support
+document.getElementById('orderIdInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        searchOrderById(e);
+    }
+});
+</script>
+
+<!-- Custom Animations and Styles -->
 <style>
 @keyframes slideIn {
     from {
@@ -178,28 +455,51 @@
     }
 }
 
-/* Hover effect for order cards */
-.hover\:shadow-md:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-/* Custom scrollbar for the page (optional) */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
     background: var(--surface);
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--accent);
-    border-radius: 4px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-light);
+}
+
+/* Loading animation for search */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Smooth transitions */
+#searchResultsContainer {
+    transition: all 0.3s ease;
+}
+
+/* Remove number input spinners */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    opacity: 0.3;
+}
+
+input[type=number]:focus::-webkit-inner-spin-button, 
+input[type=number]:focus::-webkit-outer-spin-button { 
+    opacity: 0.6;
 }
 </style>
 {% endblock %}

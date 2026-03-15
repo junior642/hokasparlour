@@ -736,6 +736,28 @@ def generate_referral_code():
     return code
 
 
+def generate_referral_code(user=None):
+    """Generate unique code based on username e.g. JOHN-AB12"""
+    if user:
+        # Use first 4 chars of username in uppercase
+        name_part = ''.join(c for c in user.username.upper() if c.isalpha())[:4]
+        if len(name_part) < 2:
+            name_part = 'HOKA'  # fallback if username has no letters
+    else:
+        name_part = 'HOKA'
+
+    chars = string.ascii_uppercase + string.digits
+    suffix = ''.join(random.choices(chars, k=4))
+    code = f"{name_part}-{suffix}"
+
+    # Ensure uniqueness
+    while Agent.objects.filter(referral_code=code).exists():
+        suffix = ''.join(random.choices(chars, k=4))
+        code = f"{name_part}-{suffix}"
+
+    return code
+
+
 class Agent(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending Approval'),
@@ -752,7 +774,7 @@ class Agent(models.Model):
         max_length=20,
         unique=True,
         blank=True,
-        help_text="Auto-generated on approval. e.g. HOKA-AB12"
+        help_text="Auto-generated from your username on approval. Can be changed by admin. e.g. JOHN-AB12"
     )
     status = models.CharField(
         max_length=20,
@@ -777,9 +799,9 @@ class Agent(models.Model):
         return f"Agent: {self.user.username} ({self.referral_code or 'pending'})"
 
     def save(self, *args, **kwargs):
-        # Auto-generate referral code when approved
+        # Auto-generate referral code when approved and no code set yet
         if self.status == 'approved' and not self.referral_code:
-            self.referral_code = generate_referral_code()
+            self.referral_code = generate_referral_code(user=self.user)
             from django.utils import timezone
             self.approved_at = timezone.now()
         super().save(*args, **kwargs)
@@ -789,7 +811,6 @@ class Agent(models.Model):
 
     def total_users_referred(self):
         return PromoUsage.objects.filter(agent=self).count()
-
 
 class PromoUsage(models.Model):
     """Tracks which user used which agent's promo code."""

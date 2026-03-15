@@ -101,6 +101,93 @@
     }
 
     /* -----------------------------------------------
+       MOBILE DROPDOWN STYLES
+    ----------------------------------------------- */
+    .mobile-profile-dropdown {
+        display: none;
+        margin-bottom: 1rem;
+    }
+
+    .dropdown-toggle {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dropdown-toggle:hover {
+        background: var(--accent-dark);
+    }
+
+    .dropdown-toggle i {
+        transition: transform 0.3s ease;
+    }
+
+    .dropdown-toggle.active i {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        display: none;
+        box-shadow: var(--shadow);
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        color: var(--accent);
+    }
+
+    .dropdown-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .dropdown-item.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .dropdown-item.active i {
+        color: white;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0.5rem 0;
+    }
+
+    /* -----------------------------------------------
        EDIT PROFILE CARD
     ----------------------------------------------- */
     .edit-card {
@@ -409,7 +496,8 @@
     }
 
     /* -----------------------------------------------
-       RESPONSIVE
+       RESPONSIVE - ONLY MOBILE VIEW CHANGED
+       Large screen view remains exactly as before
     ----------------------------------------------- */
     @media (max-width: 992px) {
         .profile-container {
@@ -424,32 +512,91 @@
 
     @media (max-width: 768px) {
         .profile-container {
-            padding: 0 1.2rem;
+            padding: 0 1rem !important;
+            margin: 1rem auto !important;
         }
-        
+
+        .container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+
+        /* Hide sidebar on mobile */
+        .profile-sidebar {
+            display: none !important;
+        }
+
+        /* Show mobile dropdown */
+        .mobile-profile-dropdown {
+            display: block !important;
+        }
+
         .edit-header {
-            padding: 1.2rem;
+            padding: 1rem 1.2rem !important;
         }
         
         .edit-header h4 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
         
         .edit-body {
-            padding: 1.5rem;
+            padding: 1.2rem !important;
         }
-        
+
+        .form-section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .form-section h5 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .form-row {
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 12px;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            margin-top: 0.3rem;
+        }
+
         .form-actions {
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
             flex-direction: column-reverse;
         }
         
         .btn {
             width: 100%;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
         }
-        
+
         .profile-picture-card {
             flex-direction: column;
             text-align: center;
+            padding: 1.2rem;
+            gap: 1rem;
         }
         
         .profile-picture-info {
@@ -458,30 +605,100 @@
         
         .profile-picture-info h6 {
             justify-content: center;
+            font-size: 0.95rem;
         }
         
         .profile-picture-info small {
             justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .profile-picture {
+            width: 70px;
+            height: 70px;
         }
     }
 
     @media (max-width: 480px) {
         .profile-container {
-            padding: 0 1rem;
+            padding: 0 0.75rem !important;
         }
         
         .edit-header h4 {
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
         
         .edit-body {
-            padding: 1.2rem;
+            padding: 1rem !important;
         }
         
         .form-group input,
         .form-group select,
         .form-group textarea {
+            padding: 0.7rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .form-section h5 {
+            font-size: 0.95rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-toggle {
             padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .profile-picture {
+            width: 60px;
+            height: 60px;
+        }
+
+        .profile-picture-info h6 {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .profile-container {
+            padding: 0 0.5rem !important;
+        }
+
+        .edit-header h4 {
+            font-size: 0.95rem;
+        }
+
+        .edit-body {
+            padding: 0.8rem !important;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.6rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .help-text {
+            font-size: 0.7rem;
+        }
+
+        .dropdown-toggle {
+            padding: 0.7rem 0.9rem;
+            font-size: 0.9rem;
         }
     }
 
@@ -497,13 +714,48 @@
     .dark-mode .profile-picture-card {
         background: var(--card);
     }
+
+    .dark-mode .dropdown-menu {
+        background: var(--surface);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
+    <!-- Mobile Profile Dropdown -->
+    <div class="mobile-profile-dropdown">
+        <button class="dropdown-toggle" id="profileDropdownToggle" onclick="toggleDropdown()">
+            <span>
+                <i class="fas fa-user-circle"></i>
+                {% if active_tab == 'edit' %}Edit Profile
+                {% elif active_tab == 'profile' %}Profile Overview
+                {% else %}My Account{% endif %}
+            </span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu" id="profileDropdownMenu">
+            <a href="{% url 'profile' %}" class="dropdown-item {% if active_tab == 'profile' %}active{% endif %}">
+                <i class="fas fa-user"></i> Profile Overview
+            </a>
+            <a href="{% url 'edit_profile' %}" class="dropdown-item {% if active_tab == 'edit' %}active{% endif %}">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+            <a href="{% url 'order_history' %}" class="dropdown-item">
+                <i class="fas fa-shopping-bag"></i> Order History
+            </a>
+            <a href="{% url 'change_password' %}" class="dropdown-item">
+                <i class="fas fa-lock"></i> Change Password
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'cart' %}" class="dropdown-item">
+                <i class="fas fa-shopping-cart"></i> My Cart
+            </a>
+        </div>
+    </div>
+
     <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
-        <!-- Sidebar -->
+        <!-- Sidebar (Hidden on mobile) -->
         <div style="flex: 1; min-width: 280px;">
             <div class="profile-sidebar">
                 <div class="sidebar-card">
@@ -614,7 +866,7 @@
                                     {{ profile_form.phone_number }}
                                     <div class="help-text">
                                         <i class="fas fa-info-circle"></i>
-                                        Format: +2547XXXXXXXX (e.g., +254783072098)
+                                        Format: +2547XXXXXXXX (e.g., +254783072098) OR 07XXXXXXXX (e.g., 0783072098)
                                     </div>
                                 </div>
                                 
@@ -637,7 +889,7 @@
                                 {{ profile_form.delivery_address }}
                                 <div class="help-text">
                                     <i class="fas fa-info-circle"></i>
-                                    Your full delivery address including building, street, estate
+                                    Your full delivery address including eg. MMU,Block A, Room 123
                                 </div>
                             </div>
                         </div>
@@ -706,4 +958,37 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleDropdown() {
+    const toggle = document.getElementById('profileDropdownToggle');
+    const menu = document.getElementById('profileDropdownMenu');
+    
+    toggle.classList.toggle('active');
+    menu.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const toggle = document.getElementById('profileDropdownToggle');
+    const menu = document.getElementById('profileDropdownMenu');
+    
+    if (toggle && menu && !toggle.contains(event.target) && !menu.contains(event.target)) {
+        toggle.classList.remove('active');
+        menu.classList.remove('show');
+    }
+});
+
+// Close dropdown on window resize if larger than mobile
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+        const menu = document.getElementById('profileDropdownMenu');
+        const toggle = document.getElementById('profileDropdownToggle');
+        if (menu && toggle) {
+            menu.classList.remove('show');
+            toggle.classList.remove('active');
+        }
+    }
+});
+</script>
 {% endblock %}

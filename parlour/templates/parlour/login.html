@@ -276,10 +276,13 @@
                 <!-- TWO OPTIONS: GOOGLE + EMAIL -->
                 <div class="login-options">
                     <!-- Google option with icon - DIRECT LINK, NO JAVASCRIPT -->
-                    <a href="{% provider_login_url 'google' %}" class="option-btn" id="googleOption">
-                        <i class="fab fa-google"></i> 
-                        <span>Login with Google</span>
-                    </a>
+                    <form id="googleForm" method="post" action="{% provider_login_url 'google' %}">
+    {% csrf_token %}
+    <button type="submit" class="option-btn" id="googleOption">
+        <i class="fab fa-google"></i>
+        <span>Login with Google</span>
+    </button>
+</form>
 
                     <!-- Email option (click to reveal form) -->
                     <button class="option-btn" id="emailOption">

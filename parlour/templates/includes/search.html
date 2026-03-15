@@ -4,8 +4,8 @@
     .search-bar-sticky-wrapper {
         position: sticky;
         top: 0;
-        z-index: 1000;
-        background: var(--bg); /* Changed to use theme background directly */
+        z-index: 50; /* Reduced from 1000 to be below hamburger menu (usually 100+) */
+        background: var(--bg);
         border-bottom: 1px solid var(--border);
         padding: 1rem 0;
         margin-bottom: 1.5rem;
@@ -51,7 +51,7 @@
         padding: 0.875rem 3rem 0.875rem 3rem;
         border: 2px solid var(--border);
         border-radius: 16px;
-        background: var(--surface); /* Changed to use surface color for contrast */
+        background: var(--surface);
         color: var(--text);
         font-size: 0.95rem;
         transition: all 0.3s ease;
@@ -80,6 +80,7 @@
         color: var(--accent);
         transition: all 0.3s ease;
         font-size: 1rem;
+        z-index: 1; /* Ensure icon stays behind input but above background */
     }
 
     #liveSearch:focus ~ .absolute.left-3 {
@@ -96,6 +97,7 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        z-index: 1; /* Ensure buttons are above input but still behind menus */
     }
 
     /* Loading spinner animation */
@@ -148,6 +150,8 @@
     #activeSearchIndicator {
         margin-top: 0.75rem;
         animation: slideDown 0.3s ease;
+        position: relative;
+        z-index: 40; /* Keep indicator below menus */
     }
 
     #activeSearchIndicator > div {
@@ -187,6 +191,8 @@
         border-radius: 24px;
         border: 1px solid var(--border);
         margin-top: 1.5rem;
+        position: relative;
+        z-index: 40; /* Keep below menus */
     }
 
     #noResultsMessage i {
@@ -218,6 +224,8 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
+        position: relative;
+        z-index: 1;
     }
 
     #noResultsMessage button:hover {
@@ -270,7 +278,7 @@
 
     /* Dark mode specific adjustments */
     .dark-mode .search-bar-sticky-wrapper {
-        background: var(--bg); /* Uses dark mode background automatically */
+        background: var(--bg);
         border-bottom-color: var(--border);
     }
 
@@ -294,6 +302,7 @@
     @media (max-width: 768px) {
         .search-bar-sticky-wrapper {
             padding: 0.75rem 0;
+            z-index: 45; /* Slightly higher on mobile but still below menu */
         }
         
         .search-bar-container {
@@ -327,6 +336,7 @@
     @media (max-width: 480px) {
         .search-bar-sticky-wrapper {
             padding: 0.5rem 0;
+            z-index: 45;
         }
         
         .search-bar-container {
@@ -350,6 +360,14 @@
         #searchTerm {
             max-width: 120px;
         }
+    }
+
+    /* Ensure hamburger menu appears above search bar */
+    /* Add this to your existing navigation styles */
+    .hamburger-menu,
+    .mobile-menu,
+    .nav-menu {
+        z-index: 100 !important; /* Menus should have higher z-index */
     }
 </style>
 

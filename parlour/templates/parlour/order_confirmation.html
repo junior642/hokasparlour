@@ -449,57 +449,26 @@
     }
 
     /* -----------------------------------------------
-       RESPONSIVE
+       RESPONSIVE - ONLY MOBILE VIEW CHANGED
+       Large screen view remains exactly as before
     ----------------------------------------------- */
     @media (max-width: 768px) {
         .confirmation-container {
-            padding: 1.5rem;
-            margin: 1rem;
+            padding: 1.2rem !important;  /* Reduced from 3rem for mobile */
+            margin: 1rem !important;      /* Adjusted margin for mobile */
+        }
+        
+        .container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
         }
         
         .success-message {
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 1.5rem;
-        }
-        
-        .info-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-        }
-        
-        .action-buttons a {
-            width: 100%;
-        }
-        
-        .order-table th,
-        .order-table td {
-            padding: 1rem 0.8rem;
-        }
-        
-        .order-table th:first-child,
-        .order-table td:first-child {
-            padding-left: 1rem;
-        }
-        
-        .order-table th:last-child,
-        .order-table td:last-child {
-            padding-right: 1rem;
-        }
-        
-        .important-notice {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .confirmation-container {
             padding: 1.2rem;
+            gap: 1rem;
         }
         
         .success-icon {
@@ -509,32 +478,180 @@
         }
         
         .success-content h2 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .success-content p {
+            font-size: 0.9rem;
+        }
+        
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .info-item {
+            padding: 1rem;
+        }
+        
+        .info-item strong {
+            font-size: 0.75rem;
+        }
+        
+        .info-item span {
+            font-size: 0.9rem;
+        }
+        
+        .section {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.2rem;
         }
         
         .section h3 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-left: 0.8rem;
+        }
+        
+        .order-id-wrapper {
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .order-id-label {
+            font-size: 0.9rem;
         }
         
         .order-id-badge {
             font-size: 1rem;
-            padding: 0.5rem 1.2rem;
+            padding: 0.4rem 1.2rem;
+        }
+        
+        .order-id-badge i {
+            font-size: 0.9rem;
+        }
+        
+        .pickup-highlight {
+            padding: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        
+        .pickup-highlight h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+        
+        .action-buttons a {
+            width: 100%;
+            min-width: auto;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.95rem;
         }
         
         .order-table {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .order-table th,
         .order-table td {
-            padding: 0.8rem 0.6rem;
+            padding: 0.8rem 0.5rem;
+        }
+        
+        .order-table th:first-child,
+        .order-table td:first-child {
+            padding-left: 0.8rem;
+        }
+        
+        .order-table th:last-child,
+        .order-table td:last-child {
+            padding-right: 0.8rem;
+        }
+        
+        .order-table th {
+            font-size: 0.7rem;
+            padding: 0.8rem 0.5rem;
+        }
+        
+        .order-table tfoot td {
+            padding: 0.8rem 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .product-size {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            margin-left: 0.3rem;
+        }
+        
+        .important-notice {
+            padding: 1rem;
+            margin: 1.5rem 0;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        
+        .important-notice i {
+            font-size: 1.2rem;
+        }
+        
+        .important-notice strong {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .important-notice p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .important-notice .order-id-highlight {
+            padding: 0.15rem 0.6rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .confirmation-container {
+            padding: 1rem !important;
+            margin: 0.5rem !important;
+            border-radius: 24px;
+        }
+        
+        .success-content h2 {
+            font-size: 1.2rem;
+        }
+        
+        .section h3 {
+            font-size: 1.1rem;
+        }
+        
+        .order-id-wrapper {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .order-table {
+            font-size: 0.8rem;
         }
         
         .product-size {
             display: block;
             margin-left: 0;
-            margin-top: 0.3rem;
+            margin-top: 0.2rem;
             width: fit-content;
+        }
+        
+        .action-buttons a {
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
         }
     }
 

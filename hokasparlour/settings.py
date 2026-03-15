@@ -32,7 +32,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = False
+DEBUG = True
 
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
@@ -101,6 +101,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'parlour.context_processors.whatsapp_popup', 
                 'parlour.context_processors.promo_popup',
+                'parlour.context_processors.cart_count',
             ],
         },
     },
@@ -208,6 +209,13 @@ LOGGING = {
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# settings.py
+SESSION_COOKIE_SECURE = True    # only send cookie over HTTPS
+SESSION_COOKIE_HTTPONLY = True  # JS cannot access the cookie
+SESSION_COOKIE_SAMESITE = 'Lax' # blocks cross-site cookie sending
+
+X_FRAME_OPTIONS = 'DENY'
 
 
 

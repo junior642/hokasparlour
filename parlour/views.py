@@ -600,6 +600,7 @@ def checkout(request):
 
 
 from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 def process_cash_order(request):
     """Process cash on delivery orders"""
@@ -625,7 +626,7 @@ def process_cash_order(request):
             order=order,
             product=product,
             quantity=item['quantity'],
-            price=product.price,  # Use the product's current price
+            price=Decimal(str(item['price'])),  # ← use cart price (already promo-adjusted)
             size=item['size']
         )
         
@@ -647,6 +648,8 @@ def process_cash_order(request):
     del request.session['pending_order']
     
     return redirect('order_confirmation', order_id=order.id)
+
+
 
 def mpesa_payment(request):
     """M-Pesa payment page"""
@@ -2632,23 +2635,19 @@ def delivery_payment_status(request, order_id):
 def clear_whatsapp_popup(request):
     from django.utils import timezone
     request.session.pop('show_whatsapp_popup', None)
-    
-    action = request.POST.get('action', 'dismiss')  # 'joined' or 'dismiss'
-    
+
+    action = request.POST.get('action', 'dismiss')
+
     if request.user.is_authenticated:
         profile, _ = Profile.objects.get_or_create(user=request.user)
         if action == 'joined':
-            # Never show again
             profile.whatsapp_joined = True
             profile.whatsapp_popup_dismissed_at = None
         else:
-            # Show again in 3 days
             profile.whatsapp_popup_dismissed_at = timezone.now()
         profile.save(update_fields=['whatsapp_joined', 'whatsapp_popup_dismissed_at'])
-    
+
     return JsonResponse({'status': 'ok'})
-
-
 
 # ── Referral Landing ──────────────────────────────────────────
 def referral_landing(request, referral_code):
@@ -2659,7 +2658,12 @@ def referral_landing(request, referral_code):
     try:
         agent = Agent.objects.get(referral_code=referral_code, status='approved')
         request.session['referral_code'] = referral_code
-        messages.success(request, f'🎉 You were referred! Sign up to get your promo discount.')
+        # Get agent's display name
+        if agent.user.first_name or agent.user.last_name:
+            referrer_name = f"{agent.user.first_name} {agent.user.last_name}".strip()
+        else:
+            referrer_name = agent.user.username
+        messages.success(request, f'🎉 You were referred by {referrer_name}! Sign up to get your promo discount on your first 5 products.')
     except Agent.DoesNotExist:
         messages.error(request, 'Invalid referral link.')
     return redirect('signup')
@@ -2667,20 +2671,26 @@ def referral_landing(request, referral_code):
 
 # ── Promo Code Popup Actions ──────────────────────────────────
 def validate_promo_code(request):
-    """AJAX endpoint to validate a promo code."""
     code = request.POST.get('code', '').strip().upper()
     try:
         agent = Agent.objects.get(referral_code=code, status='approved')
+        # Get agent display name
+        if agent.user.first_name or agent.user.last_name:
+            agent_name = f"{agent.user.first_name} {agent.user.last_name}".strip()
+        else:
+            agent_name = agent.user.username
+
         return JsonResponse({
             'valid': True,
+            'agent_name': agent_name,
             'message': f'✅ Valid code! You get discount pricing on your first 5 products.'
         })
     except Agent.DoesNotExist:
         return JsonResponse({
             'valid': False,
+            'agent_name': '',
             'message': '❌ Invalid promo code. Please check and try again.'
         })
-
 
 @require_POST
 def save_promo_code(request):

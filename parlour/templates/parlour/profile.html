@@ -471,8 +471,111 @@
         border-color: var(--accent);
     }
 
+    /* Mobile Dropdown Styles */
+    .mobile-profile-dropdown {
+        display: none;
+        margin-bottom: 1rem;
+    }
+
+    .dropdown-toggle {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .dropdown-toggle:hover {
+        background: var(--accent-dark);
+    }
+
+    .dropdown-toggle i {
+        transition: transform 0.3s ease;
+    }
+
+    .dropdown-toggle.active i {
+        transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        display: none;
+        box-shadow: var(--shadow);
+    }
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0.9rem 1.2rem;
+        color: var(--text-soft);
+        text-decoration: none;
+        border-radius: 12px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        color: var(--accent);
+    }
+
+    .dropdown-item:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+
+    .dropdown-item.active {
+        background: var(--accent);
+        color: white;
+    }
+
+    .dropdown-item.active i {
+        color: white;
+    }
+
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0.5rem 0;
+    }
+
+    .dropdown-item.text-danger {
+        color: #ef4444;
+    }
+
+    .dropdown-item.text-danger i {
+        color: #ef4444;
+    }
+
+    .dropdown-item.text-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+    }
+
+    .dropdown-item.text-danger:hover i {
+        color: #ef4444;
+    }
+
     /* -----------------------------------------------
-       RESPONSIVE
+       RESPONSIVE - ONLY MOBILE VIEW CHANGED
+       Large screen view remains exactly as before
     ----------------------------------------------- */
     @media (max-width: 992px) {
         .profile-container {
@@ -491,51 +594,187 @@
 
     @media (max-width: 768px) {
         .profile-container {
-            padding: 0 1.2rem;
+            padding: 0 1rem !important;
+            margin: 1rem auto !important;
         }
-        
-        .main-card-header {
-            padding: 1.2rem;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .main-card-body {
-            padding: 1.5rem;
-        }
-        
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-        }
-        
-        .orders-table {
-            display: block;
-            overflow-x: auto;
-        }
-    }
 
-    @media (max-width: 480px) {
-        .profile-container {
-            padding: 0 1rem;
+        .container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
         }
-        
+
+        /* Hide sidebar on mobile */
+        .profile-sidebar {
+            display: none !important;
+        }
+
+        /* Show mobile dropdown */
+        .mobile-profile-dropdown {
+            display: block !important;
+        }
+
+        .main-card-header {
+            padding: 1rem 1.2rem !important;
+        }
+
         .main-card-header h4 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
         }
-        
+
+        .main-card-body {
+            padding: 1.2rem !important;
+        }
+
+        /* Profile picture section on mobile */
+        .profile-picture-section {
+            grid-column: span 2;
+            margin-bottom: 1rem;
+        }
+
         .profile-avatar {
             width: 100px;
             height: 100px;
         }
-        
+
+        .profile-avatar i {
+            font-size: 3rem;
+        }
+
         .profile-name {
             font-size: 1.2rem;
         }
-        
+
+        .member-since {
+            font-size: 0.85rem;
+        }
+
+        /* Info sections on mobile */
+        .info-section h5 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+        }
+
+        .info-value {
+            font-size: 0.95rem;
+        }
+
+        /* Orders table on mobile */
+        .orders-table {
+            font-size: 0.85rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 0.8rem 0.4rem;
+        }
+
+        .order-status {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
+        .view-order-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.75rem;
+        }
+
         .edit-btn {
             width: 100%;
             justify-content: center;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        .shop-btn {
+            padding: 0.7rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Profile info grid on mobile */
+        [style*="grid-template-columns: 1fr 2fr"] {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+
+        /* Progress card on mobile */
+        .progress-card {
+            padding: 1rem;
+        }
+
+        .progress-card h6 {
+            font-size: 0.95rem;
+        }
+
+        .complete-btn {
+            padding: 0.6rem;
+            font-size: 0.85rem;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .profile-container {
+            padding: 0 0.75rem !important;
+        }
+
+        .main-card-header h4 {
+            font-size: 1.1rem;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+        }
+
+        .profile-name {
+            font-size: 1rem;
+        }
+
+        .info-section h5 {
+            font-size: 0.95rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+        }
+
+        .orders-table {
+            font-size: 0.75rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 0.6rem 0.3rem;
+        }
+
+        .dropdown-toggle {
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
         }
     }
 
@@ -547,13 +786,53 @@
     .dark-mode .order-status {
         border: 1px solid rgba(255,255,255,0.1);
     }
+
+    .dark-mode .dropdown-menu {
+        background: var(--surface);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
+    <!-- Mobile Profile Dropdown -->
+    <div class="mobile-profile-dropdown">
+        <button class="dropdown-toggle" id="profileDropdownToggle" onclick="toggleDropdown()">
+            <span>
+                <i class="fas fa-user-circle"></i>
+                {% if active_tab == 'profile' %}Profile Overview
+                {% elif active_tab == 'edit' %}Edit Profile
+                {% elif active_tab == 'orders' %}Order History
+                {% elif active_tab == 'password' %}Change Password
+                {% else %}My Account{% endif %}
+            </span>
+            <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu" id="profileDropdownMenu">
+            <a href="{% url 'profile' %}" class="dropdown-item {% if active_tab == 'profile' %}active{% endif %}">
+                <i class="fas fa-user"></i> Profile Overview
+            </a>
+            <a href="{% url 'edit_profile' %}" class="dropdown-item {% if active_tab == 'edit' %}active{% endif %}">
+                <i class="fas fa-edit"></i> Edit Profile
+            </a>
+            <a href="{% url 'order_history' %}" class="dropdown-item {% if active_tab == 'orders' %}active{% endif %}">
+                <i class="fas fa-shopping-bag"></i> Order History
+            </a>
+            <a href="{% url 'change_password' %}" class="dropdown-item {% if active_tab == 'password' %}active{% endif %}">
+                <i class="fas fa-lock"></i> Change Password
+            </a>
+            <a href="{% url 'cart' %}" class="dropdown-item">
+                <i class="fas fa-shopping-cart"></i> My Cart
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="{% url 'logout' %}" class="dropdown-item text-danger">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+
     <div class="row" style="display: flex; gap: 2rem; flex-wrap: wrap;">
-        <!-- Sidebar -->
+        <!-- Sidebar (Hidden on mobile) -->
         <div style="flex: 1; min-width: 280px;">
             <div class="profile-sidebar">
                 <!-- Account Navigation Card -->
@@ -783,4 +1062,37 @@
         </div>
     </div>
 </div>
+
+<script>
+function toggleDropdown() {
+    const toggle = document.getElementById('profileDropdownToggle');
+    const menu = document.getElementById('profileDropdownMenu');
+    
+    toggle.classList.toggle('active');
+    menu.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const toggle = document.getElementById('profileDropdownToggle');
+    const menu = document.getElementById('profileDropdownMenu');
+    
+    if (!toggle.contains(event.target) && !menu.contains(event.target)) {
+        toggle.classList.remove('active');
+        menu.classList.remove('show');
+    }
+});
+
+// Close dropdown on window resize if larger than mobile
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+        const menu = document.getElementById('profileDropdownMenu');
+        const toggle = document.getElementById('profileDropdownToggle');
+        if (menu && toggle) {
+            menu.classList.remove('show');
+            toggle.classList.remove('active');
+        }
+    }
+});
+</script>
 {% endblock %}
