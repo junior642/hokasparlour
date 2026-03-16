@@ -32,7 +32,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
@@ -211,7 +211,8 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # settings.py
-SESSION_COOKIE_SECURE = True    # only send cookie over HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # or os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
+CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True  # JS cannot access the cookie
 SESSION_COOKIE_SAMESITE = 'Lax' # blocks cross-site cookie sending
 
