@@ -30,6 +30,9 @@ def whatsapp_popup(request):
 
 def promo_popup(request):
     """Show promo code popup once on first signup."""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"PROMO CHECK - new_signup: {request.session.get('new_signup')} | session_key: {request.session.session_key} | user: {request.user}")
     if not request.user.is_authenticated:
         return {'show_promo_popup': False}
     

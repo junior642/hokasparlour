@@ -953,10 +953,14 @@ def verify_otp(request):
                     except Agent.DoesNotExist:
                         # Invalid referral code — still show popup
                         request.session['new_signup'] = True
+                        request.session.modified = True
+                        request.session.save()
                         messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
                 else:
                     # No referral code — show promo popup on home page
                     request.session['new_signup'] = True
+                    request.session.modified = True
+                    request.session.save()
                     messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
                 # ─────────────────────────────────────────────────────
 
@@ -971,7 +975,6 @@ def verify_otp(request):
             messages.error(request, '❌ Invalid OTP. Please try again.')
 
     return render(request, 'parlour/verify_otp.html', {'email': pending.get('email')})
-
 
 def user_logout(request):
     logout(request)

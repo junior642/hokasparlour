@@ -260,6 +260,24 @@
                 <i class="fas fa-truck"></i>
                 Delivery Dashboard
             </a>
+            <!-- Agent Links (authenticated users) -->
+        {% if user.is_authenticated %}
+        <div class="mt-4 pt-4 border-t border-[var(--border)] flex flex-col gap-2">
+            {% if user.agent.status == 'approved' %}
+                <a href="{% url 'agent_dashboard' %}"
+                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                    <i class="fas fa-users"></i>
+                    Agent Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'become_agent' %}"
+                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                    <i class="fas fa-handshake"></i>
+                    Become an Agent
+                </a>
+            {% endif %}
+        </div>    
+        {% endif %}    
         </div>
         {% endif %}
     </div>

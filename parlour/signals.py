@@ -100,9 +100,13 @@ def on_user_signed_up(request, user, **kwargs):
             logger.info(f"Referral code {referral_code} applied for {user.username}")
         except Agent.DoesNotExist:
             request.session['new_signup'] = True
+            request.session.modified = True
+            request.session.save()
             profile.promo_popup_shown = False
             profile.save(update_fields=['promo_popup_shown'])
     else:
         request.session['new_signup'] = True
+        request.session.modified = True
+        request.session.save()
         profile.promo_popup_shown = False
         profile.save(update_fields=['promo_popup_shown'])
