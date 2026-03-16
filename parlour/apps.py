@@ -1,14 +1,15 @@
 from django.apps import AppConfig
+import os
 
 class ParlourConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'parlour'
 
     def ready(self):
-        import os
-        # Prevent double-start when Django's reloader spawns a second process
-        if os.environ.get('RUN_MAIN') != 'true':
-            return
-        from . import scheduler
-        scheduler.start()
-        from . import signals  # ← register signals
+        # Always register signals
+        from . import signals
+
+        # Only start scheduler in dev (Django reloader process)
+        if os.environ.get('RUN_MAIN') == 'true':
+            from . import scheduler
+            scheduler.start()

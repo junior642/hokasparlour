@@ -453,12 +453,14 @@ class Profile(models.Model):
     whatsapp_joined = models.BooleanField(default=False)
     whatsapp_popup_dismissed_at = models.DateTimeField(null=True, blank=True)
 
-    # Add to existing Profile model
     promo_popup_shown = models.BooleanField(
-        default=False,
-        help_text="True after the promo code popup has been shown once on signup"
+       default=False,
+       help_text="True after the promo code popup has been shown once on signup"
     )
-    
+    show_promo_popup = models.BooleanField(
+       default=False,
+       help_text="True when user should see the promo popup on next page load" 
+    )    
     preferred_payment_method = models.CharField(
         max_length=20,
         choices=[
@@ -489,11 +491,7 @@ class Profile(models.Model):
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
-    else:
         Profile.objects.get_or_create(user=instance)
-        instance.profile.save()
-
 
 class OrderHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='order_history')

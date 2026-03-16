@@ -77,13 +77,10 @@ def send_order_status_email(sender, instance, **kwargs):
 
 @receiver(user_signed_up)
 def on_user_signed_up(request, user, **kwargs):
-    """
-    Fires after ANY signup — manual OTP or Google OAuth.
-    Handles referral code and promo popup flag.
-    """
     profile, _ = Profile.objects.get_or_create(user=user)
-
     referral_code = request.session.pop('referral_code', None)
+
+    logger.info(f"SIGNAL FIRED - user: {user.username} | referral_code: {referral_code} | session_key: {request.session.session_key}")
 
     if referral_code:
         try:
@@ -95,18 +92,21 @@ def on_user_signed_up(request, user, **kwargs):
                     promo_purchases_count=0,
                     is_active=True
                 )
-            profile.promo_popup_shown = True
-            profile.save(update_fields=['promo_popup_shown'])
+            # Use update() to bypass ORM cache entirely
+            Profile.objects.filter(user=user).update(
+                show_promo_popup=False,
+                promo_popup_shown=True
+            )
             logger.info(f"Referral code {referral_code} applied for {user.username}")
         except Agent.DoesNotExist:
-            request.session['new_signup'] = True
-            request.session.modified = True
-            request.session.save()
-            profile.promo_popup_shown = False
-            profile.save(update_fields=['promo_popup_shown'])
+            Profile.objects.filter(user=user).update(
+                show_promo_popup=True,
+                promo_popup_shown=False
+            )
+            logger.info(f"Invalid referral — show_promo_popup=True set for {user.username}")
     else:
-        request.session['new_signup'] = True
-        request.session.modified = True
-        request.session.save()
-        profile.promo_popup_shown = False
-        profile.save(update_fields=['promo_popup_shown'])
+        Profile.objects.filter(user=user).update(
+            show_promo_popup=True,
+            promo_popup_shown=False
+        )
+        logger.info(f"No referral code — show_promo_popup=True set for {user.username}")

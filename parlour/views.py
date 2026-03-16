@@ -945,22 +945,25 @@ def verify_otp(request):
                             promo_purchases_count=0,
                             is_active=True
                         )
-                        # Mark popup as shown since code already applied
+                        # Referral code applied — no need to show popup
                         profile, _ = Profile.objects.get_or_create(user=user)
                         profile.promo_popup_shown = True
-                        profile.save(update_fields=['promo_popup_shown'])
+                        profile.show_promo_popup = False
+                        profile.save(update_fields=['promo_popup_shown', 'show_promo_popup'])
                         messages.success(request, "🎉 Account verified! Promo code applied — enjoy discount pricing on your first 5 products!")
                     except Agent.DoesNotExist:
-                        # Invalid referral code — still show popup
-                        request.session['new_signup'] = True
-                        request.session.modified = True
-                        request.session.save()
+                        # Invalid referral code — show popup so user can enter manually
+                        profile, _ = Profile.objects.get_or_create(user=user)
+                        profile.show_promo_popup = True
+                        profile.promo_popup_shown = False
+                        profile.save(update_fields=['show_promo_popup', 'promo_popup_shown'])
                         messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
                 else:
                     # No referral code — show promo popup on home page
-                    request.session['new_signup'] = True
-                    request.session.modified = True
-                    request.session.save()
+                    profile, _ = Profile.objects.get_or_create(user=user)
+                    profile.show_promo_popup = True
+                    profile.promo_popup_shown = False
+                    profile.save(update_fields=['show_promo_popup', 'promo_popup_shown'])
                     messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
                 # ─────────────────────────────────────────────────────
 
@@ -975,7 +978,6 @@ def verify_otp(request):
             messages.error(request, '❌ Invalid OTP. Please try again.')
 
     return render(request, 'parlour/verify_otp.html', {'email': pending.get('email')})
-
 def user_logout(request):
     logout(request)
     messages.success(request, 'You have been logged out.')
@@ -2697,11 +2699,8 @@ def validate_promo_code(request):
 
 @require_POST
 def save_promo_code(request):
-    """Save the promo code after user enters it in the popup."""
     if not request.user.is_authenticated:
         return JsonResponse({'status': 'error', 'message': 'Not logged in'})
-
-    # Check if user already used a promo code
     if hasattr(request.user, 'promousage'):
         return JsonResponse({'status': 'error', 'message': 'Promo already applied'})
 
@@ -2714,11 +2713,10 @@ def save_promo_code(request):
             promo_purchases_count=0,
             is_active=True
         )
-        # Mark popup as shown
         profile, _ = Profile.objects.get_or_create(user=request.user)
         profile.promo_popup_shown = True
-        profile.save(update_fields=['promo_popup_shown'])
-
+        profile.show_promo_popup = False  # ← clear the flag
+        profile.save(update_fields=['promo_popup_shown', 'show_promo_popup'])
         return JsonResponse({
             'status': 'success',
             'message': '🎉 Promo code applied! You get discount pricing on your first 5 products.'
@@ -2729,13 +2727,12 @@ def save_promo_code(request):
 
 @require_POST
 def skip_promo_code(request):
-    """User skipped the promo popup."""
     if request.user.is_authenticated:
         profile, _ = Profile.objects.get_or_create(user=request.user)
         profile.promo_popup_shown = True
-        profile.save(update_fields=['promo_popup_shown'])
-    return JsonResponse({'status': 'ok'})    
-
+        profile.show_promo_popup = False  # ← clear the flag
+        profile.save(update_fields=['promo_popup_shown', 'show_promo_popup'])
+    return JsonResponse({'status': 'ok'})
 
 @login_required
 def become_agent(request):
