@@ -870,3 +870,31 @@ def handle_new_user(sender, instance, created, **kwargs):
         # Create profile if it doesn't exist
         profile, _ = Profile.objects.get_or_create(user=instance)
         # promo_popup_shown defaults to False — popup will show on first visit            
+
+
+
+# Add this to your models.py
+
+from django.db import models
+from django.conf import settings
+
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='wishlist_items'
+    )
+    product = models.ForeignKey(
+        'Product',  # replace with your actual product model reference e.g. 'parlour.Product'
+        on_delete=models.CASCADE,
+        related_name='wishlisted_by'
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'product')  # prevents duplicate entries
+        ordering = ['-added_at']
+
+    def __str__(self):
+        return f"{self.user.username} → {self.product.name}"

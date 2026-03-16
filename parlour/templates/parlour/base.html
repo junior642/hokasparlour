@@ -185,12 +185,22 @@
             color: var(--text);
             font-family: 'Playfair Display', serif;
             line-height: 1.2;
+
+            /* Add these */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo a img {
+            height: 3.8rem;   /* matches ~1.5rem font-size × 1.2 line-height */
+            width: auto;
+            display: block;
         }
 
         .logo span {
             color: var(--accent);
         }
-
         /* Hamburger Menu */
         .hamburger-btn {
             background: transparent;
@@ -1150,7 +1160,7 @@ function joinWhatsappFromPromo() {
     <header>
         <div class="header-container">
             <div class="logo">
-                <a href="{% url 'home' %}">HOKA'S<span> PARLOUR</span></a>
+                <a href="{% url 'home' %}"><img src="{% static 'favicon/logo.png' %}" alt="HOKA'S PARLOUR">HOKA'S<span> PARLOUR</span></a>
             </div>
             
             <!-- Hamburger Button -->
@@ -1311,7 +1321,7 @@ function joinWhatsappFromPromo() {
                         <li><a href="{% url 'home' %}"><i class="fas fa-chevron-right"></i> Home</a></li>
                         <li><a href="{% url 'about' %}"><i class="fas fa-chevron-right"></i> About Us</a></li>
                         <li><a href="{% url 'contact' %}"><i class="fas fa-chevron-right"></i> Contact</a></li>
-                        <li><a href="{% url 'order_tracking' %}"><i class="fas fa-chevron-right"></i> Track Order</a></li>
+                        <li><a href="/profile/orders/"><i class="fas fa-chevron-right"></i> Track Order</a></li>
                     </ul>
                 </div>
                 

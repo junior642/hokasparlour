@@ -168,51 +168,51 @@
             </p>
             
             <!-- Price Card -->
-<div class="bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-xl p-4 lg:p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[#B48AFF]">
-    <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] font-medium">Price</span>
-    <div class="flex items-baseline gap-3 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
+            <div class="bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-xl p-4 lg:p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[#B48AFF]">
+                <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] font-medium">Price</span>
+                <div class="flex items-baseline gap-3 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
 
-        {% if user_promo and user_promo.is_active and product.discount_price %}
-            <!-- Promo user: anchor → normal → discount -->
-            {% if product.anchor_price %}
-            <span class="text-sm text-gray-400 line-through">
-                KSh {{ product.anchor_price|floatformat:0 }}
-            </span>
-            {% endif %}
-            <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
-                KSh {{ product.price|floatformat:0 }}
-            </span>
-            <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-green-500">
-                KSh {{ product.discount_price|floatformat:0 }}
-            </span>
-            <span class="bg-green-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
-                🏷️ Promo
-            </span>
-            <div class="w-full text-right">
-                <span class="text-xs text-green-600 font-medium">
-                    {{ user_promo.remaining_promo_purchases }} of 5 promo purchases remaining
-                </span>
+                    {% if user_promo and user_promo.is_active and product.discount_price %}
+                        <!-- Promo user: anchor → normal → discount -->
+                        {% if product.anchor_price %}
+                        <span class="text-sm text-gray-400 line-through">
+                            KSh {{ product.anchor_price|floatformat:0 }}
+                        </span>
+                        {% endif %}
+                        <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
+                            KSh {{ product.price|floatformat:0 }}
+                        </span>
+                        <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-green-500">
+                            KSh {{ product.discount_price|floatformat:0 }}
+                        </span>
+                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
+                            🏷️ Promo
+                        </span>
+                        <div class="w-full text-right">
+                            <span class="text-xs text-green-600 font-medium">
+                                {{ user_promo.remaining_promo_purchases }} of 5 promo purchases remaining
+                            </span>
+                        </div>
+
+                    {% else %}
+                        <!-- Normal user: anchor → normal price -->
+                        {% if product.anchor_price %}
+                        <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
+                            KSh {{ product.anchor_price|floatformat:0 }}
+                        </span>
+                        <span class="bg-[#FF6B9D] text-white px-2 py-1 rounded-full text-sm font-semibold">
+                            Sale
+                        </span>
+                        {% endif %}
+                        <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#8B3DFF]">
+                            KSh {{ product.price|floatformat:0 }}
+                        </span>
+
+                    {% endif %}
+
+                    <small class="text-[var(--text-secondary)] dark:text-[#B0B7C3]">KES</small>
+                </div>
             </div>
-
-        {% else %}
-            <!-- Normal user: anchor → normal price -->
-            {% if product.anchor_price %}
-            <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
-                KSh {{ product.anchor_price|floatformat:0 }}
-            </span>
-            <span class="bg-[#FF6B9D] text-white px-2 py-1 rounded-full text-sm font-semibold">
-                Sale
-            </span>
-            {% endif %}
-            <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#8B3DFF]">
-                KSh {{ product.price|floatformat:0 }}
-            </span>
-
-        {% endif %}
-
-        <small class="text-[var(--text-secondary)] dark:text-[#B0B7C3]">KES</small>
-    </div>
-</div>
             
             <!-- Stock Status -->
             {% if product.is_in_stock %}
@@ -541,17 +541,74 @@ function addToWishlist(productId) {
     }, 500);
 }
 
-// Share function
-function shareProduct() {
+// Share function — includes product image via Web Share API
+async function shareProduct() {
+    const btn = event.currentTarget;
+    const originalHTML = btn.innerHTML;
+    const productName = '{{ product.name|escapejs }}';
+    const productDesc = '{{ product.description|truncatechars:100|escapejs }}';
+    const productUrl = window.location.href;
+    const imageUrl = '{% if all_images %}{{ all_images.0.url }}{% endif %}';
+
     if (navigator.share) {
-        navigator.share({
-            title: '{{ product.name|escapejs }}',
-            text: '{{ product.description|truncatechars:100|escapejs }}',
-            url: window.location.href
-        }).catch(console.error);
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sharing...';
+        btn.disabled = true;
+
+        try {
+            // Attempt to share with product image attached
+            if (imageUrl && navigator.canShare) {
+                const response = await fetch(imageUrl);
+                const blob = await response.blob();
+
+                // Determine file extension from MIME type
+                const ext = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : 'jpg';
+                const file = new File([blob], `${productName}.${ext}`, { type: blob.type });
+
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: productName,
+                        text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`,
+                        url: productUrl,
+                        files: [file]
+                    });
+                    btn.innerHTML = '<i class="fas fa-check"></i> Shared!';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    }, 2000);
+                    return;
+                }
+            }
+
+            // Fallback: share without image (image sharing not supported on this device/browser)
+            await navigator.share({
+                title: productName,
+                text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`,
+                url: productUrl
+            });
+            btn.innerHTML = '<i class="fas fa-check"></i> Shared!';
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }, 2000);
+
+        } catch (err) {
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+
+            // Only show error if user didn't cancel
+            if (err.name !== 'AbortError') {
+                navigator.clipboard.writeText(productUrl).then(() => {
+                    showToast('Link copied to clipboard!');
+                }).catch(() => {
+                    showToast('Press Ctrl+C to copy the link');
+                });
+            }
+        }
+
     } else {
-        // Fallback
-        navigator.clipboard.writeText(window.location.href).then(() => {
+        // Browser doesn't support Web Share API at all — copy link to clipboard
+        navigator.clipboard.writeText(productUrl).then(() => {
             showToast('Link copied to clipboard!');
         }).catch(() => {
             showToast('Press Ctrl+C to copy the link');
