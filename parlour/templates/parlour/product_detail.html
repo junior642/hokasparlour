@@ -4,68 +4,36 @@
 {% block title %}{{ product.name }} - Hoka's Parlour{% endblock %}
 
 {% block content %}
-<!-- Custom CSS for animations and keyframes that Tailwind doesn't handle -->
 <style>
 @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes slideInRight {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
-
 @keyframes slideOutRight {
     from { transform: translateX(0); opacity: 1; }
     to { transform: translateX(100%); opacity: 0; }
 }
-
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
 
-.animate-fade-slide-up {
-    animation: fadeSlideUp 0.6s ease;
-}
+.animate-fade-slide-up { animation: fadeSlideUp 0.6s ease; }
+.animate-spin-custom { animation: spin 0.8s linear infinite; }
+.animate-slide-in-right { animation: slideInRight 0.3s ease; }
+.animate-slide-out-right { animation: slideOutRight 0.3s ease; }
+.animate-pulse-custom { animation: pulse 2s infinite; }
 
-.animate-spin-custom {
-    animation: spin 0.8s linear infinite;
-}
+.thumbnail-scroll::-webkit-scrollbar { height: 4px; }
+.thumbnail-scroll::-webkit-scrollbar-track { background: var(--border-light, #E9EAF0); border-radius: 10px; }
+.thumbnail-scroll::-webkit-scrollbar-thumb { background: #8B3DFF; border-radius: 10px; }
+.dark .thumbnail-scroll::-webkit-scrollbar-track { background: #2A2D3A; }
 
-.animate-slide-in-right {
-    animation: slideInRight 0.3s ease;
-}
-
-.animate-slide-out-right {
-    animation: slideOutRight 0.3s ease;
-}
-
-.animate-pulse-custom {
-    animation: pulse 2s infinite;
-}
-
-/* Custom scrollbar for thumbnails */
-.thumbnail-scroll::-webkit-scrollbar {
-    height: 4px;
-}
-
-.thumbnail-scroll::-webkit-scrollbar-track {
-    background: var(--border-light, #E9EAF0);
-    border-radius: 10px;
-}
-
-.thumbnail-scroll::-webkit-scrollbar-thumb {
-    background: #8B3DFF;
-    border-radius: 10px;
-}
-
-/* Custom select arrow */
 .custom-select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B3DFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -74,41 +42,43 @@
     appearance: none;
 }
 
-/* Dark mode support for scrollbar */
-.dark .thumbnail-scroll::-webkit-scrollbar-track {
-    background: #2A2D3A;
+/* Wishlist button — active/wishlisted state */
+.wishlist-btn.is-wishlisted {
+    background-color: #FF6B9D !important;
+    border-color: #FF6B9D !important;
+    color: white !important;
+}
+.wishlist-btn.is-wishlisted:hover {
+    background-color: #e0547f !important;
+    border-color: #e0547f !important;
 }
 </style>
 
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-8 animate-fade-slide-up">
-    
+
     <!-- MAIN PRODUCT GRID -->
     <div class="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 lg:gap-10 bg-[var(--bg-primary)] dark:bg-[#13141B] rounded-3xl lg:rounded-4xl p-4 sm:p-6 lg:p-8 border border-[var(--border-light)] dark:border-[#2A2D3A] shadow-[var(--shadow-md)]">
-        
+
         <!-- IMAGE GALLERY SECTION -->
         <div class="bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] rounded-2xl p-4 lg:p-6">
             {% if all_images %}
                 <div class="flex flex-col gap-4">
-                    <!-- Main Image -->
-                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-[var(--bg-primary)] dark:bg-[#13141B] border-2 border-[var(--border-light)] dark:border-[#2A2D3A] cursor-zoom-in group" 
+                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-[var(--bg-primary)] dark:bg-[#13141B] border-2 border-[var(--border-light)] dark:border-[#2A2D3A] cursor-zoom-in group"
                          onclick="openZoomModal()">
-                        <img src="{{ all_images.0.url }}" alt="{{ product.name }}" 
+                        <img src="{{ all_images.0.url }}" alt="{{ product.name }}"
                              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                              id="mainImage">
                         <div class="absolute bottom-3 right-3 bg-black/50 text-white p-2 rounded-full text-sm backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
                             <i class="fas fa-search-plus"></i>
                         </div>
                     </div>
-                    
-                    <!-- Thumbnails -->
                     {% if all_images|length > 1 %}
                         <div class="flex gap-3 overflow-x-auto pb-2 thumbnail-scroll">
                             {% for img in all_images %}
                                 <div class="flex-none w-[70px] lg:w-[80px] aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all hover:-translate-y-1 hover:shadow-md
                                             {% if forloop.first %}border-[#8B3DFF] opacity-100{% else %}border-transparent opacity-60{% endif %}"
                                      onclick="changeImage('{{ img.url }}', this)">
-                                    <img src="{{ img.url }}" alt="{{ img.alt_text|default:product.name }}" 
-                                         class="w-full h-full object-cover">
+                                    <img src="{{ img.url }}" alt="{{ img.alt_text|default:product.name }}" class="w-full h-full object-cover">
                                 </div>
                             {% endfor %}
                         </div>
@@ -121,7 +91,7 @@
                 </div>
             {% endif %}
         </div>
-        
+
         <!-- PRODUCT INFO SECTION -->
         <div class="flex flex-col">
             <!-- Breadcrumb -->
@@ -132,16 +102,15 @@
                 <i class="fas fa-chevron-right text-xs"></i>
                 <span class="truncate max-w-[150px]">{{ product.name|truncatechars:30 }}</span>
             </div>
-            
+
             <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--text-primary)] dark:text-[#F9FAFF] mb-3 lg:mb-4 leading-tight">
                 {{ product.name }}
             </h1>
-            
+
             <!-- Product Meta -->
             <div class="flex flex-wrap items-center gap-3 lg:gap-4 mb-4 lg:mb-6">
                 <span class="inline-flex items-center gap-2 bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] text-[#8B3DFF] px-3 lg:px-4 py-1.5 lg:py-2 rounded-full text-sm font-semibold border border-[#B48AFF]">
-                    <i class="fas fa-tshirt"></i>
-                    {{ product.category.name }}
+                    <i class="fas fa-tshirt"></i> {{ product.category.name }}
                 </span>
                 {% if product.sku %}
                     <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] text-sm flex items-center gap-2">
@@ -149,89 +118,83 @@
                     </span>
                 {% endif %}
             </div>
-            
+
             <!-- Rating -->
             <div class="flex items-center gap-3 mb-4 lg:mb-6">
                 <div class="flex gap-1 text-[#FFB800]">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
                 </div>
                 <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] text-sm">(24 reviews)</span>
             </div>
-            
+
             <!-- Description -->
             <p class="text-[var(--text-secondary)] dark:text-[#B0B7C3] leading-relaxed mb-6 lg:mb-8 pb-6 border-b border-[var(--border-light)] dark:border-[#2A2D3A]">
                 {{ product.description }}
             </p>
-            
+
             <!-- Price Card -->
             <div class="bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] rounded-xl p-4 lg:p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-[#B48AFF]">
                 <span class="text-[var(--text-secondary)] dark:text-[#B0B7C3] font-medium">Price</span>
                 <div class="flex items-baseline gap-3 flex-wrap w-full sm:w-auto justify-between sm:justify-end">
-
                     {% if user_promo and user_promo.is_active and product.discount_price %}
-                        <!-- Promo user: anchor → normal → discount -->
                         {% if product.anchor_price %}
-                        <span class="text-sm text-gray-400 line-through">
-                            KSh {{ product.anchor_price|floatformat:0 }}
-                        </span>
+                            <span class="text-sm text-gray-400 line-through">KSh {{ product.anchor_price|floatformat:0 }}</span>
                         {% endif %}
-                        <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
-                            KSh {{ product.price|floatformat:0 }}
-                        </span>
-                        <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-green-500">
-                            KSh {{ product.discount_price|floatformat:0 }}
-                        </span>
-                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
-                            🏷️ Promo
-                        </span>
+                        <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">KSh {{ product.price|floatformat:0 }}</span>
+                        <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-green-500">KSh {{ product.discount_price|floatformat:0 }}</span>
+                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-sm font-semibold">🏷️ Promo</span>
                         <div class="w-full text-right">
-                            <span class="text-xs text-green-600 font-medium">
-                                {{ user_promo.remaining_promo_purchases }} of 5 promo purchases remaining
-                            </span>
+                            <span class="text-xs text-green-600 font-medium">{{ user_promo.remaining_promo_purchases }} of 5 promo purchases remaining</span>
                         </div>
-
                     {% else %}
-                        <!-- Normal user: anchor → normal price -->
                         {% if product.anchor_price %}
-                        <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">
-                            KSh {{ product.anchor_price|floatformat:0 }}
-                        </span>
-                        <span class="bg-[#FF6B9D] text-white px-2 py-1 rounded-full text-sm font-semibold">
-                            Sale
-                        </span>
+                            <span class="text-base lg:text-lg text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">KSh {{ product.anchor_price|floatformat:0 }}</span>
+                            <span class="bg-[#FF6B9D] text-white px-2 py-1 rounded-full text-sm font-semibold">Sale</span>
                         {% endif %}
-                        <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#8B3DFF]">
-                            KSh {{ product.price|floatformat:0 }}
-                        </span>
-
+                        <span class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#8B3DFF]">KSh {{ product.price|floatformat:0 }}</span>
                     {% endif %}
-
                     <small class="text-[var(--text-secondary)] dark:text-[#B0B7C3]">KES</small>
                 </div>
             </div>
-            
+
             <!-- Stock Status -->
             {% if product.is_in_stock %}
-                <div class="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] rounded-xl mb-6 border-l-4 {% if product.stock_quantity <= 5 %}border-l-[#F59E0B]{% else %}border-l-[#10B981]{% endif %}">
-                    <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-lg lg:text-xl {% if product.stock_quantity <= 5 %}bg-[rgba(245,158,11,0.1)] text-[#F59E0B]{% else %}bg-[rgba(16,185,129,0.1)] text-[#10B981]{% endif %}">
-                        <i class="fas {% if product.stock_quantity <= 5 %}fa-exclamation{% else %}fa-check{% endif %}"></i>
+                <div class="flex items-center gap-3 lg:gap-4 p-3 lg:p-4 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] rounded-xl mb-6 border-l-4 
+                    {% if product.is_auto_warehouse %}border-l-[#F59E0B]
+                    {% elif product.stock_quantity <= 5 and product.stock_type == 'ready' %}border-l-[#F59E0B]
+                    {% else %}border-l-[#10B981]{% endif %}">
+                    <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-lg lg:text-xl 
+                        {% if product.is_auto_warehouse %}bg-[rgba(245,158,11,0.1)] text-[#F59E0B]
+                        {% elif product.stock_quantity <= 5 and product.stock_type == 'ready' %}bg-[rgba(245,158,11,0.1)] text-[#F59E0B]
+                        {% else %}bg-[rgba(16,185,129,0.1)] text-[#10B981]{% endif %}">
+                        <i class="fas {% if product.is_auto_warehouse %}fa-clock{% elif product.stock_quantity <= 5 %}fa-exclamation{% else %}fa-check{% endif %}"></i>
                     </div>
                     <div>
                         <h4 class="font-bold text-[var(--text-primary)] dark:text-[#F9FAFF] text-sm lg:text-base">
-                            {% if product.stock_quantity <= 5 %}Low Stock{% else %}In Stock{% endif %}
+                            {% if product.is_auto_warehouse %}
+                                Available to Order
+                            {% elif product.stock_quantity <= 5 %}
+                                Low Stock
+                            {% else %}
+                                In Stock
+                            {% endif %}
                         </h4>
-                        <p class="text-xs lg:text-sm text-[var(--text-secondary)] dark:text-[#B0B7C3]">{{ product.stock_quantity }} units available • Ready to ship</p>
+                        <p class="text-xs lg:text-sm text-[var(--text-secondary)] dark:text-[#B0B7C3]">
+                            {% if product.is_auto_warehouse %}
+                                Sourced on order • {{ delivery_info.label }} by {{ delivery_info.date }}
+                            {% elif product.stock_type == 'ready' %}
+                                {{ product.stock_quantity }} units available • Ready to ship
+                            {% else %}
+                                Sourced on order • {{ delivery_info.label }} by {{ delivery_info.date }}
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
-                
+
                 <!-- Add to Cart Form -->
                 <form method="post" action="{% url 'add_to_cart' product.id %}" class="flex flex-col gap-4 lg:gap-6" id="addToCartForm">
                     {% csrf_token %}
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {% if sizes %}
                         <div class="flex flex-col gap-2">
@@ -246,7 +209,7 @@
                             </select>
                         </div>
                         {% endif %}
-                        
+
                         <div class="flex flex-col gap-2">
                             <label class="text-sm font-semibold text-[var(--text-primary)] dark:text-[#F9FAFF] flex items-center gap-2">
                                 <i class="fas fa-shopping-bag text-[#8B3DFF]"></i> Quantity
@@ -258,23 +221,31 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <button type="submit" class="w-full py-3 lg:py-4 bg-gradient-to-r from-[#8B3DFF] to-[#6B1FCC] text-white font-bold text-base lg:text-lg rounded-xl transition-all hover:-translate-y-1 hover:shadow-[0_30px_50px_-15px_rgba(139,61,255,0.35)] active:translate-y-0 flex items-center justify-center gap-3 relative overflow-hidden group" id="addToCartBtn">
                         <span class="absolute inset-0 bg-white/30 rounded-full scale-0 group-hover:scale-[300] transition-transform duration-600"></span>
                         <i class="fas fa-cart-plus relative z-10"></i>
                         <span class="relative z-10">Add to Cart</span>
                     </button>
                 </form>
-                
+
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                    <button class="flex-1 py-3 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] border-2 border-[var(--border-light)] dark:border-[#2A2D3A] rounded-xl text-[var(--text-primary)] dark:text-[#F9FAFF] font-semibold hover:bg-[#8B3DFF] hover:border-[#8B3DFF] hover:text-white transition-all hover:-translate-y-1 flex items-center justify-center gap-2" onclick="addToWishlist({{ product.id }})">
-                        <i class="far fa-heart"></i> Wishlist
+
+                    <!-- ── Wishlist Toggle Button ── -->
+                    <button
+                        id="wishlistBtn"
+                        class="wishlist-btn flex-1 py-3 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] border-2 border-[var(--border-light)] dark:border-[#2A2D3A] rounded-xl text-[var(--text-primary)] dark:text-[#F9FAFF] font-semibold transition-all hover:-translate-y-1 flex items-center justify-center gap-2"
+                        onclick="toggleWishlist({{ product.id }})">
+                        <i class="far fa-heart" id="wishlistIcon"></i>
+                        <span id="wishlistLabel">Wishlist</span>
                     </button>
+
                     <button class="flex-1 py-3 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] border-2 border-[var(--border-light)] dark:border-[#2A2D3A] rounded-xl text-[var(--text-primary)] dark:text-[#F9FAFF] font-semibold hover:bg-[#8B3DFF] hover:border-[#8B3DFF] hover:text-white transition-all hover:-translate-y-1 flex items-center justify-center gap-2" onclick="shareProduct()">
                         <i class="fas fa-share-alt"></i> Share
                     </button>
                 </div>
+
             {% else %}
                 <!-- Out of Stock -->
                 <div class="flex items-center gap-4 p-4 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] rounded-xl mb-6 border-l-4 border-l-[#EF4444]">
@@ -286,14 +257,11 @@
                         <p class="text-sm text-[var(--text-secondary)] dark:text-[#B0B7C3]">This item is currently unavailable</p>
                     </div>
                 </div>
-                
-                <!-- Notify Button -->
                 <button class="w-full py-4 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] text-[var(--text-primary)] dark:text-[#F9FAFF] font-bold rounded-xl hover:bg-[#8B3DFF] hover:text-white transition-all flex items-center justify-center gap-3" onclick="notifyWhenAvailable()">
-                    <i class="fas fa-bell"></i>
-                    Notify When Available
+                    <i class="fas fa-bell"></i> Notify When Available
                 </button>
             {% endif %}
-            
+
             <!-- Delivery Info -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 p-4 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] rounded-xl">
                 <div class="flex flex-col items-center text-center gap-1">
@@ -312,7 +280,7 @@
                     <small class="text-xs text-[var(--text-secondary)] dark:text-[#B0B7C3]">100% secure</small>
                 </div>
             </div>
-            
+
             <!-- Product Tabs -->
             <div class="mt-6 bg-[var(--bg-primary)] dark:bg-[#13141B] rounded-2xl border border-[var(--border-light)] dark:border-[#2A2D3A] overflow-hidden">
                 <div class="flex border-b border-[var(--border-light)] dark:border-[#2A2D3A] bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] flex-wrap">
@@ -327,15 +295,14 @@
                     <p><strong>Care Instructions:</strong> Machine wash cold, tumble dry low</p>
                 </div>
             </div>
-            
+
             <!-- Back Link -->
             <a href="{% url 'home' %}" class="inline-flex items-center gap-3 mt-6 py-2 px-4 lg:px-6 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] border border-[var(--border-light)] dark:border-[#2A2D3A] rounded-full text-[var(--text-secondary)] dark:text-[#B0B7C3] hover:bg-[#8B3DFF] hover:text-white hover:border-[#8B3DFF] transition-all hover:-translate-x-1 w-fit text-sm lg:text-base font-medium">
-                <i class="fas fa-arrow-left"></i>
-                Back to Products
+                <i class="fas fa-arrow-left"></i> Back to Products
             </a>
         </div>
     </div>
-    
+
     <!-- RECOMMENDATIONS SECTION -->
     {% if recommended_products %}
     <div class="mt-8 lg:mt-12">
@@ -343,12 +310,10 @@
             <h3 class="font-display text-2xl lg:text-3xl font-bold text-[var(--text-primary)] dark:text-[#F9FAFF] mb-2">You May Also Like</h3>
             <p class="text-[var(--text-secondary)] dark:text-[#B0B7C3]">More {{ product.category.name }} for you</p>
         </div>
-        
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
             {% for rec_product in recommended_products %}
                 <a href="{% url 'product_detail' rec_product.id %}" class="group bg-[var(--bg-primary)] dark:bg-[#13141B] border border-[var(--border-light)] dark:border-[#2A2D3A] rounded-xl lg:rounded-2xl p-3 lg:p-4 transition-all hover:-translate-y-2 hover:shadow-[0_20px_40px_-12px_rgba(139,61,255,0.25)] hover:border-[#8B3DFF] relative overflow-hidden">
                     <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#8B3DFF] to-[#6B1FCC] scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                    
                     {% if rec_product.image %}
                         <img src="{{ rec_product.image.url }}" alt="{{ rec_product.name }}" class="w-full aspect-square object-cover rounded-lg mb-3 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C]">
                     {% else %}
@@ -356,7 +321,6 @@
                             <i class="fas fa-image"></i>
                         </div>
                     {% endif %}
-                    
                     <h4 class="text-sm lg:text-base font-semibold text-[var(--text-primary)] dark:text-[#F9FAFF] mb-1 line-clamp-2">{{ rec_product.name|truncatechars:30 }}</h4>
                     <div class="text-base lg:text-lg font-bold text-[#8B3DFF] mb-1">KSh {{ rec_product.price|floatformat:0 }}</div>
                     <div class="text-xs text-[var(--text-secondary)] dark:text-[#B0B7C3] flex items-center gap-1">
@@ -371,21 +335,19 @@
 </div>
 
 <!-- Toast Notification Container -->
-<div id="toastContainer" class="fixed bottom-4 right-4 z-50"></div>
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
 
 <script>
-// Image gallery functionality
+const CSRF_TOKEN = '{{ csrf_token }}';
+const PRODUCT_ID = {{ product.id }};
+
+// ─── Image Gallery ────────────────────────────────────────────────────────────
 function changeImage(imageUrl, thumbnailElement) {
     const mainImage = document.getElementById('mainImage');
     if (mainImage) {
         mainImage.style.opacity = '0';
-        setTimeout(() => {
-            mainImage.src = imageUrl;
-            mainImage.style.opacity = '1';
-        }, 150);
+        setTimeout(() => { mainImage.src = imageUrl; mainImage.style.opacity = '1'; }, 150);
     }
-    
-    // Update active thumbnail
     document.querySelectorAll('[onclick^="changeImage"]').forEach(thumb => {
         thumb.classList.remove('border-[#8B3DFF]', 'opacity-100');
         thumb.classList.add('border-transparent', 'opacity-60');
@@ -394,30 +356,100 @@ function changeImage(imageUrl, thumbnailElement) {
     thumbnailElement.classList.add('border-[#8B3DFF]', 'opacity-100');
 }
 
-// Quantity controls
+// ─── Quantity Controls ────────────────────────────────────────────────────────
 function incrementQuantity(max) {
     const input = document.getElementById('quantity');
-    let value = parseInt(input.value);
-    if (value < max) {
-        input.value = value + 1;
-    }
+    if (parseInt(input.value) < max) input.value = parseInt(input.value) + 1;
 }
-
 function decrementQuantity() {
     const input = document.getElementById('quantity');
-    let value = parseInt(input.value);
-    if (value > 1) {
-        input.value = value - 1;
+    if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const colorMap = { success: '#10B981', removed: '#FF6B9D', error: '#EF4444' };
+    const iconMap  = { success: 'fa-check-circle', removed: 'fa-heart-broken', error: 'fa-exclamation-circle' };
+    const color = colorMap[type] || colorMap.success;
+    const icon  = iconMap[type]  || iconMap.success;
+
+    const toast = document.createElement('div');
+    toast.className = 'flex items-center gap-3 bg-[var(--bg-primary)] dark:bg-[#13141B] border-l-4 rounded-xl p-4 shadow-[0_20px_40px_-12px_rgba(139,61,255,0.25)] animate-slide-in-right min-w-[260px]';
+    toast.style.borderLeftColor = color;
+    toast.innerHTML = `
+        <div style="color:${color}" class="text-xl"><i class="fas ${icon}"></i></div>
+        <div class="text-[var(--text-primary)] dark:text-[#F9FAFF] font-medium text-sm">${message}</div>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => { if (toast.parentNode) container.removeChild(toast); }, 300);
+    }, 3000);
+}
+
+// ─── Wishlist: update button visual state ─────────────────────────────────────
+function setWishlistState(inWishlist) {
+    const btn   = document.getElementById('wishlistBtn');
+    const icon  = document.getElementById('wishlistIcon');
+    const label = document.getElementById('wishlistLabel');
+    if (!btn) return;
+
+    if (inWishlist) {
+        btn.classList.add('is-wishlisted');
+        icon.className    = 'fas fa-heart';
+        label.textContent = 'Wishlisted';
+    } else {
+        btn.classList.remove('is-wishlisted');
+        icon.className    = 'far fa-heart';
+        label.textContent = 'Wishlist';
     }
 }
 
-// Tab switching
+// ─── Wishlist: toggle on click ────────────────────────────────────────────────
+async function toggleWishlist(productId) {
+    const btn   = document.getElementById('wishlistBtn');
+    const label = document.getElementById('wishlistLabel');
+    if (!btn || btn.disabled) return;
+
+    const prevLabel = label.textContent;
+    btn.disabled = true;
+    label.textContent = '...';
+
+    try {
+        const res = await fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) throw new Error('Network error');
+
+        const data = await res.json();
+        const added = data.status === 'added';
+        setWishlistState(added);
+        showToast(data.message, added ? 'success' : 'removed');
+
+    } catch (err) {
+        label.textContent = prevLabel;
+        showToast('Something went wrong. Please try again.', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// ─── Wishlist: check status on page load ──────────────────────────────────────
+async function checkWishlistStatus() {
+    try {
+        const res = await fetch(`/wishlist/status/${PRODUCT_ID}/`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setWishlistState(data.in_wishlist);
+    } catch (_) { /* silently fail — button stays in default state */ }
+}
+
+// ─── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(tabIndex) {
-    const tabs = document.querySelectorAll('.tab-header');
-    const tabContent = document.getElementById('tabContent');
-    
-    tabs.forEach((tab, index) => {
-        if (index === tabIndex) {
+    document.querySelectorAll('.tab-header').forEach((tab, i) => {
+        if (i === tabIndex) {
             tab.classList.add('text-[#8B3DFF]', 'border-b-3', 'border-[#8B3DFF]', 'bg-[var(--bg-primary)]', 'dark:bg-[#13141B]');
             tab.classList.remove('text-[var(--text-secondary)]', 'dark:text-[#B0B7C3]', 'border-transparent');
         } else {
@@ -425,216 +457,108 @@ function switchTab(tabIndex) {
             tab.classList.add('text-[var(--text-secondary)]', 'dark:text-[#B0B7C3]', 'border-transparent');
         }
     });
-    
+
     const contents = [
         `<p><strong>Stock Type:</strong> {{ product.get_stock_type_display|escapejs }}</p>
          <p><strong>Delivery:</strong> {{ product.get_delivery_type|escapejs }}</p>
          <p><strong>Material:</strong> Premium Quality Fabric</p>
          <p><strong>Care Instructions:</strong> Machine wash cold, tumble dry low</p>`,
-        
         `<p><strong>Shipping Information:</strong></p>
-         <ul style="margin-left: 1.5rem;">
+         <ul style="margin-left:1.5rem;">
              <li>Free shipping on orders in MMU</li>
              <li>Standard delivery: 3-5 business days</li>
              <li>Express delivery: 1-2 business days</li>
              <li>Same-day delivery available in MMU Rongai</li>
          </ul>`,
-        
         `<p><strong>Customer Reviews</strong></p>
          <p>No reviews yet. Be the first to review this product!</p>`
     ];
-    
-    tabContent.innerHTML = contents[tabIndex];
+    document.getElementById('tabContent').innerHTML = contents[tabIndex];
 }
 
-// Toast notification
-function showToast(message, type = 'success') {
-    const toastContainer = document.getElementById('toastContainer');
-    
-    const toast = document.createElement('div');
-    toast.className = 'flex items-center gap-3 bg-[var(--bg-primary)] dark:bg-[#13141B] border-l-4 border-l-[#10B981] rounded-xl p-4 shadow-[0_20px_40px_-12px_rgba(139,61,255,0.25)] animate-slide-in-right';
-    toast.innerHTML = `
-        <div class="text-[#10B981] text-xl">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="text-[var(--text-primary)] dark:text-[#F9FAFF] font-medium">${message}</div>
-    `;
-    
-    toastContainer.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toastContainer.removeChild(toast);
-            }
-        }, 300);
-    }, 3000);
-}
-
-// Add to cart handling
-document.addEventListener('DOMContentLoaded', function() {
-    const addToCartForm = document.getElementById('addToCartForm');
-    if (addToCartForm) {
-        addToCartForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('addToCartBtn');
-            const originalHTML = btn.innerHTML;
-            
-            // Show loading state
-            btn.innerHTML = '<span class="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin-custom"></span> Adding...';
-            btn.disabled = true;
-            
-            // Simulate API call
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Added!';
-                btn.style.background = '#10B981';
-                
-                // Show toast notification
-                showToast('Item added to cart successfully!');
-                
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.disabled = false;
-                    btn.style.background = '';
-                }, 2000);
-                
-                // Submit form after visual feedback
-                setTimeout(() => {
-                    addToCartForm.submit();
-                }, 500);
-            }, 800);
-        });
-    }
-    
-    // Size select enhancement
-    const sizeSelect = document.getElementById('size');
-    if (sizeSelect) {
-        sizeSelect.addEventListener('change', function() {
-            this.style.borderColor = '#8B3DFF';
-        });
-    }
-    
-    // Set first tab as active
-    const firstTab = document.querySelector('.tab-header');
-    if (firstTab) {
-        firstTab.classList.add('text-[#8B3DFF]', 'border-b-3', 'border-[#8B3DFF]', 'bg-[var(--bg-primary)]', 'dark:bg-[#13141B]');
-    }
-});
-
-// Wishlist function
-function addToWishlist(productId) {
-    const btn = event.currentTarget;
-    const originalHTML = btn.innerHTML;
-    
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-    btn.disabled = true;
-    
-    setTimeout(() => {
-        btn.innerHTML = '<i class="fas fa-heart" style="color: #FF6B9D;"></i> Added to Wishlist';
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-        }, 2000);
-        showToast('Added to wishlist!');
-    }, 500);
-}
-
-// Share function — includes product image via Web Share API
+// ─── Share with Image ─────────────────────────────────────────────────────────
 async function shareProduct() {
     const btn = event.currentTarget;
     const originalHTML = btn.innerHTML;
     const productName = '{{ product.name|escapejs }}';
     const productDesc = '{{ product.description|truncatechars:100|escapejs }}';
-    const productUrl = window.location.href;
-    const imageUrl = '{% if all_images %}{{ all_images.0.url }}{% endif %}';
+    const productUrl  = window.location.href;
+    const imageUrl    = '{% if all_images %}{{ all_images.0.url }}{% endif %}';
 
     if (navigator.share) {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sharing...';
-        btn.disabled = true;
-
+        btn.disabled  = true;
         try {
-            // Attempt to share with product image attached
             if (imageUrl && navigator.canShare) {
-                const response = await fetch(imageUrl);
-                const blob = await response.blob();
-
-                // Determine file extension from MIME type
-                const ext = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : 'jpg';
+                const res  = await fetch(imageUrl);
+                const blob = await res.blob();
+                const ext  = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : 'jpg';
                 const file = new File([blob], `${productName}.${ext}`, { type: blob.type });
-
                 if (navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        title: productName,
-                        text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`,
-                        url: productUrl,
-                        files: [file]
-                    });
+                    await navigator.share({ title: productName, text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`, url: productUrl, files: [file] });
                     btn.innerHTML = '<i class="fas fa-check"></i> Shared!';
-                    setTimeout(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.disabled = false;
-                    }, 2000);
+                    setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
                     return;
                 }
             }
-
-            // Fallback: share without image (image sharing not supported on this device/browser)
-            await navigator.share({
-                title: productName,
-                text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`,
-                url: productUrl
-            });
+            await navigator.share({ title: productName, text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`, url: productUrl });
             btn.innerHTML = '<i class="fas fa-check"></i> Shared!';
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }, 2000);
-
+            setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
         } catch (err) {
             btn.innerHTML = originalHTML;
-            btn.disabled = false;
-
-            // Only show error if user didn't cancel
+            btn.disabled  = false;
             if (err.name !== 'AbortError') {
-                navigator.clipboard.writeText(productUrl).then(() => {
-                    showToast('Link copied to clipboard!');
-                }).catch(() => {
-                    showToast('Press Ctrl+C to copy the link');
-                });
+                navigator.clipboard.writeText(productUrl).then(() => showToast('Link copied to clipboard!'));
             }
         }
-
     } else {
-        // Browser doesn't support Web Share API at all — copy link to clipboard
-        navigator.clipboard.writeText(productUrl).then(() => {
-            showToast('Link copied to clipboard!');
-        }).catch(() => {
-            showToast('Press Ctrl+C to copy the link');
-        });
+        navigator.clipboard.writeText(productUrl)
+            .then(() => showToast('Link copied to clipboard!'))
+            .catch(() => showToast('Press Ctrl+C to copy the link'));
     }
 }
 
-// Notify when available
+// ─── Add to Cart ──────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    checkWishlistStatus();
+
+    const addToCartForm = document.getElementById('addToCartForm');
+    if (addToCartForm) {
+        addToCartForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('addToCartBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin-custom"></span> Adding...';
+            btn.disabled = true;
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Added!';
+                btn.style.background = '#10B981';
+                showToast('Item added to cart successfully!');
+                setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; btn.style.background = ''; }, 2000);
+                setTimeout(() => { addToCartForm.submit(); }, 500);
+            }, 800);
+        });
+    }
+
+    const sizeSelect = document.getElementById('size');
+    if (sizeSelect) sizeSelect.addEventListener('change', function () { this.style.borderColor = '#8B3DFF'; });
+
+    const firstTab = document.querySelector('.tab-header');
+    if (firstTab) firstTab.classList.add('text-[#8B3DFF]', 'border-b-3', 'border-[#8B3DFF]', 'bg-[var(--bg-primary)]', 'dark:bg-[#13141B]');
+});
+
+// ─── Notify When Available ────────────────────────────────────────────────────
 function notifyWhenAvailable() {
     const btn = event.currentTarget;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
     btn.disabled = true;
-    
     setTimeout(() => {
         btn.innerHTML = '<i class="fas fa-check"></i> Subscribed!';
-        setTimeout(() => {
-            btn.innerHTML = '<i class="fas fa-bell"></i> Notify When Available';
-            btn.disabled = false;
-        }, 2000);
-        showToast('We\'ll notify you when this item is back in stock!');
+        showToast("We'll notify you when this item is back in stock!");
+        setTimeout(() => { btn.innerHTML = '<i class="fas fa-bell"></i> Notify When Available'; btn.disabled = false; }, 2000);
     }, 800);
 }
 
-// Zoom modal (placeholder)
-function openZoomModal() {
-    console.log('Zoom image');
-}
+function openZoomModal() { console.log('Zoom image'); }
 </script>
 {% endblock %}

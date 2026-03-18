@@ -1182,15 +1182,28 @@ function joinWhatsappFromPromo() {
                 <a href="{% url 'profile' %}" class="profile-link">
                     <i class="fas fa-user"></i> Profile
                 </a>
+
                 
                 {% if user.is_authenticated %}
 
                     {% if user.is_staff %}
-                        <a href="/admin/"><i class="fas fa-shield"></i> Admin</a>
+                        <a href="/hoka-secure-panel-2024/"><i class="fas fa-shield"></i> Admin</a>
                         <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> A.Track Order</a>
                     {% endif %}
                     
                     <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+
+                    <a href="{% url 'delivery_dashboard' %}"
+                        class="relative text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all">
+                            <i class="fas fa-bell text-lg"></i>
+                            {% if pending_orders_count > 0 %}
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold 
+                                        rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 
+                                        leading-none animate-pulse">
+                                {{ pending_orders_count }}
+                            </span>
+                            {% endif %}
+                        </a>
                     
                 {% else %}
                     <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
@@ -1243,6 +1256,11 @@ function joinWhatsappFromPromo() {
             <a href="/profile/orders/">
                 <i class="fas fa-truck"></i> Track Order
             </a>
+
+            <a href="{% url 'wishlist' %}" class="flex items-center gap-2 text-[var(--text-primary)] hover:text-[#FF6B9D] transition-colors">
+                <i class="far fa-heart"></i>
+                <span>My Wishlist</span>
+            </a>
             
             {% if user.is_authenticated %}
 
@@ -1251,6 +1269,17 @@ function joinWhatsappFromPromo() {
                         <i class="fas fa-shield"></i> Admin
                     </a>
                     <a href="{% url 'order_tracking' %}"><i class="fas fa-truck"></i> A.Track Order</a>
+                    <a href="{% url 'delivery_dashboard' %}"
+                        class="relative text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all">
+                            <i class="fas fa-bell text-lg"></i>
+                            {% if pending_orders_count > 0 %}
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold 
+                                        rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 
+                                        leading-none animate-pulse">
+                                {{ pending_orders_count }}
+                            </span>
+                            {% endif %}
+                        </a>
                 {% endif %}
 
                 <a href="{% url 'profile' %}" class="profile-link">

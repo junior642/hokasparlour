@@ -1,36 +1,39 @@
 {% if ads %}
 {% with slideshow_id=slideshow_id|default:"default" %}
 <div class="w-full mb-4 sm:mb-10 relative z-10" id="ad-section-{{ slideshow_id }}">
-    <div class="relative w-full rounded-3xl overflow-hidden bg-gradient-to-br from-purple-900 to-purple-500 shadow-2xl transition-all duration-300" id="adsSlideshow-{{ slideshow_id }}">
-        
+    <div class="relative w-full rounded-lg sm:rounded-xl overflow-hidden bg-gradient-to-br from-purple-900 to-purple-500 shadow-2xl transition-all duration-300" id="adsSlideshow-{{ slideshow_id }}">
+
         <!-- Slides Container -->
-        <div class="relative w-full min-h-[200px] sm:min-h-[380px] lg:min-h-[500px] xl:min-h-[600px] overflow-hidden" id="slidesContainer-{{ slideshow_id }}">
+        <div class="relative w-full overflow-hidden" id="slidesContainer-{{ slideshow_id }}">
             {% for ad in ads %}
                 {% if ad.ad_type == 'single_image' and ad.single_image %}
-                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active opacity-100 visible scale-100 pointer-events-auto relative{% endif %}" 
-                     data-ad-id="{{ ad.id }}" 
-                     data-index="{{ forloop.counter0 }}" 
+                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active{% endif %}"
+                     data-ad-id="{{ ad.id }}"
+                     data-index="{{ forloop.counter0 }}"
                      data-slideshow="{{ slideshow_id }}">
-                    {% if ad.button_url %}
+                    {% with btn_url=ad.get_button_url %}
+                    {% if btn_url and btn_url != '#' %}
                     <a href="{% url 'ad_click' ad.id %}" class="block w-full h-full" target="_blank" rel="noopener">
                     {% endif %}
-                        <div class="relative w-full h-[200px] sm:h-[330px] md:h-[400px] lg:h-[480px] xl:h-[580px] 2xl:h-[650px] overflow-hidden">
+                        <div class="relative w-full overflow-hidden" style="aspect-ratio: 16/7;">
                             <img src="{{ ad.single_image.url }}" alt="{{ ad.title }}"
                                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-                                 class="w-full h-full object-cover transition-transform duration-700 hover:scale-105">
+                                 class="w-full h-full object-cover sm:object-cover transition-transform duration-700 hover:scale-105"
+                                 style="object-position: center center;">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
                         </div>
-                    {% if ad.button_url %}
+                    {% if btn_url and btn_url != '#' %}
                     </a>
                     {% endif %}
+                    {% endwith %}
                 </div>
 
                 {% elif ad.ad_type == 'multi_image' %}
-                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active opacity-100 visible scale-100 pointer-events-auto relative{% endif %}" 
-                     data-ad-id="{{ ad.id }}" 
-                     data-index="{{ forloop.counter0 }}" 
+                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active{% endif %}"
+                     data-ad-id="{{ ad.id }}"
+                     data-index="{{ forloop.counter0 }}"
                      data-slideshow="{{ slideshow_id }}">
-                    <div class="relative w-full h-[200px] sm:h-[330px] md:h-[400px] lg:h-[480px] xl:h-[580px] 2xl:h-[650px] overflow-hidden">
+                    <div class="relative w-full overflow-hidden" style="aspect-ratio: 16/7;">
                         {% with first_image=ad.get_images.0 %}
                             {% if first_image %}
                             <img src="{{ first_image.image.url }}" alt="{{ ad.title }}"
@@ -39,21 +42,23 @@
                             {% endif %}
                         {% endwith %}
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                        <div class="absolute top-3 right-3 sm:top-6 sm:right-6 bg-black/30 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-xs font-semibold px-2 py-1 sm:px-4 sm:py-2 rounded-full shadow-sm z-20 animate-fadeInDown">
+                        <div class="absolute top-2 right-2 sm:top-6 sm:right-6 bg-black/30 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-xs font-semibold px-2 py-1 sm:px-4 sm:py-2 rounded-full shadow-sm z-20 animate-fadeInDown">
                             <i class="fas fa-images mr-1 sm:mr-2"></i> {{ ad.get_images.count }} images
                         </div>
-                        {% if ad.button_url %}
+                        {% with btn_url=ad.get_button_url %}
+                        {% if btn_url and btn_url != '#' %}
                         <a href="{% url 'ad_click' ad.id %}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
                         {% endif %}
+                        {% endwith %}
                     </div>
                 </div>
 
                 {% elif ad.ad_type == 'video' and ad.video %}
-                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active opacity-100 visible scale-100 pointer-events-auto relative{% endif %}" 
-                     data-ad-id="{{ ad.id }}" 
-                     data-index="{{ forloop.counter0 }}" 
+                <div class="ad-slide absolute top-0 left-0 w-full h-full opacity-0 invisible scale-105 transition-all duration-800 ease-out pointer-events-none {% if forloop.first %}active{% endif %}"
+                     data-ad-id="{{ ad.id }}"
+                     data-index="{{ forloop.counter0 }}"
                      data-slideshow="{{ slideshow_id }}">
-                    <div class="relative w-full h-[200px] sm:h-[330px] md:h-[400px] lg:h-[480px] xl:h-[580px] 2xl:h-[650px] overflow-hidden video-wrapper">
+                    <div class="relative w-full overflow-hidden video-wrapper" style="aspect-ratio: 16/7;">
                         {% if ad.video_poster %}
                         <img src="{{ ad.video_poster.url }}" alt="{{ ad.title }}"
                              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
@@ -67,68 +72,70 @@
                         </div>
                         {% endif %}
                         <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                        <div class="absolute top-3 right-3 sm:top-6 sm:right-6 bg-black/30 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-xs font-semibold px-2 py-1 sm:px-4 sm:py-2 rounded-full shadow-sm z-20 animate-fadeInDown">
+                        <div class="absolute top-2 right-2 sm:top-6 sm:right-6 bg-black/30 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-xs font-semibold px-2 py-1 sm:px-4 sm:py-2 rounded-full shadow-sm z-20 animate-fadeInDown">
                             <i class="fas fa-play mr-1 sm:mr-2"></i> Video Ad
                         </div>
-                        {% if ad.button_url %}
+                        {% with btn_url=ad.get_button_url %}
+                        {% if btn_url and btn_url != '#' %}
                         <a href="{% url 'ad_click' ad.id %}" class="absolute inset-0 z-10" target="_blank" rel="noopener" aria-label="View advertisement"></a>
                         {% endif %}
+                        {% endwith %}
                     </div>
                 </div>
                 {% endif %}
             {% endfor %}
 
-            <!-- Arrow Navigation - Made more transparent -->
-            <div class="absolute top-1/2 -translate-y-1/2 z-30 flex justify-between w-full px-1 sm:px-6 pointer-events-none">
-                <button class="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-black/20 backdrop-blur-md text-white/80 cursor-pointer flex items-center justify-center transition-all duration-300 pointer-events-auto border border-white/30 hover:bg-black/40 hover:text-white hover:scale-110 active:scale-95" 
-                        id="prevSlideBtn-{{ slideshow_id }}" 
-                        data-slideshow="{{ slideshow_id }}" 
+            <!-- Arrow Navigation -->
+            <div class="absolute top-1/2 -translate-y-1/2 z-30 flex justify-between w-full px-1 sm:px-4 pointer-events-none">
+                <button class="w-7 h-7 sm:w-12 sm:h-12 rounded-full bg-black/20 backdrop-blur-md text-white/80 cursor-pointer flex items-center justify-center transition-all duration-300 pointer-events-auto border border-white/30 hover:bg-black/40 hover:text-white hover:scale-110 active:scale-95"
+                        id="prevSlideBtn-{{ slideshow_id }}"
+                        data-slideshow="{{ slideshow_id }}"
                         aria-label="Previous slide">
-                    <i class="fas fa-chevron-left text-xs sm:text-xl"></i>
+                    <i class="fas fa-chevron-left text-xs sm:text-base"></i>
                 </button>
-                <button class="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-black/20 backdrop-blur-md text-white/80 cursor-pointer flex items-center justify-center transition-all duration-300 pointer-events-auto border border-white/30 hover:bg-black/40 hover:text-white hover:scale-110 active:scale-95" 
-                        id="nextSlideBtn-{{ slideshow_id }}" 
-                        data-slideshow="{{ slideshow_id }}" 
+                <button class="w-7 h-7 sm:w-12 sm:h-12 rounded-full bg-black/20 backdrop-blur-md text-white/80 cursor-pointer flex items-center justify-center transition-all duration-300 pointer-events-auto border border-white/30 hover:bg-black/40 hover:text-white hover:scale-110 active:scale-95"
+                        id="nextSlideBtn-{{ slideshow_id }}"
+                        data-slideshow="{{ slideshow_id }}"
                         aria-label="Next slide">
-                    <i class="fas fa-chevron-right text-xs sm:text-xl"></i>
+                    <i class="fas fa-chevron-right text-xs sm:text-base"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Timer Progress Bar - Hidden on mobile, visible on larger screens -->
-        <div class="hidden sm:block w-full h-1 bg-white/10 relative overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-purple-300 to-purple-100 w-0 transition-[width] duration-100 absolute top-0 left-0 rounded-r" id="timerBar-{{ slideshow_id }}"></div>
-        </div>
+        
 
-        <!-- Content Below Slideshow - More compact on mobile -->
-        <div class="px-3 py-2 sm:px-6 sm:py-5 bg-gradient-to-br from-purple-800 to-purple-900" id="adContentContainer-{{ slideshow_id }}">
+        <!-- Content Below Slideshow -->
+        <div class="px-3 py-2 sm:px-6 sm:py-4 bg-gradient-to-br from-purple-800 to-purple-900" id="adContentContainer-{{ slideshow_id }}">
             {% for ad in ads %}
                 {% if ad.ad_type == 'single_image' and ad.single_image or ad.ad_type == 'multi_image' or ad.ad_type == 'video' and ad.video %}
                 <div class="ad-content-item {% if not forloop.first %}hidden{% endif %}" data-ad-id="{{ ad.id }}" data-slideshow="{{ slideshow_id }}">
                     <div class="flex flex-row items-center justify-between gap-2">
                         <div class="flex-1 min-w-0 pr-2">
                             {% if ad.headline %}
-                            <h3 class="font-bold text-sm sm:text-xl md:text-2xl lg:text-3xl leading-tight text-white truncate">
+                            <h3 class="font-bold text-xs sm:text-xl md:text-2xl lg:text-3xl leading-tight text-white truncate">
                                 {{ ad.headline }}
                             </h3>
                             {% endif %}
                             {% if ad.subheadline %}
-                            <p class="text-xs sm:text-base text-purple-100/90 max-w-2xl leading-relaxed hidden sm:block">
+                            <p class="hidden sm:block text-xs sm:text-base text-purple-100/90 max-w-2xl leading-relaxed">
                                 {{ ad.subheadline }}
                             </p>
                             {% endif %}
                         </div>
-                        {% if ad.button_text and ad.button_url %}
-                        <a href="{% url 'ad_click' ad.id %}" 
-                           class="group inline-flex items-center gap-1 sm:gap-3 px-3 py-1.5 sm:px-6 sm:py-3 rounded-full text-white font-semibold text-xs sm:text-base transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 whitespace-nowrap bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 relative overflow-hidden"
-                           target="_blank" rel="noopener">
+
+                        <!-- Button: works for both internal and external links -->
+                        {% with btn_url=ad.get_button_url %}
+                        {% if ad.button_text and btn_url and btn_url != '#' %}
+                        <a href="{{ btn_url }}"
+                           class="group inline-flex items-center gap-1 sm:gap-3 px-3 py-1.5 sm:px-6 sm:py-3 rounded-full text-white font-semibold text-[10px] sm:text-base transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:translate-y-0 whitespace-nowrap bg-white/20 backdrop-blur-sm border border-white/30 hover:bg-white/30 relative overflow-hidden flex-shrink-0">
                             <span class="relative z-10">{{ ad.button_text }}</span>
-                            <i class="fas fa-arrow-right text-[10px] sm:text-sm transition-transform duration-300 group-hover:translate-x-1 relative z-10"></i>
+                            <i class="fas fa-arrow-right text-[8px] sm:text-sm transition-transform duration-300 group-hover:translate-x-1 relative z-10"></i>
                         </a>
                         {% endif %}
+                        {% endwith %}
                     </div>
                     {% if ad.subheadline %}
-                    <p class="text-xs text-purple-100/80 mt-1 sm:hidden truncate">
+                    <p class="text-[10px] text-purple-100/80 mt-0.5 sm:hidden truncate">
                         {{ ad.subheadline }}
                     </p>
                     {% endif %}
@@ -146,7 +153,17 @@
     }
     .animate-fadeInDown { animation: fadeInDown 0.5s ease; }
     .duration-800 { transition-duration: 800ms; }
-    .duration-600 { transition-duration: 600ms; }
+
+    /* Slide states */
+    .ad-slide {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(1.05);
+        pointer-events: none;
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+    }
     .ad-slide.active {
         opacity: 1 !important;
         visibility: visible !important;
@@ -154,28 +171,12 @@
         pointer-events: auto !important;
         position: relative !important;
     }
-    .ad-slide {
-        opacity: 0;
-        visibility: hidden;
-        transform: scale(1.05);
-        pointer-events: none;
-        position: absolute;
-    }
-    /* Mobile optimizations */
-    @media (max-width: 640px) {
-        .min-h-[200px] {
-            min-height: 200px;
-        }
-        .h-[200px] {
-            height: 200px;
-        }
-    }
+    .ad-content-item.hidden { display: none; }
 </style>
 
 <script>
 (function() {
     'use strict';
-
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initSlideshow);
     } else {
@@ -185,37 +186,30 @@
     function initSlideshow() {
         const slideshowId = '{{ slideshow_id }}';
         const section = document.getElementById(`ad-section-${slideshowId}`);
-
         if (!section) return;
 
-        // ── Scope ALL queries strictly to this section ──
         const slides = section.querySelectorAll(`.ad-slide[data-slideshow="${slideshowId}"]`);
         const contentItems = section.querySelectorAll(`.ad-content-item[data-slideshow="${slideshowId}"]`);
         const prevBtn = document.getElementById(`prevSlideBtn-${slideshowId}`);
         const nextBtn = document.getElementById(`nextSlideBtn-${slideshowId}`);
         const timerBar = document.getElementById(`timerBar-${slideshowId}`);
 
-        console.log('Initializing slideshow with ID:', slideshowId);
-        console.log('Slides found:', slides.length);
-        console.log('Content items found:', contentItems.length);
-
         if (!slides.length) return;
 
         let currentIndex = 0;
-        let totalSlides = slides.length;
-        let isPlaying = true;
-        let slideDuration = 30000;
+        const totalSlides = slides.length;
+        const slideDuration = 5000;
         let progressInterval = null;
 
-        if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); prevSlide(); });
-        if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); nextSlide(); });
+        if (prevBtn) prevBtn.addEventListener('click', e => { e.preventDefault(); prevSlide(); });
+        if (nextBtn) nextBtn.addEventListener('click', e => { e.preventDefault(); nextSlide(); });
 
         // Touch support
         const slidesContainer = document.getElementById(`slidesContainer-${slideshowId}`);
         if (slidesContainer) {
             let touchStartX = 0;
-            slidesContainer.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-            slidesContainer.addEventListener('touchend', (e) => {
+            slidesContainer.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            slidesContainer.addEventListener('touchend', e => {
                 const diff = e.changedTouches[0].screenX - touchStartX;
                 if (Math.abs(diff) > 30) diff > 0 ? prevSlide() : nextSlide();
             }, { passive: true });
@@ -225,12 +219,8 @@
         startTimer();
 
         function showSlide(index) {
-            slides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
-            });
-            contentItems.forEach((item, i) => {
-                item.classList.toggle('hidden', i !== index);
-            });
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            contentItems.forEach((item, i) => item.classList.toggle('hidden', i !== index));
             currentIndex = index;
             resetTimerBar();
         }
@@ -239,13 +229,12 @@
         function prevSlide() { showSlide((currentIndex - 1 + totalSlides) % totalSlides); }
 
         function startTimer() {
-            if (!isPlaying) return;
             stopTimer();
             let startTime = Date.now();
             progressInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                const progress = (elapsed / slideDuration) * 100;
-                if (timerBar) timerBar.style.width = Math.min(progress, 100) + '%';
+                const progress = (elapsed / slideDuration) * 4000;
+                if (timerBar) timerBar.style.width = Math.min(progress, 4000) + '%';
                 if (elapsed >= slideDuration) { nextSlide(); startTime = Date.now(); }
             }, 50);
         }
@@ -256,7 +245,7 @@
 
         function resetTimerBar() {
             if (timerBar) timerBar.style.width = '0%';
-            if (isPlaying) startTimer();
+            startTimer();
         }
     }
 })();

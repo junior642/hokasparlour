@@ -184,7 +184,6 @@ def product_detail(request, product_id):
             'alt_text': additional_image.alt_text
         })
     
-    # Fix: category is now a ForeignKey
     recommended_products = Product.objects.filter(
         category=product.category,  
     ).exclude(
@@ -200,14 +199,18 @@ def product_detail(request, product_id):
             pass
 
     prices = product.get_display_prices(request.user)
+
+    # ── Delivery info (respects auto-warehouse switching) ─────────
+    delivery_info = product.get_delivery_info()
     
     context = {
         'product': product,
         'sizes': sizes,
         'all_images': all_images,
         'recommended_products': recommended_products,
-        'user_promo': user_promo,       # promo usage object
-        'prices': prices,               # dict with price, anchor_price, has_discount, promo_remaining
+        'user_promo': user_promo,
+        'prices': prices,
+        'delivery_info': delivery_info,     # ← NEW
     }
     return render(request, 'parlour/product_detail.html', context)
 
@@ -2803,3 +2806,180 @@ def agent_referrals(request):
 
     referrals = PromoUsage.objects.filter(agent=agent).select_related('user').order_by('-created_at')
     return render(request, 'parlour/agent_referrals.html', {'agent': agent, 'referrals': referrals})
+
+
+# Add these to your views.py
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404, render
+from .models import Wishlist, Product  # adjust import path as needed
+
+
+# ─── Helper: session wishlist key ───────────────────────────────────────────
+SESSION_KEY = 'wishlist'
+
+
+def _get_session_wishlist(request):
+    """Return the session wishlist as a list of product id strings."""
+    return request.session.get(SESSION_KEY, [])
+
+
+def _save_session_wishlist(request, wishlist):
+    request.session[SESSION_KEY] = wishlist
+    request.session.modified = True
+
+
+# ─── Toggle Wishlist (AJAX) ──────────────────────────────────────────────────
+@require_POST
+def toggle_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.user.is_authenticated:
+        # ── Database wishlist for logged-in users ──
+        obj, created = Wishlist.objects.get_or_create(user=request.user, product=product)
+        if not created:
+            obj.delete()
+            return JsonResponse({'status': 'removed', 'message': f'"{product.name}" removed from wishlist'})
+        return JsonResponse({'status': 'added', 'message': f'"{product.name}" added to wishlist'})
+
+    else:
+        # ── Session wishlist for guests ──
+        wishlist = _get_session_wishlist(request)
+        pid = str(product_id)
+        if pid in wishlist:
+            wishlist.remove(pid)
+            _save_session_wishlist(request, wishlist)
+            return JsonResponse({'status': 'removed', 'message': f'"{product.name}" removed from wishlist'})
+        else:
+            wishlist.append(pid)
+            _save_session_wishlist(request, wishlist)
+            return JsonResponse({'status': 'added', 'message': f'"{product.name}" added to wishlist'})
+
+
+# ─── Check wishlist status (AJAX) ────────────────────────────────────────────
+def wishlist_status(request, product_id):
+    """Returns whether this product is in the current user's wishlist."""
+    if request.user.is_authenticated:
+        in_wishlist = Wishlist.objects.filter(user=request.user, product_id=product_id).exists()
+    else:
+        wishlist = _get_session_wishlist(request)
+        in_wishlist = str(product_id) in wishlist
+
+    return JsonResponse({'in_wishlist': in_wishlist})
+
+
+# ─── Wishlist Page ────────────────────────────────────────────────────────────
+def wishlist_page(request):
+    """Renders the wishlist page, merging session wishlist into DB on login."""
+    if request.user.is_authenticated:
+        # Merge any session wishlist items into the database
+        session_wishlist = _get_session_wishlist(request)
+        if session_wishlist:
+            for pid in session_wishlist:
+                try:
+                    product = Product.objects.get(id=pid)
+                    Wishlist.objects.get_or_create(user=request.user, product=product)
+                except Product.DoesNotExist:
+                    pass
+            # Clear session wishlist after merging
+            _save_session_wishlist(request, [])
+
+        wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product')
+        products = [item.product for item in wishlist_items]
+
+    else:
+        session_wishlist = _get_session_wishlist(request)
+        products = list(Product.objects.filter(id__in=session_wishlist))
+
+    return render(request, 'parlour/wishlist.html', {'products': products})
+
+
+
+# Add these to your views.py
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404, render
+from .models import Wishlist, Product  # adjust import path as needed
+
+
+# ─── Helper: session wishlist key ───────────────────────────────────────────
+SESSION_KEY = 'wishlist'
+
+
+def _get_session_wishlist(request):
+    """Return the session wishlist as a list of product id strings."""
+    return request.session.get(SESSION_KEY, [])
+
+
+def _save_session_wishlist(request, wishlist):
+    request.session[SESSION_KEY] = wishlist
+    request.session.modified = True
+
+
+# ─── Toggle Wishlist (AJAX) ──────────────────────────────────────────────────
+@require_POST
+def toggle_wishlist(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.user.is_authenticated:
+        # ── Database wishlist for logged-in users ──
+        obj, created = Wishlist.objects.get_or_create(user=request.user, product=product)
+        if not created:
+            obj.delete()
+            return JsonResponse({'status': 'removed', 'message': f'"{product.name}" removed from wishlist'})
+        return JsonResponse({'status': 'added', 'message': f'"{product.name}" added to wishlist'})
+
+    else:
+        # ── Session wishlist for guests ──
+        wishlist = _get_session_wishlist(request)
+        pid = str(product_id)
+        if pid in wishlist:
+            wishlist.remove(pid)
+            _save_session_wishlist(request, wishlist)
+            return JsonResponse({'status': 'removed', 'message': f'"{product.name}" removed from wishlist'})
+        else:
+            wishlist.append(pid)
+            _save_session_wishlist(request, wishlist)
+            return JsonResponse({'status': 'added', 'message': f'"{product.name}" added to wishlist'})
+
+
+# ─── Check wishlist status (AJAX) ────────────────────────────────────────────
+def wishlist_status(request, product_id):
+    """Returns whether this product is in the current user's wishlist."""
+    if request.user.is_authenticated:
+        in_wishlist = Wishlist.objects.filter(user=request.user, product_id=product_id).exists()
+    else:
+        wishlist = _get_session_wishlist(request)
+        in_wishlist = str(product_id) in wishlist
+
+    return JsonResponse({'in_wishlist': in_wishlist})
+
+
+# ─── Wishlist Page ────────────────────────────────────────────────────────────
+def wishlist_page(request):
+    """Renders the wishlist page, merging session wishlist into DB on login."""
+    if request.user.is_authenticated:
+        # Merge any session wishlist items into the database
+        session_wishlist = _get_session_wishlist(request)
+        if session_wishlist:
+            for pid in session_wishlist:
+                try:
+                    product = Product.objects.get(id=pid)
+                    Wishlist.objects.get_or_create(user=request.user, product=product)
+                except Product.DoesNotExist:
+                    pass
+            # Clear session wishlist after merging
+            _save_session_wishlist(request, [])
+
+        wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product')
+        products = [item.product for item in wishlist_items]
+
+    else:
+        session_wishlist = _get_session_wishlist(request)
+        products = list(Product.objects.filter(id__in=session_wishlist))
+
+    return render(request, 'parlour/wishlist.html', {'products': products})    

@@ -340,6 +340,10 @@
                 </a>
             </div>
         </form>
+        <a href="{% url 'wishlist' %}" class="flex items-center gap-2 text-[var(--text-primary)] hover:text-[#FF6B9D] transition-colors">
+    <i class="far fa-heart"></i>
+    <span>My Wishlist</span>
+</a>
 
         <!-- Admin Links (staff only) -->
         {% if user.is_staff %}
@@ -354,12 +358,29 @@
                 <i class="fas fa-ad"></i>
                 Manage Ads
             </a>
-            <a href="{% url 'delivery_dashboard' %}" 
-               class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
-                <i class="fas fa-truck"></i>
-                Delivery Dashboard
-            </a>
+           <!-- Bell icon with badge (place in your navbar icon cluster) -->
+             {% if user.agent.status == 'approved' %}
+                <a href="{% url 'agent_dashboard' %}"
+                class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                    <i class="fas fa-users"></i>
+                    Agent Dashboard
+                </a>
+            {% endif %}
 
+
+<!-- Delivery Dashboard link with badge -->
+<a href="{% url 'delivery_dashboard' %}"
+   class="relative text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+    <i class="fas fa-truck"></i>
+    Delivery Dashboard
+    {% if pending_orders_count > 0 %}
+    <span class="bg-red-500 text-white text-xs font-bold 
+                 rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 
+                 leading-none">
+        {{ pending_orders_count }}
+    </span>
+    {% endif %}
+</a>
 <!-- Agent Links (authenticated users) -->
         {% if user.is_authenticated %}
         <div class="mt-4 pt-4 border-t border-[var(--border)] flex flex-col gap-2">

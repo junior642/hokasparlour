@@ -1,7 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 import logging
-from parlour.models import Profile
+from parlour.models import Profile, Order
 
 logger = logging.getLogger(__name__)
 
@@ -56,3 +56,17 @@ def cart_count(request):
     cart = request.session.get('cart', {})
     count = sum(item['quantity'] for item in cart.values())
     return {'cart_count': count}
+
+
+def pending_orders_count(request):
+    """Inject active order count for staff notification badge."""
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return {'pending_orders_count': 0}
+
+    try:
+        count = Order.objects.filter(
+            order_status__in=['pending', 'processing', 'dispatched']
+        ).count()
+        return {'pending_orders_count': count}
+    except Exception:
+        return {'pending_orders_count': 0}

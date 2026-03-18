@@ -1,0 +1,381 @@
+{% extends 'parlour/base.html' %}
+{% load static %}
+
+{% block title %}My Wishlist - Hoka's Parlour{% endblock %}
+
+{% block content %}
+<style>
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slideOutRight {
+    from { transform: translateX(0);    opacity: 1; }
+    to   { transform: translateX(100%); opacity: 0; }
+}
+@keyframes heartPop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.4); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+@keyframes fadeOut {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(0.95); }
+}
+
+.animate-fade-slide-up  { animation: fadeSlideUp 0.5s ease both; }
+.animate-slide-in-right { animation: slideInRight 0.3s ease; }
+.heart-pop              { animation: heartPop 0.4s ease; }
+
+/* Staggered card entrance */
+.wishlist-card { animation: fadeSlideUp 0.5s ease both; }
+.wishlist-card:nth-child(1)  { animation-delay: 0.05s; }
+.wishlist-card:nth-child(2)  { animation-delay: 0.10s; }
+.wishlist-card:nth-child(3)  { animation-delay: 0.15s; }
+.wishlist-card:nth-child(4)  { animation-delay: 0.20s; }
+.wishlist-card:nth-child(5)  { animation-delay: 0.25s; }
+.wishlist-card:nth-child(6)  { animation-delay: 0.30s; }
+.wishlist-card:nth-child(7)  { animation-delay: 0.35s; }
+.wishlist-card:nth-child(8)  { animation-delay: 0.40s; }
+
+.wishlist-card.removing {
+    animation: fadeOut 0.35s ease forwards;
+}
+
+/* Remove button */
+.remove-btn {
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}
+.remove-btn:hover {
+    background: #EF4444 !important;
+    color: white !important;
+    transform: scale(1.08);
+}
+</style>
+
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-8">
+
+    <!-- ── PAGE HEADER ── -->
+    <div class="animate-fade-slide-up mb-8 lg:mb-10">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <a href="{% url 'home' %}" class="text-sm text-[var(--text-secondary)] dark:text-[#B0B7C3] hover:text-[#8B3DFF] transition-colors">Home</a>
+                    <i class="fas fa-chevron-right text-xs text-[var(--text-secondary)] dark:text-[#B0B7C3]"></i>
+                    <span class="text-sm text-[var(--text-primary)] dark:text-[#F9FAFF] font-medium">Wishlist</span>
+                </div>
+                <h1 class="font-display text-3xl lg:text-4xl font-extrabold text-[var(--text-primary)] dark:text-[#F9FAFF] flex items-center gap-3">
+                    <i class="fas fa-heart text-[#FF6B9D]"></i>
+                    My Wishlist
+                </h1>
+                <p class="text-[var(--text-secondary)] dark:text-[#B0B7C3] mt-1" id="itemCountText">
+                    {% if products %}
+                        {{ products|length }} item{{ products|length|pluralize }} saved
+                    {% else %}
+                        No items saved yet
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if products %}
+            <div class="flex items-center gap-3">
+                <button onclick="clearWishlist()"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-[var(--border-light)] dark:border-[#2A2D3A] text-[var(--text-secondary)] dark:text-[#B0B7C3] font-medium text-sm hover:border-[#EF4444] hover:text-[#EF4444] transition-all">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+                <a href="{% url 'home' %}"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8B3DFF] to-[#6B1FCC] text-white font-semibold text-sm hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-8px_rgba(139,61,255,0.4)] transition-all">
+                    <i class="fas fa-shopping-bag"></i> Continue Shopping
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ── WISHLIST GRID ── -->
+    {% if products %}
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-5" id="wishlistGrid">
+        {% for product in products %}
+        <div class="wishlist-card group bg-[var(--bg-primary)] dark:bg-[#13141B] border border-[var(--border-light)] dark:border-[#2A2D3A] rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-[0_20px_40px_-12px_rgba(139,61,255,0.2)] hover:border-[#8B3DFF] transition-all relative"
+             id="card-{{ product.id }}">
+
+            <!-- Top accent bar -->
+            <div class="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#8B3DFF] to-[#FF6B9D] scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+
+            <!-- Remove button -->
+            <button onclick="removeFromWishlist({{ product.id }}, this)"
+                class="remove-btn absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/80 dark:bg-[#1E1F2C]/80 backdrop-blur-sm border border-[var(--border-light)] dark:border-[#2A2D3A] text-[var(--text-secondary)] dark:text-[#B0B7C3] flex items-center justify-center text-xs shadow-sm"
+                title="Remove from wishlist">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Product Image -->
+            <a href="{% url 'product_detail' product.id %}" class="block">
+                {% if product.image %}
+                    <div class="w-full aspect-square overflow-hidden bg-[var(--bg-secondary)] dark:bg-[#1E1F2C]">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    </div>
+                {% else %}
+                    <div class="w-full aspect-square bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--bg-primary)] dark:from-[#1E1F2C] dark:to-[#13141B] flex items-center justify-center text-[#B48AFF] text-4xl">
+                        <i class="fas fa-image"></i>
+                    </div>
+                {% endif %}
+            </a>
+
+            <!-- Product Info -->
+            <div class="p-3 lg:p-4">
+                <!-- Category badge -->
+                <span class="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.1)] text-[#8B3DFF] border border-[#B48AFF] mb-2">
+                    {{ product.category.name }}
+                </span>
+
+                <a href="{% url 'product_detail' product.id %}">
+                    <h3 class="font-semibold text-sm lg:text-base text-[var(--text-primary)] dark:text-[#F9FAFF] line-clamp-2 mb-2 hover:text-[#8B3DFF] transition-colors leading-snug">
+                        {{ product.name }}
+                    </h3>
+                </a>
+
+                <!-- Price -->
+                <div class="flex items-baseline gap-2 mb-3">
+                    {% if product.anchor_price %}
+                        <span class="text-xs text-[var(--text-secondary)] dark:text-[#B0B7C3] line-through">KSh {{ product.anchor_price|floatformat:0 }}</span>
+                    {% endif %}
+                    <span class="text-base lg:text-lg font-extrabold text-[#8B3DFF]">KSh {{ product.price|floatformat:0 }}</span>
+                </div>
+
+                <!-- Stock indicator -->
+                <div class="flex items-center gap-1.5 mb-3 text-xs {% if product.is_in_stock %}text-[#10B981]{% else %}text-[#EF4444]{% endif %}">
+                    <i class="fas {% if product.is_in_stock %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                    <span>{% if product.is_in_stock %}In Stock{% else %}Out of Stock{% endif %}</span>
+                </div>
+
+                <!-- Add to Cart / View button -->
+                {% if product.is_in_stock %}
+                    <a href="{% url 'product_detail' product.id %}"
+                        class="w-full py-2 px-3 bg-gradient-to-r from-[#8B3DFF] to-[#6B1FCC] text-white font-semibold text-sm rounded-xl flex items-center justify-center gap-2 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_-6px_rgba(139,61,255,0.4)] transition-all">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </a>
+                {% else %}
+                    <a href="{% url 'product_detail' product.id %}"
+                        class="w-full py-2 px-3 bg-[var(--bg-secondary)] dark:bg-[#1E1F2C] border border-[var(--border-light)] dark:border-[#2A2D3A] text-[var(--text-secondary)] dark:text-[#B0B7C3] font-semibold text-sm rounded-xl flex items-center justify-center gap-2 hover:bg-[#8B3DFF] hover:text-white hover:border-[#8B3DFF] transition-all">
+                        <i class="fas fa-eye"></i> View Product
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- ── EMPTY STATE ── -->
+    <div class="animate-fade-slide-up flex flex-col items-center justify-center py-24 text-center" id="emptyState">
+        <div class="relative mb-6">
+            <div class="w-28 h-28 rounded-full bg-[var(--primary-soft)] dark:bg-[rgba(139,61,255,0.08)] flex items-center justify-center">
+                <i class="far fa-heart text-5xl text-[#FF6B9D]"></i>
+            </div>
+            <!-- decorative dots -->
+            <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#FF6B9D] opacity-40"></div>
+            <div class="absolute bottom-2 -left-2 w-3 h-3 rounded-full bg-[#8B3DFF] opacity-30"></div>
+        </div>
+        <h2 class="font-display text-2xl font-bold text-[var(--text-primary)] dark:text-[#F9FAFF] mb-2">Your wishlist is empty</h2>
+        <p class="text-[var(--text-secondary)] dark:text-[#B0B7C3] mb-8 max-w-sm">
+            Browse our collection and tap the <strong>Wishlist</strong> button on any product to save it here for later.
+        </p>
+        <a href="{% url 'home' %}"
+            class="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#8B3DFF] to-[#6B1FCC] text-white font-bold rounded-xl hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(139,61,255,0.4)] transition-all">
+            <i class="fas fa-shopping-bag"></i> Browse Products
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+<!-- Confirm Clear Modal -->
+<div id="clearModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="bg-[var(--bg-primary)] dark:bg-[#13141B] rounded-2xl p-6 max-w-sm w-full border border-[var(--border-light)] dark:border-[#2A2D3A] shadow-2xl animate-fade-slide-up">
+        <div class="w-14 h-14 rounded-full bg-[rgba(239,68,68,0.1)] flex items-center justify-center text-[#EF4444] text-2xl mx-auto mb-4">
+            <i class="fas fa-trash-alt"></i>
+        </div>
+        <h3 class="font-display text-xl font-bold text-[var(--text-primary)] dark:text-[#F9FAFF] text-center mb-2">Clear Wishlist?</h3>
+        <p class="text-[var(--text-secondary)] dark:text-[#B0B7C3] text-sm text-center mb-6">This will remove all saved items. This action cannot be undone.</p>
+        <div class="flex gap-3">
+            <button onclick="closeClearModal()"
+                class="flex-1 py-2.5 rounded-xl border-2 border-[var(--border-light)] dark:border-[#2A2D3A] text-[var(--text-secondary)] dark:text-[#B0B7C3] font-semibold hover:bg-[var(--bg-secondary)] dark:hover:bg-[#1E1F2C] transition-all">
+                Cancel
+            </button>
+            <button onclick="confirmClearWishlist()"
+                class="flex-1 py-2.5 rounded-xl bg-[#EF4444] text-white font-semibold hover:bg-[#dc2626] transition-all">
+                Clear All
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const colorMap  = { success: '#10B981', removed: '#FF6B9D', error: '#EF4444' };
+    const iconMap   = { success: 'fa-check-circle', removed: 'fa-heart-broken', error: 'fa-exclamation-circle' };
+    const color = colorMap[type] || colorMap.success;
+    const icon  = iconMap[type]  || iconMap.success;
+
+    const toast = document.createElement('div');
+    toast.className = 'flex items-center gap-3 bg-[var(--bg-primary)] dark:bg-[#13141B] border-l-4 rounded-xl p-4 shadow-xl animate-slide-in-right min-w-[240px]';
+    toast.style.borderLeftColor = color;
+    toast.innerHTML = `
+        <div style="color:${color}" class="text-xl"><i class="fas ${icon}"></i></div>
+        <div class="text-[var(--text-primary)] dark:text-[#F9FAFF] font-medium text-sm">${message}</div>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.animation = 'slideOutRight 0.3s ease forwards';
+        setTimeout(() => { if (toast.parentNode) container.removeChild(toast); }, 300);
+    }, 3000);
+}
+
+// ─── Update item count text ───────────────────────────────────────────────────
+function updateCountText() {
+    const cards = document.querySelectorAll('.wishlist-card:not(.removing)');
+    // Wait for removal animation to finish before counting
+    setTimeout(() => {
+        const remaining = document.querySelectorAll('.wishlist-card').length;
+        const el = document.getElementById('itemCountText');
+        if (el) el.textContent = remaining === 0 ? 'No items saved yet' : `${remaining} item${remaining !== 1 ? 's' : ''} saved`;
+    }, 400);
+}
+
+// ─── Remove single item ───────────────────────────────────────────────────────
+async function removeFromWishlist(productId, btnEl) {
+    const card = document.getElementById(`card-${productId}`);
+    if (!card || btnEl.disabled) return;
+
+    btnEl.disabled = true;
+    btnEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+
+        if (data.status === 'removed') {
+            card.classList.add('removing');
+            updateCountText();
+            setTimeout(() => {
+                card.remove();
+                showToast(data.message, 'removed');
+                checkIfEmpty();
+            }, 350);
+        } else {
+            // Was not in wishlist — shouldn't happen on this page, but handle gracefully
+            btnEl.disabled = false;
+            btnEl.innerHTML = '<i class="fas fa-times"></i>';
+            showToast('Could not remove item.', 'error');
+        }
+    } catch (err) {
+        btnEl.disabled = false;
+        btnEl.innerHTML = '<i class="fas fa-times"></i>';
+        showToast('Something went wrong. Please try again.', 'error');
+    }
+}
+
+// ─── Check if grid is now empty → show empty state ───────────────────────────
+function checkIfEmpty() {
+    const grid  = document.getElementById('wishlistGrid');
+    const cards = grid ? grid.querySelectorAll('.wishlist-card') : [];
+    if (cards.length === 0) {
+        if (grid) grid.remove();
+
+        // Hide Clear All / Continue Shopping buttons
+        const headerBtns = document.querySelector('[data-header-actions]');
+        if (headerBtns) headerBtns.remove();
+
+        // Show empty state
+        const container = document.querySelector('.max-w-\\[1440px\\]');
+        if (container) {
+            const empty = document.createElement('div');
+            empty.className = 'animate-fade-slide-up flex flex-col items-center justify-center py-24 text-center';
+            empty.innerHTML = `
+                <div class="relative mb-6">
+                    <div class="w-28 h-28 rounded-full bg-[var(--primary-soft)] flex items-center justify-center" style="background:rgba(139,61,255,0.08)">
+                        <i class="far fa-heart text-5xl" style="color:#FF6B9D"></i>
+                    </div>
+                    <div class="absolute -top-1 -right-1 w-4 h-4 rounded-full opacity-40" style="background:#FF6B9D"></div>
+                    <div class="absolute bottom-2 -left-2 w-3 h-3 rounded-full opacity-30" style="background:#8B3DFF"></div>
+                </div>
+                <h2 class="font-display text-2xl font-bold mb-2" style="color:var(--text-primary)">Your wishlist is empty</h2>
+                <p class="text-sm mb-8 max-w-sm" style="color:var(--text-secondary)">
+                    Browse our collection and tap the <strong>Wishlist</strong> button on any product to save it here for later.
+                </p>
+                <a href="/" class="inline-flex items-center gap-3 px-6 py-3 text-white font-bold rounded-xl transition-all hover:-translate-y-1"
+                   style="background: linear-gradient(to right, #8B3DFF, #6B1FCC)">
+                    <i class="fas fa-shopping-bag"></i> Browse Products
+                </a>
+            `;
+            container.appendChild(empty);
+        }
+    }
+}
+
+// ─── Clear All modal ──────────────────────────────────────────────────────────
+function clearWishlist() {
+    const modal = document.getElementById('clearModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeClearModal() {
+    const modal = document.getElementById('clearModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+async function confirmClearWishlist() {
+    closeClearModal();
+    const cards = document.querySelectorAll('.wishlist-card');
+
+    // Remove all cards from backend one by one
+    const removePromises = Array.from(cards).map(card => {
+        const productId = card.id.replace('card-', '');
+        return fetch(`/wishlist/toggle/${productId}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/json' },
+        }).catch(() => {}); // ignore individual errors
+    });
+
+    // Animate all cards out
+    cards.forEach((card, i) => {
+        setTimeout(() => card.classList.add('removing'), i * 60);
+    });
+
+    await Promise.all(removePromises);
+
+    setTimeout(() => {
+        const grid = document.getElementById('wishlistGrid');
+        if (grid) grid.remove();
+        showToast('Wishlist cleared', 'removed');
+        checkIfEmpty();
+        const el = document.getElementById('itemCountText');
+        if (el) el.textContent = 'No items saved yet';
+    }, cards.length * 60 + 400);
+}
+
+// Close modal on backdrop click
+document.getElementById('clearModal').addEventListener('click', function (e) {
+    if (e.target === this) closeClearModal();
+});
+</script>
+{% endblock %}

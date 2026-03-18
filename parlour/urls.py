@@ -54,6 +54,10 @@ urlpatterns = [
     path('ads/<int:ad_id>/images/add/', views.ad_image_add, name='ad_image_add'),
     path('ads/images/<int:image_id>/delete/', views.ad_image_delete, name='ad_image_delete'),
 
+    path('wishlist/', views.wishlist_page, name='wishlist'),
+    path('wishlist/toggle/<int:product_id>/', views.toggle_wishlist, name='toggle_wishlist'),
+    path('wishlist/status/<int:product_id>/', views.wishlist_status, name='wishlist_status'),
+
 
 
     path('hoka/delivery/', views.delivery_dashboard, name='delivery_dashboard'),

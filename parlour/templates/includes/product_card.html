@@ -69,40 +69,53 @@
         {% endif %}
     </div>
 
-    <!-- Stock -->
-    <div class="text-[8px] lg:text-xs text-[var(--text-soft)] flex items-center gap-1 mb-1 lg:mb-3">
-        <i class="fas fa-box text-[var(--accent)] text-[8px] lg:text-xs"></i>
-        {% if product.is_in_stock %}
-            {% if product.stock_type == 'ready' %}
-                <span class="truncate">{{ product.stock_quantity }} in stock</span>
-            {% else %}
-                <span class="truncate">Available on order</span>
-            {% endif %}
+   <!-- Stock -->
+<div class="text-[8px] lg:text-xs text-[var(--text-soft)] flex items-center gap-1 mb-1 lg:mb-3">
+    <i class="fas fa-box text-[var(--accent)] text-[8px] lg:text-xs"></i>
+    {% if product.is_in_stock %}
+        {% if product.is_auto_warehouse %}
+            <span class="truncate text-[#F59E0B]">Available on order</span>
+        {% elif product.stock_type == 'ready' %}
+            <span class="truncate">{{ product.stock_quantity }} in stock</span>
         {% else %}
-            <span style="color: #ef4444;">Out of stock</span>
+            <span class="truncate">Available on order</span>
+        {% endif %}
+    {% else %}
+        <span style="color: #ef4444;">Out of stock</span>
+    {% endif %}
+</div>
+
+<!-- Stock Type and Delivery Badges -->
+<div class="mb-1 lg:mb-3 space-y-0.5 lg:space-y-1">
+    <div class="flex items-center gap-1 lg:gap-2 text-[8px] lg:text-sm">
+        <strong class="text-[var(--text)] hidden lg:inline">Stock Type:</strong>
+        {% if product.is_auto_warehouse %}
+            <span style="background:#6c757d;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">
+                Warehouse Stock
+            </span>
+        {% elif product.stock_type == 'ready' %}
+            <span style="background:#28a745;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">
+                Ready Stock
+            </span>
+        {% else %}
+            <span style="background:#6c757d;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">
+                Warehouse Stock
+            </span>
         {% endif %}
     </div>
-
-    <!-- Stock Type and Delivery Badges -->
-    <div class="mb-1 lg:mb-3 space-y-0.5 lg:space-y-1">
-        <div class="flex items-center gap-1 lg:gap-2 text-[8px] lg:text-sm">
-            <strong class="text-[var(--text)] hidden lg:inline">Stock Type:</strong>
-            {% if product.stock_type == 'ready' %}
-                <span style="background:#28a745;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">Ready Stock</span>
-            {% else %}
-                <span style="background:#6c757d;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">Warehouse Stock</span>
-            {% endif %}
-        </div>
-        <div class="flex items-center gap-1 lg:gap-2 text-[8px] lg:text-sm">
-            <strong class="text-[var(--text)] hidden lg:inline">Delivery:</strong>
-            {% if product.stock_type == 'ready' %}
-                <span style="background:#17a2b8;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">Next Day Delivery</span>
-            {% else %}
-                <span style="background:#ffc107;color:black;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">Monday Delivery</span>
-            {% endif %}
-        </div>
+    <div class="flex items-center gap-1 lg:gap-2 text-[8px] lg:text-sm">
+        <strong class="text-[var(--text)] hidden lg:inline">Delivery:</strong>
+        {% if product.stock_type == 'ready' %}
+            <span style="background:#17a2b8;color:white;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">
+                Next Day Delivery
+            </span>
+        {% else %}
+            <span style="background:#ffc107;color:black;padding:2px 6px;border-radius:8px;font-size:12px;display:inline-block;">
+                Monday Delivery
+            </span>
+        {% endif %}
     </div>
-
+</div>
     <!-- View Details Button -->
     <div class="flex items-center justify-center gap-0.5 lg:gap-2 p-1 lg:p-3 bg-[var(--accent-soft)] text-[var(--accent)] rounded lg:rounded-2xl font-semibold text-[7px] lg:text-sm transition-all hover:bg-[var(--accent)] hover:text-white border border-transparent hover:border-[var(--accent)] mt-auto">
         View Details
