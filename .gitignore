@@ -21,4 +21,26 @@ staticfiles/
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.dbbackup_*.json
+*.json.bak
+# Backups — never commit these
+backup_*.json
+*.sql
+*.tar.gz
+
+# Environment
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+myenv/
+venv/
+
+# Django
+staticfiles/
+media/
+db.sqlite3
+debug.log
