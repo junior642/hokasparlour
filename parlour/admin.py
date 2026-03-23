@@ -10,9 +10,9 @@ from .models import Category
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'slug', 'created_at']
+    list_display = ['name', 'slug', 'gender', 'created_at']
+    list_filter = ['gender']
     prepopulated_fields = {'slug': ('name',)}
-
 
 
 from .models import Color
@@ -98,6 +98,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'category',
+        'gender',
         'stock_type',
         'delivery_badge',
         'price',
@@ -112,7 +113,7 @@ class ProductAdmin(admin.ModelAdmin):
         'created_at',
     )
 
-    list_filter = ('category', 'stock_type', 'created_at')
+    list_filter = ('category', 'gender', 'stock_type', 'created_at')
     search_fields = ('name', 'description')
     ordering = ('-created_at',)
     inlines = [ProductImageInline]
@@ -125,7 +126,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'category', 'stock_type', 'price', 'stock_quantity')
+            'fields': ('name', 'category', 'gender', 'stock_type', 'price', 'stock_quantity')
         }),
         ('Pricing', {
             'fields': ('anchor_price', 'discount_price'),

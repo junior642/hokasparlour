@@ -27,6 +27,7 @@ def home(request):
     category = request.GET.get('category')
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
+    gender = request.GET.get('gender')
 
     # Apply filters
     if category:
@@ -35,6 +36,8 @@ def home(request):
         products = products.filter(price__gte=min_price)
     if max_price:
         products = products.filter(price__lte=max_price)
+    if gender:
+        products = products.filter(gender=gender)
 
     # Get all categories for the filter sidebar
     categories = Category.objects.all()
@@ -161,14 +164,19 @@ def home(request):
         'selected_category': int(category) if category else None,
         'min_price': min_price,
         'max_price': max_price,
+        'selected_gender': gender,
+        'gender_choices': Product.GENDER_CHOICES,
         'ads': main_ads,
         'slideshow_data': json.dumps(slideshow_data),
         'category_sections': category_sections,
         'top_selling': top_selling,
-        'user_promo': user_promo,               # ← added
+        'user_promo': user_promo,
     }
     return render(request, 'parlour/home.html', context)
 
+
+
+    
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     sizes = [size.strip() for size in product.available_sizes.split(',')]

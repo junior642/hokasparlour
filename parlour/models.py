@@ -89,9 +89,16 @@ class StoreSettings(models.Model):
 
 
 class Category(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('U', 'Unisex'),
+    ]
+
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
@@ -127,6 +134,12 @@ class Product(models.Model):
     STOCK_TYPE_CHOICES = [
         ('ready', 'Ready Stock'),
         ('warehouse', 'Warehouse Stock'),
+    ]
+
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('U', 'Unisex'),
     ]
 
     name = models.CharField(max_length=200)
@@ -211,6 +224,7 @@ class Product(models.Model):
         default=1,
         help_text="[Ready Stock] Number of items you currently have. Warehouse stock ignores this."
     )
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

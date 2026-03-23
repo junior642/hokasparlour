@@ -158,6 +158,192 @@
             height: 2rem;
         }
     }
+    
+    /* Install prompt styles */
+    .install-prompt {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        background: var(--card);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 16px;
+        z-index: 1000;
+        border: 1px solid var(--border);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .install-prompt.show {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .install-prompt-content {
+        flex: 1;
+    }
+    
+    .install-prompt h4 {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-bottom: 4px;
+        color: var(--text);
+    }
+    
+    .install-prompt p {
+        font-size: 0.875rem;
+        color: var(--text-soft);
+        margin: 0;
+    }
+    
+    .install-prompt button {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+    
+    .install-btn {
+        background: var(--accent);
+        color: white;
+    }
+    
+    .install-btn:hover {
+        background: var(--accent-light);
+        transform: translateY(-1px);
+    }
+    
+    .close-install {
+        background: transparent;
+        color: var(--text-soft);
+    }
+    
+    .close-install:hover {
+        background: var(--accent-soft);
+        color: var(--accent);
+    }
+    
+    @media (min-width: 768px) {
+        .install-prompt {
+            left: auto;
+            right: 20px;
+            bottom: 20px;
+            width: 320px;
+        }
+    }
+
+    /* Add this to your extra_style block */
+
+/* Horizontal scroll styles - only activates when 2 rows are filled */
+.products-scroll-container {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+    /* Only show scrollbar when there's overflow */
+    overflow-x: auto;
+}
+
+.products-scroll-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.products-scroll-container::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+.products-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+.products-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-light);
+}
+
+/* Grid layout - 2 rows fixed height */
+.products-grid-horizontal {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-auto-columns: minmax(160px, 220px);
+    gap: 1rem;
+    padding: 0.5rem 0.25rem 1rem 0.25rem;
+    /* Ensure minimum height to maintain 2 rows */
+    min-height: 400px;
+}
+
+/* Adjust card height to fill grid rows */
+.products-grid-horizontal .product-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .products-grid-horizontal {
+        grid-auto-columns: minmax(140px, 180px);
+        gap: 0.75rem;
+        min-height: 360px;
+    }
+}
+
+@media (max-width: 480px) {
+    .products-grid-horizontal {
+        grid-auto-columns: minmax(130px, 160px);
+        gap: 0.6rem;
+        min-height: 340px;
+    }
+}
+
+/* Hide scrollbar when not needed */
+.products-scroll-container {
+    scrollbar-width: thin;
+}
+
+/* Smooth scroll indicator (optional visual cue) */
+.products-scroll-container.has-scroll {
+    position: relative;
+}
+
+.products-scroll-container.has-scroll::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, var(--bg), transparent);
+    pointer-events: none;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+/* Remove the scroll buttons CSS since we're not using them */
+/* The .scroll-btn classes are no longer needed */
 </style>
 {% endblock %}
 
@@ -169,6 +355,19 @@
 {% if ads %}
     {% include 'includes/ad_slideshow.html' with ads=ads slideshow_id="default" %}
 {% endif %}
+
+<!-- Install Prompt (only shown when appropriate) -->
+<div id="installPrompt" class="install-prompt">
+    <div class="install-prompt-content">
+        <h4>Install Hoka's Parlour App</h4>
+        <p>Get faster access and offline browsing</p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+        <button id="closeInstallBtn" class="close-install">Not now</button>
+        <button id="installBtn" class="install-btn">Install</button>
+    </div>
+</div>
+
 <!-- Filter Toggle Button (visible on mobile/tablet) -->
 <div class="flex items-center justify-between mb-4 lg:hidden">
     <button class="filter-toggle-btn" id="filterToggleBtn">
@@ -196,51 +395,75 @@
         </h3>
         
         <form method="get" action="{% url 'home' %}">
-            <!-- Category Filter -->
-            <div class="mb-7">
-                <label for="category-mobile" class="block mb-2 font-semibold text-sm text-[var(--text)] tracking-wide flex items-center gap-1">
-                    <i class="fas fa-tag" style="color: var(--accent);"></i> Category
-                </label>
-                <select name="category" id="category-mobile" 
-                        class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all">
-                    <option value="">All Categories</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
-                            {{ category.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <!-- Price Range Filter -->
-            <div class="mb-7">
-                <label class="block mb-2 font-semibold text-sm text-[var(--text)] tracking-wide flex items-center gap-1">
-                    <i class="fas fa-dollar-sign" style="color: var(--accent);"></i> Price Range
-                </label>
-                <div class="flex gap-2 items-center">
-                    <input type="number" name="min_price" placeholder="Min" step="0.01" value="{{ min_price }}"
-                           class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all placeholder:text-[var(--text-soft)] placeholder:opacity-50">
-                    <span class="text-[var(--text-soft)] font-semibold">—</span>
-                    <input type="number" name="max_price" placeholder="Max" step="0.01" value="{{ max_price }}"
-                           class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all placeholder:text-[var(--text-soft)] placeholder:opacity-50">
-                </div>
-            </div>
-            
-            <!-- Filter Actions -->
-            <div class="mb-7">
-                <button type="submit" 
-                        class="w-full p-4 bg-[var(--accent)] text-white font-semibold rounded-2xl text-base transition-all hover:bg-[var(--accent-light)] hover:-translate-y-0.5 hover:shadow-md flex items-center justify-center gap-2">
-                    <i class="fas fa-check text-sm"></i>
-                    Apply Filters
-                </button>
-                
-                <a href="{% url 'home' %}" 
-                   class="flex items-center justify-center gap-1.5 mt-4 text-[var(--text-soft)] text-sm p-2 rounded-xl hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all">
-                    <i class="fas fa-times"></i>
-                    Clear Filters
-                </a>
-            </div>
-        </form>
+    
+    <!-- Category Filter -->
+    <div class="mb-7">
+        <label for="category" class="block mb-2 font-semibold text-sm text-[var(--text)] tracking-wide flex items-center gap-1">
+            <i class="fas fa-tag" style="color: var(--accent);"></i> Category
+        </label>
+        <select name="category" id="category" 
+                class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Gender Filter -->
+    <div class="mb-7">
+        <label class="block mb-2 font-semibold text-sm text-[var(--text)] tracking-wide flex items-center gap-1">
+            <i class="fas fa-venus-mars" style="color: var(--accent);"></i> Gender
+        </label>
+        <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-xl hover:bg-[var(--accent-soft)] transition-all">
+                <input type="radio" name="gender" value=""
+                       {% if not selected_gender %}checked{% endif %}
+                       class="accent-[var(--accent)] w-4 h-4">
+                <span class="text-[var(--text)] text-sm font-medium">All</span>
+            </label>
+            {% for value, label in gender_choices %}
+            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-xl hover:bg-[var(--accent-soft)] transition-all">
+                <input type="radio" name="gender" value="{{ value }}"
+                       {% if selected_gender == value %}checked{% endif %}
+                       class="accent-[var(--accent)] w-4 h-4">
+                <span class="text-[var(--text)] text-sm font-medium">{{ label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Price Range Filter -->
+    <div class="mb-7">
+        <label class="block mb-2 font-semibold text-sm text-[var(--text)] tracking-wide flex items-center gap-1">
+            <i class="fas fa-dollar-sign" style="color: var(--accent);"></i> Price Range
+        </label>
+        <div class="flex gap-2 items-center">
+            <input type="number" name="min_price" placeholder="Min" step="0.01" value="{{ min_price }}"
+                   class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all placeholder:text-[var(--text-soft)] placeholder:opacity-50">
+            <span class="text-[var(--text-soft)] font-semibold">—</span>
+            <input type="number" name="max_price" placeholder="Max" step="0.01" value="{{ max_price }}"
+                   class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all placeholder:text-[var(--text-soft)] placeholder:opacity-50">
+        </div>
+    </div>
+    
+    <!-- Filter Actions -->
+    <div class="mb-7">
+        <button type="submit" 
+                class="w-full p-4 bg-[var(--accent)] text-white font-semibold rounded-2xl text-base transition-all hover:bg-[var(--accent-light)] hover:-translate-y-0.5 hover:shadow-md flex items-center justify-center gap-2">
+            <i class="fas fa-check text-sm"></i>
+            Apply Filters
+        </button>
+        
+        <a href="{% url 'home' %}" 
+           class="flex items-center justify-center gap-1.5 mt-4 text-[var(--text-soft)] text-sm p-2 rounded-xl hover:text-[var(--accent)] hover:bg-[var(--accent-soft)] transition-all">
+            <i class="fas fa-times"></i>
+            Clear Filters
+        </a>
+    </div>
+</form>
 
         <!-- Admin Links (staff only) -->
         {% if user.is_staff %}
@@ -324,6 +547,29 @@
                            class="w-full p-3 px-4 border-2 border-[var(--border)] rounded-2xl bg-[var(--bg)] text-[var(--text)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-4 focus:ring-[var(--accent-soft)] transition-all placeholder:text-[var(--text-soft)] placeholder:opacity-50">
                 </div>
             </div>
+
+            <!-- Gender Filter -->
+<div class="mb-7">
+    <label for="gender" class="block mb-2 font-semibold text-sm text-[var(--text)] tracking-wide flex items-center gap-1">
+        <i class="fas fa-venus-mars" style="color: var(--accent);"></i> Gender
+    </label>
+    <div class="flex flex-col gap-2">
+        {% for value, label in gender_choices %}
+        <label class="flex items-center gap-2 cursor-pointer p-2 rounded-xl hover:bg-[var(--accent-soft)] transition-all">
+            <input type="radio" name="gender" value="{{ value }}"
+                   {% if selected_gender == value %}checked{% endif %}
+                   class="accent-[var(--accent)] w-4 h-4">
+            <span class="text-[var(--text)] text-sm font-medium">{{ label }}</span>
+        </label>
+        {% endfor %}
+        <label class="flex items-center gap-2 cursor-pointer p-2 rounded-xl hover:bg-[var(--accent-soft)] transition-all">
+            <input type="radio" name="gender" value=""
+                   {% if not selected_gender %}checked{% endif %}
+                   class="accent-[var(--accent)] w-4 h-4">
+            <span class="text-[var(--text)] text-sm font-medium">All</span>
+        </label>
+    </div>
+</div>
             
             <!-- Filter Actions -->
             <div class="mb-7">
@@ -406,8 +652,96 @@
         
     </aside>
     
+
+    
     <!-- PRODUCTS SECTION -->
     <section class="flex-1 min-w-0">
+
+        <!-- Quick Filter Tabs -->
+<div class="relative mb-4 lg:mb-6">
+    <!-- Scroll Container -->
+    <div class="flex gap-2 overflow-x-auto scrollbar-hide pb-2"
+         style="scrollbar-width: none; -ms-overflow-style: none;">
+
+        <!-- For You (coming soon) -->
+        <a href="{% url 'home' %}"
+           class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all whitespace-nowrap
+                  {% if not selected_category and not selected_gender %}
+                      bg-[var(--accent)] text-white border-[var(--accent)]
+                  {% else %}
+                      bg-[var(--card)] text-[var(--text-soft)] border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]
+                  {% endif %}">
+            <i class="fas fa-star text-xs"></i>
+            All
+        </a>
+
+        <!-- For You -->
+        <button disabled
+                class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm whitespace-nowrap
+                       bg-[var(--card)] text-[var(--text-soft)] border-[var(--border)] opacity-50 cursor-not-allowed">
+            <i class="fas fa-heart text-xs"></i>
+            For You
+            <span class="text-[9px] bg-[var(--accent-soft)] text-[var(--accent)] px-1.5 py-0.5 rounded-full">Soon</span>
+        </button>
+
+        <!-- Male -->
+        <a href="?gender=M{% if selected_category %}&category={{ selected_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}"
+           class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all whitespace-nowrap
+                  {% if selected_gender == 'M' %}
+                      bg-[var(--accent)] text-white border-[var(--accent)]
+                  {% else %}
+                      bg-[var(--card)] text-[var(--text-soft)] border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]
+                  {% endif %}">
+            <i class="fas fa-mars text-xs"></i>
+            Male
+        </a>
+
+        <!-- Female -->
+        <a href="?gender=F{% if selected_category %}&category={{ selected_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}"
+           class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all whitespace-nowrap
+                  {% if selected_gender == 'F' %}
+                      bg-[var(--accent)] text-white border-[var(--accent)]
+                  {% else %}
+                      bg-[var(--card)] text-[var(--text-soft)] border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]
+                  {% endif %}">
+            <i class="fas fa-venus text-xs"></i>
+            Female
+        </a>
+
+        <!-- Unisex -->
+        <a href="?gender=U{% if selected_category %}&category={{ selected_category }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}"
+           class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all whitespace-nowrap
+                  {% if selected_gender == 'U' %}
+                      bg-[var(--accent)] text-white border-[var(--accent)]
+                  {% else %}
+                      bg-[var(--card)] text-[var(--text-soft)] border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]
+                  {% endif %}">
+            <i class="fas fa-venus-mars text-xs"></i>
+            Unisex
+        </a>
+
+        <!-- Divider -->
+        <div class="flex-shrink-0 w-px bg-[var(--border)] mx-1 self-stretch"></div>
+
+        <!-- All Categories -->
+        {% for cat in categories %}
+        <a href="?category={{ cat.id }}{% if selected_gender %}&gender={{ selected_gender }}{% endif %}{% if min_price %}&min_price={{ min_price }}{% endif %}{% if max_price %}&max_price={{ max_price }}{% endif %}"
+           class="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border-2 font-semibold text-sm transition-all whitespace-nowrap
+                  {% if selected_category == cat.id %}
+                      bg-[var(--accent)] text-white border-[var(--accent)]
+                  {% else %}
+                      bg-[var(--card)] text-[var(--text-soft)] border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]
+                  {% endif %}">
+            <i class="fas fa-tag text-xs"></i>
+            {{ cat.name }}
+        </a>
+        {% endfor %}
+
+    </div>
+
+    <!-- Fade effect on right edge -->
+    <div class="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[var(--bg)] to-transparent pointer-events-none"></div>
+</div>
 
         <!-- Top Selling Section -->
         {% if top_selling %}
@@ -510,7 +844,7 @@
     </section>
 </div>
 
-<!-- Create the ad_slideshow.html include file -->
+<!-- PWA Installation Script -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Mobile filter toggle functionality
@@ -557,6 +891,147 @@
                 new bootstrap.Dropdown(dropdown);
             });
         }
+        
+        // ========== PWA INSTALL PROMPT FIX ==========
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installBtn = document.getElementById('installBtn');
+        const closeInstallBtn = document.getElementById('closeInstallBtn');
+        
+        // Check if app is already installed
+        function isAppInstalled() {
+            // Check if running in standalone mode (already installed)
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                return true;
+            }
+            
+            // Check if app is installed via beforeinstallprompt event
+            // Some browsers set this flag
+            if (localStorage.getItem('pwa-installed') === 'true') {
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Check if user is online
+        function isOnline() {
+            return navigator.onLine;
+        }
+        
+        // Hide install prompt if conditions aren't met
+        function hideInstallPromptIfNeeded() {
+            if (isAppInstalled() || !isOnline()) {
+                installPrompt.classList.remove('show');
+                return true;
+            }
+            return false;
+        }
+        
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            
+            // Store the event for later use
+            deferredPrompt = e;
+            
+            // Check if we should show the prompt
+            if (!isAppInstalled() && isOnline()) {
+                // Check if user has dismissed this prompt before
+                const promptDismissed = localStorage.getItem('install-prompt-dismissed');
+                const dismissTimestamp = localStorage.getItem('install-prompt-dismiss-timestamp');
+                
+                // If dismissed, check if it was more than 7 days ago
+                if (promptDismissed === 'true' && dismissTimestamp) {
+                    const daysSinceDismiss = (Date.now() - parseInt(dismissTimestamp)) / (1000 * 60 * 60 * 24);
+                    if (daysSinceDismiss > 7) {
+                        // Reset dismissal after 7 days
+                        localStorage.removeItem('install-prompt-dismissed');
+                        localStorage.removeItem('install-prompt-dismiss-timestamp');
+                        installPrompt.classList.add('show');
+                    }
+                } else if (promptDismissed !== 'true') {
+                    // Show the custom install prompt
+                    installPrompt.classList.add('show');
+                }
+            }
+        });
+        
+        // Install button click handler
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) {
+                    return;
+                }
+                
+                // Show the install prompt
+                deferredPrompt.prompt();
+                
+                // Wait for the user to respond to the prompt
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                // Check the outcome
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    // Store that app is installed
+                    localStorage.setItem('pwa-installed', 'true');
+                    // Hide the custom prompt
+                    installPrompt.classList.remove('show');
+                } else {
+                    console.log('User dismissed the install prompt');
+                    // Store dismissal to prevent showing too frequently
+                    localStorage.setItem('install-prompt-dismissed', 'true');
+                    localStorage.setItem('install-prompt-dismiss-timestamp', Date.now().toString());
+                    // Hide the custom prompt
+                    installPrompt.classList.remove('show');
+                }
+                
+                // Clear the deferred prompt
+                deferredPrompt = null;
+            });
+        }
+        
+        // Close button click handler
+        if (closeInstallBtn) {
+            closeInstallBtn.addEventListener('click', () => {
+                installPrompt.classList.remove('show');
+                // Store dismissal to prevent showing too frequently
+                localStorage.setItem('install-prompt-dismissed', 'true');
+                localStorage.setItem('install-prompt-dismiss-timestamp', Date.now().toString());
+            });
+        }
+        
+        // Check for online/offline status changes
+        window.addEventListener('online', () => {
+            if (!isAppInstalled() && deferredPrompt && !localStorage.getItem('install-prompt-dismissed')) {
+                installPrompt.classList.add('show');
+            }
+        });
+        
+        window.addEventListener('offline', () => {
+            installPrompt.classList.remove('show');
+        });
+        
+        // Check app installed status on app install event
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            localStorage.setItem('pwa-installed', 'true');
+            installPrompt.classList.remove('show');
+            deferredPrompt = null;
+        });
+        
+        // Initial check
+        hideInstallPromptIfNeeded();
+        
+        // Also check when display mode changes (user might have installed from browser)
+        window.matchMedia('(display-mode: standalone)').addListener((e) => {
+            if (e.matches) {
+                localStorage.setItem('pwa-installed', 'true');
+                installPrompt.classList.remove('show');
+            }
+        });
     });
 </script>
 {% endblock %}
