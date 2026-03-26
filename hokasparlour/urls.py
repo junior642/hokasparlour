@@ -37,6 +37,7 @@ def google_verify(request):
 urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('hoka-secure-panel-2024/', admin.site.urls),
+    path('whatsapp/', include('whatsapphoka.urls')),
     path('', include(tf_urls)),
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),

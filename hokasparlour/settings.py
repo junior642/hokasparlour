@@ -10,7 +10,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
@@ -30,11 +30,13 @@ INSTALLED_APPS = [
     'parlour',
     'hokaadmin',
     'finance',
+     'whatsapphoka',
     'axes',
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
     'two_factor',
+
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -120,9 +122,10 @@ TWO_FACTOR_FORCE_OTP_ADMIN = True
 TWO_FACTOR_PATCH_ADMIN = True
 
 # ── Axes (brute force protection) ─────────────────────────────────────────────
-AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = 1
-AXES_LOCKOUT_TEMPLATE = 'lockout.html'
+if DEBUG:
+    AXES_FAILURE_LIMIT = 5
+    AXES_COOLOFF_TIME = 1
+    AXES_LOCKOUT_TEMPLATE = 'lockout.html'
 
 # ── Social Auth ───────────────────────────────────────────────────────────────
 SOCIALACCOUNT_PROVIDERS = {
@@ -141,6 +144,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
+
+#--------------- whatsapp--------------------------------
+WHATSAPP_SERVICE_URL = "http://localhost:3000"
 
 # ── Session & Cookies ─────────────────────────────────────────────────────────
 SESSION_COOKIE_HTTPONLY = True
