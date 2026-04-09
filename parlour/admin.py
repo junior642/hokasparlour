@@ -655,3 +655,14 @@ class PromoUsageAdmin(admin.ModelAdmin):
             color, r
         )
     remaining.short_description = 'Remaining'
+
+
+from parlour.models import ContactMessage
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display  = ['full_name', 'email', 'subject', 'status', 'created_at']
+    list_filter   = ['status', 'subject', 'created_at']
+    search_fields = ['full_name', 'email', 'message', 'order_number']
+    readonly_fields = ['full_name', 'email', 'phone', 'subject', 'order_number',
+                       'message', 'user', 'ip_address', 'created_at']    

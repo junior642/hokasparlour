@@ -428,20 +428,20 @@
 </div>
 
 <script>
-// Live search functionality
+// Live search functionality - Complete Fix
 document.addEventListener('DOMContentLoaded', function() {
     // Add scroll effect to sticky bar
     const stickyBar = document.getElementById('stickySearchBar');
-    
-    function handleScroll() {
-        if (window.scrollY > 10) {
-            stickyBar.classList.add('scrolled');
-        } else {
-            stickyBar.classList.remove('scrolled');
+    if (stickyBar) {
+        function handleScroll() {
+            if (window.scrollY > 10) {
+                stickyBar.classList.add('scrolled');
+            } else {
+                stickyBar.classList.remove('scrolled');
+            }
         }
+        window.addEventListener('scroll', handleScroll);
     }
-    
-    window.addEventListener('scroll', handleScroll);
     
     const searchInput = document.getElementById('liveSearch');
     const searchSpinner = document.getElementById('searchSpinner');
@@ -453,172 +453,266 @@ document.addEventListener('DOMContentLoaded', function() {
     const noResultsMessage = document.getElementById('noResultsMessage');
     const noResultsTerm = document.getElementById('noResultsTerm');
     
-    // Function to get all product containers (works with both grid and horizontal scroll)
-    function getAllProductContainers() {
-        const containers = [];
+    // Store original HTML for each product section
+    const originalSections = new Map();
+    let allProducts = [];
+    
+    // Function to get all product containers and store original HTML
+    function saveOriginalContent() {
+        originalSections.clear();
         
-        // Check for products-grid (fallback flat grid)
-        const productGrid = document.querySelector('.products-grid');
-        if (productGrid) {
-            containers.push(productGrid);
-        }
+        // Find all section containers that contain products
+        const sections = document.querySelectorAll('section.mb-8, section.mb-6, section.mb-12');
         
-        // Check for horizontal scroll containers
-        const scrollContainers = document.querySelectorAll('.products-scroll-container .products-grid-horizontal');
-        scrollContainers.forEach(container => {
-            containers.push(container);
+        sections.forEach((section, index) => {
+            // Store the entire section HTML
+            originalSections.set(section, section.cloneNode(true));
         });
         
-        return containers;
+        // Also store the top selling section if it exists
+        const topSellingSection = document.querySelector('.mb-6.lg\\:mb-10');
+        if (topSellingSection) {
+            originalSections.set(topSellingSection, topSellingSection.cloneNode(true));
+        }
+        
+        console.log(`Saved ${originalSections.size} sections`);
     }
     
-    // Store original HTML for each container
-    const originalHTMLMap = new Map();
-    const allProductCards = [];
-    
-    // Initialize product cards data
-    function initializeProductData() {
-        const containers = getAllProductContainers();
+    // Function to extract product data from all product cards
+    function extractProductData() {
+        allProducts = [];
+        const productCards = document.querySelectorAll('.product-card');
         
-        containers.forEach((container, containerIndex) => {
-            // Store original HTML
-            originalHTMLMap.set(container, container.innerHTML);
+        productCards.forEach((card, index) => {
+            // Find which section this card belongs to
+            let section = card.closest('section');
+            if (!section) {
+                section = card.closest('.mb-8, .mb-6, .mb-12, .mb-6.lg\\:mb-10');
+            }
             
-            // Get all product cards in this container
-            const cards = container.querySelectorAll('.product-card');
-            cards.forEach((card, cardIndex) => {
-                const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
-                const description = card.querySelector('p')?.textContent.toLowerCase() || '';
-                const priceElement = card.querySelector('.text-xs.lg\\:text-2xl') || card.querySelector('.text-xs.lg\\:text-2xl.font-extrabold');
-                const price = priceElement?.textContent.toLowerCase() || '';
-                
-                allProductCards.push({
-                    id: `${containerIndex}-${cardIndex}`,
-                    container: container,
-                    element: card,
-                    name: name,
-                    description: description,
-                    price: price,
-                    html: card.outerHTML
-                });
+            // Extract product name
+            const nameElement = card.querySelector('h3');
+            const name = nameElement ? nameElement.textContent.toLowerCase().trim() : '';
+            
+            // Extract description
+            const descElement = card.querySelector('h3 + p');
+            const description = descElement ? descElement.textContent.toLowerCase().trim() : '';
+            
+            // Extract price
+            let price = '';
+            const priceDiv = card.querySelector('.my-0\\.5.lg\\:my-2');
+            if (priceDiv) {
+                const normalPrice = priceDiv.querySelector('.text-xs.lg\\:text-2xl.font-extrabold');
+                const discountPrice = priceDiv.querySelector('.text-xs.lg\\:text-2xl.font-extrabold.text-green-500');
+                if (discountPrice) {
+                    price = discountPrice.textContent.toLowerCase();
+                } else if (normalPrice) {
+                    price = normalPrice.textContent.toLowerCase();
+                }
+            }
+            
+            allProducts.push({
+                id: index,
+                element: card,
+                section: section,
+                name: name,
+                description: description,
+                price: price,
+                html: card.outerHTML
             });
         });
+        
+        console.log(`Extracted ${allProducts.length} products`);
+        return allProducts;
     }
     
-    // Wait for DOM to be fully loaded with all product cards
-    setTimeout(initializeProductData, 500);
+    // Function to restore original content
+    function restoreOriginalContent() {
+        originalSections.forEach((originalSection, section) => {
+            if (section && section.parentNode) {
+                const newSection = originalSection.cloneNode(true);
+                section.parentNode.replaceChild(newSection, section);
+            }
+        });
+        
+        // Re-extract product data after restoration
+        setTimeout(() => {
+            extractProductData();
+        }, 100);
+    }
     
-    let searchTimeout;
-    
-    // Live search function
-    function performSearch(query) {
+    // Function to filter and display products
+    function filterAndDisplay(query) {
         query = query.toLowerCase().trim();
         
-        // Show/hide clear button
-        if (query.length > 0) {
-            clearButton.classList.remove('hidden');
-        } else {
-            clearButton.classList.add('hidden');
-        }
+        console.log(`Filtering products for: "${query}"`);
         
-        // Update active search indicator
-        if (query.length > 0) {
-            searchTermSpan.textContent = query;
-            activeSearchIndicator.classList.remove('hidden');
-        } else {
-            activeSearchIndicator.classList.add('hidden');
+        if (!query) {
+            // If no query, restore original content
+            restoreOriginalContent();
+            
+            // Update UI
+            if (clearButton) clearButton.classList.add('hidden');
+            if (activeSearchIndicator) activeSearchIndicator.classList.add('hidden');
+            if (searchResultsCount) searchResultsCount.classList.add('hidden');
+            if (noResultsMessage) noResultsMessage.classList.add('hidden');
+            
+            return;
         }
         
         // Filter products
-        const filteredProducts = allProductCards.filter(card => {
-            return card.name.includes(query) || 
-                   card.description.includes(query) ||
-                   card.price.includes(query);
+        const filteredProducts = allProducts.filter(product => {
+            return product.name.includes(query) || 
+                   product.description.includes(query) ||
+                   product.price.includes(query);
         });
+        
+        console.log(`Found ${filteredProducts.length} matching products`);
         
         // Update results count
-        if (query.length > 0) {
-            resultsCountSpan.textContent = filteredProducts.length;
-            searchResultsCount.classList.remove('hidden');
-        } else {
-            searchResultsCount.classList.add('hidden');
+        if (resultsCountSpan) resultsCountSpan.textContent = filteredProducts.length;
+        if (searchResultsCount) {
+            if (filteredProducts.length > 0) {
+                searchResultsCount.classList.remove('hidden');
+            } else {
+                searchResultsCount.classList.add('hidden');
+            }
         }
         
-        // Group filtered products by container
-        const productsByContainer = new Map();
+        // Update active search indicator
+        if (searchTermSpan) searchTermSpan.textContent = query;
+        if (activeSearchIndicator) activeSearchIndicator.classList.remove('hidden');
+        
+        if (filteredProducts.length === 0) {
+            // Show no results message
+            if (noResultsTerm) noResultsTerm.textContent = query;
+            if (noResultsMessage) noResultsMessage.classList.remove('hidden');
+            
+            // Hide all product sections
+            const sections = document.querySelectorAll('section.mb-8, section.mb-6, section.mb-12, .mb-6.lg\\:mb-10');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            return;
+        }
+        
+        // Hide no results message
+        if (noResultsMessage) noResultsMessage.classList.add('hidden');
+        
+        // Group filtered products by their original section
+        const productsBySection = new Map();
         filteredProducts.forEach(product => {
-            if (!productsByContainer.has(product.container)) {
-                productsByContainer.set(product.container, []);
+            if (product.section) {
+                if (!productsBySection.has(product.section)) {
+                    productsBySection.set(product.section, []);
+                }
+                productsBySection.get(product.section).push(product);
             }
-            productsByContainer.get(product.container).push(product);
         });
         
-        // Update each container
-        const containers = getAllProductContainers();
+        // For each section, either show filtered products or hide the section
+        const sections = document.querySelectorAll('section.mb-8, section.mb-6, section.mb-12, .mb-6.lg\\:mb-10');
         
-        if (filteredProducts.length === 0 && query.length > 0) {
-            // Show no results message
-            noResultsTerm.textContent = query;
-            noResultsMessage.classList.remove('hidden');
+        sections.forEach(section => {
+            const products = productsBySection.get(section);
             
-            // Clear all containers
-            containers.forEach(container => {
-                container.innerHTML = '';
-            });
-        } else {
-            // Hide no results message
-            noResultsMessage.classList.add('hidden');
-            
-            // Update each container with filtered products or restore original
-            containers.forEach(container => {
-                const products = productsByContainer.get(container);
+            if (products && products.length > 0) {
+                // Show this section
+                section.style.display = '';
                 
-                if (query.length === 0) {
-                    // Restore original HTML
-                    const originalHTML = originalHTMLMap.get(container);
-                    if (originalHTML) {
-                        container.innerHTML = originalHTML;
-                    }
-                } else if (products && products.length > 0) {
-                    // Show filtered products
-                    container.innerHTML = products.map(product => product.html).join('');
-                } else {
-                    // No products in this container, clear it
-                    container.innerHTML = '';
+                // Find the grid container within this section
+                const gridContainer = section.querySelector('.grid');
+                if (gridContainer) {
+                    // Replace the grid content with filtered products
+                    gridContainer.innerHTML = products.map(product => product.html).join('');
                 }
-            });
-            
-            // Add highlight animation to first result in the first container that has results
-            if (filteredProducts.length > 0 && query.length > 0) {
-                setTimeout(() => {
-                    const firstResult = document.querySelector('.product-card');
-                    if (firstResult) {
-                        firstResult.classList.add('search-highlight');
-                        setTimeout(() => {
-                            firstResult.classList.remove('search-highlight');
-                        }, 1000);
-                    }
-                }, 100);
+            } else {
+                // Hide this section if it has no matching products
+                section.style.display = 'none';
             }
+        });
+        
+        // Add highlight animation to first result
+        setTimeout(() => {
+            const firstResult = document.querySelector('.product-card');
+            if (firstResult) {
+                firstResult.classList.add('search-highlight');
+                setTimeout(() => {
+                    firstResult.classList.remove('search-highlight');
+                }, 1000);
+            }
+        }, 100);
+    }
+    
+    // Initialize everything
+    function initializeSearch() {
+        console.log('Initializing search...');
+        
+        // Save original content
+        saveOriginalContent();
+        
+        // Extract product data
+        extractProductData();
+        
+        // Check if we have products
+        if (allProducts.length === 0) {
+            console.warn('No products found, will retry in 1 second...');
+            setTimeout(initializeSearch, 1000);
+            return;
+        }
+        
+        console.log(`Search initialized successfully with ${allProducts.length} products`);
+        
+        // Show clear button if there's text in search input
+        if (searchInput && searchInput.value.trim()) {
+            filterAndDisplay(searchInput.value);
         }
     }
     
-    // Input event listener with debounce
+    // Set up event listeners
     if (searchInput) {
+        let searchTimeout;
+        
         searchInput.addEventListener('input', function(e) {
             const query = e.target.value;
             
             // Show loading spinner
-            searchSpinner.classList.remove('hidden');
+            if (searchSpinner) searchSpinner.classList.remove('hidden');
+            
+            // Show/hide clear button
+            if (clearButton) {
+                if (query.length > 0) {
+                    clearButton.classList.remove('hidden');
+                } else {
+                    clearButton.classList.add('hidden');
+                }
+            }
             
             // Clear previous timeout
             clearTimeout(searchTimeout);
             
-            // Set new timeout for debounce (300ms)
+            // Set new timeout for debounce
             searchTimeout = setTimeout(() => {
-                performSearch(query);
-                searchSpinner.classList.add('hidden');
+                filterAndDisplay(query);
+                if (searchSpinner) searchSpinner.classList.add('hidden');
             }, 300);
+        });
+        
+        // Handle keyboard shortcut (Escape to clear)
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                clearSearch();
+            }
+        });
+        
+        // Prevent form submission on enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterAndDisplay(e.target.value);
+            }
         });
     }
     
@@ -627,84 +721,52 @@ document.addEventListener('DOMContentLoaded', function() {
         if (searchInput) {
             searchInput.value = '';
             searchInput.focus();
-            searchSpinner.classList.add('hidden');
-            clearButton.classList.add('hidden');
-            activeSearchIndicator.classList.add('hidden');
-            searchResultsCount.classList.add('hidden');
-            noResultsMessage.classList.add('hidden');
+            filterAndDisplay('');
             
-            // Restore original products in all containers
-            const containers = getAllProductContainers();
-            containers.forEach(container => {
-                const originalHTML = originalHTMLMap.get(container);
-                if (originalHTML) {
-                    container.innerHTML = originalHTML;
-                }
-            });
-            
-            // Remove sticky bar scroll effect
-            stickyBar.classList.remove('scrolled');
+            if (searchSpinner) searchSpinner.classList.add('hidden');
+            if (clearButton) clearButton.classList.add('hidden');
+            if (activeSearchIndicator) activeSearchIndicator.classList.add('hidden');
+            if (searchResultsCount) searchResultsCount.classList.add('hidden');
+            if (noResultsMessage) noResultsMessage.classList.add('hidden');
         }
     };
     
-    // Handle keyboard shortcut (Escape to clear)
-    if (searchInput) {
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                clearSearch();
-            }
-        });
-    }
+    // Start initialization
+    initializeSearch();
     
-    // Prevent form submission on enter
-    if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performSearch(e.target.value);
-            }
-        });
-    }
-    
-    // Re-initialize product data when filters change (for AJAX loading)
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'childList') {
-                // Clear existing data and reinitialize
-                allProductCards.length = 0;
-                originalHTMLMap.clear();
-                initializeProductData();
-            }
+    // Watch for filter form submissions (category, gender, price filters)
+    const filterForms = document.querySelectorAll('form');
+    filterForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            // Allow the form to submit normally, but reinitialize search after
+            setTimeout(() => {
+                console.log('Filter applied, reinitializing search...');
+                saveOriginalContent();
+                extractProductData();
+                
+                // If there's text in search, reapply filter
+                if (searchInput && searchInput.value.trim()) {
+                    filterAndDisplay(searchInput.value);
+                }
+            }, 500);
         });
     });
     
-    // Observe the product section for changes
-    const productSection = document.querySelector('.flex-1.min-w-0');
-    if (productSection) {
-        observer.observe(productSection, { childList: true, subtree: true });
-    }
-    
-    // Clean up scroll listener on page unload
-    window.addEventListener('beforeunload', function() {
-        window.removeEventListener('scroll', handleScroll);
-        observer.disconnect();
+    // Also watch for filter links (gender tabs, category links)
+    const filterLinks = document.querySelectorAll('a[href*="category"], a[href*="gender"], a[href*="min_price"], a[href*="max_price"]');
+    filterLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            setTimeout(() => {
+                console.log('Filter link clicked, reinitializing search...');
+                saveOriginalContent();
+                extractProductData();
+                
+                // If there's text in search, reapply filter
+                if (searchInput && searchInput.value.trim()) {
+                    filterAndDisplay(searchInput.value);
+                }
+            }, 500);
+        });
     });
 });
-
-// Add RGB variable for accent color if not exists
-if (!document.querySelector('style#accent-rgb')) {
-    const style = document.createElement('style');
-    style.id = 'accent-rgb';
-    style.textContent = `
-        :root {
-            --accent-rgb: 236, 72, 153; /* Pink accent color in RGB */
-        }
-        
-        .dark-mode {
-            --accent-rgb: 244, 114, 182; /* Lighter accent for dark mode */
-        }
-    `;
-    document.head.appendChild(style);
-}
 </script>

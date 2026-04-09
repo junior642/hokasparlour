@@ -1,18 +1,459 @@
-{% extends 'base.html' %}
+{% extends 'parlour/base_b.html' %}
 {% load static %}
 
 {% block title %}WhatsApp Messenger — Hoka's Parlour{% endblock %}
 
+{% block extra_style %}
+<style>
+  /* WhatsApp Messenger Styles - Inherits from base template */
+  
+  .wa-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0;
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Header */
+  .wa-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .wa-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .wa-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-md);
+  }
+
+  .wa-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .wa-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    margin: 4px 0 0;
+  }
+
+  /* Status Badge */
+  .wa-status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    animation: pulse 2s infinite;
+  }
+
+  .status-dot.online {
+    background: #25D366;
+    box-shadow: 0 0 8px rgba(37, 211, 102, 0.5);
+  }
+
+  .status-dot.offline {
+    background: var(--danger);
+    animation: none;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+  }
+
+  /* Tabs */
+  .wa-tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .wa-tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .wa-tab:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .wa-tab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .customer-count {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+
+  /* Tab Content */
+  .wa-tab-content {
+    display: none;
+  }
+
+  .wa-tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Card */
+  .wa-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    transition: var(--transition);
+  }
+
+  .wa-card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title i {
+    color: #25D366;
+  }
+
+  /* Form Elements */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 500px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--surface);
+    transition: var(--transition);
+    font-family: 'Inter', monospace;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #25D366;
+    box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+  }
+
+  .char-count {
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    text-align: right;
+    margin-top: 6px;
+  }
+
+  /* Templates */
+  .templates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .template-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    background: var(--card);
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-soft);
+    transition: var(--transition);
+    font-weight: 500;
+  }
+
+  .template-btn:hover {
+    border-color: #25D366;
+    color: #25D366;
+    background: rgba(37, 211, 102, 0.05);
+    transform: translateY(-1px);
+  }
+
+  /* Bulk Info Box */
+  .bulk-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--success-soft);
+    border: 1px solid var(--success);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: var(--success);
+  }
+
+  .bulk-info i {
+    font-size: 1.2rem;
+    margin-top: 2px;
+  }
+
+  .bulk-info code {
+    background: var(--card);
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--success);
+    border: 1px solid var(--success);
+  }
+
+  /* Confirm Checkbox */
+  .confirm-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .confirm-check input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #25D366;
+  }
+
+  .confirm-check label {
+    margin: 0;
+    font-size: 0.85rem;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .confirm-check label strong {
+    color: #25D366;
+  }
+
+  /* Send Buttons */
+  .wa-send-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .wa-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  }
+
+  .wa-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .wa-send-btn.bulk {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  }
+
+  .wa-send-btn.bulk:hover {
+    box-shadow: 0 4px 12px rgba(123, 46, 218, 0.3);
+  }
+
+  /* Result Box */
+  .result-box {
+    margin-top: 20px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .result-box.success {
+    background: var(--success-soft);
+    border: 1px solid var(--success);
+    color: var(--success);
+  }
+
+  .result-box.error {
+    background: var(--danger-soft);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+  }
+
+  .result-box i {
+    font-size: 1.1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .wa-wrapper {
+      padding: 0;
+    }
+    
+    .wa-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .wa-card {
+      padding: 20px;
+    }
+    
+    .wa-title {
+      font-size: 1.3rem;
+    }
+    
+    .templates {
+      gap: 6px;
+    }
+    
+    .template-btn {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+    }
+  }
+
+  /* Select Dropdown Styling */
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="wa-wrapper">
 
-  <!-- ── Header ──────────────────────────────────────────────── -->
+  <!-- Header -->
   <div class="wa-header">
     <div class="wa-header-left">
       <div class="wa-icon">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-        </svg>
+        <i class="fab fa-whatsapp" style="font-size: 28px;"></i>
       </div>
       <div>
         <h1 class="wa-title">WhatsApp Messenger</h1>
@@ -25,25 +466,28 @@
     </div>
   </div>
 
-  <!-- ── Tabs ────────────────────────────────────────────────── -->
+  <!-- Tabs -->
   <div class="wa-tabs">
     <button class="wa-tab active" onclick="switchTab('single')">
-      👤 Single Customer
+      <i class="fas fa-user"></i> Single Customer
     </button>
     <button class="wa-tab" onclick="switchTab('bulk')">
-      👥 Bulk Message
+      <i class="fas fa-users"></i> Bulk Message
       <span class="customer-count">{{ total_customers }} customers</span>
     </button>
   </div>
 
-  <!-- ── Single Message Tab ───────────────────────────────────── -->
+  <!-- Single Message Tab -->
   <div id="tab-single" class="wa-tab-content active">
     <div class="wa-card">
-      <h2 class="card-title">Send to a Single Customer</h2>
+      <h2 class="card-title">
+        <i class="fas fa-paper-plane"></i>
+        Send to a Single Customer
+      </h2>
 
       <!-- Customer Dropdown -->
       <div class="form-group">
-        <label>Pick a Customer from Orders</label>
+        <label><i class="fas fa-user-check"></i> Pick a Customer from Orders</label>
         <select id="customerSelect" onchange="fillCustomer()">
           <option value="">— Select a customer —</option>
           {% for customer in customers %}
@@ -62,49 +506,60 @@
       <div class="form-row">
         <!-- Name -->
         <div class="form-group">
-          <label>Customer Name</label>
+          <label><i class="fas fa-signature"></i> Customer Name</label>
           <input type="text" id="singleName" placeholder="e.g. Jane Wanjiku" />
         </div>
         <!-- Phone -->
         <div class="form-group">
-          <label>Phone Number</label>
+          <label><i class="fas fa-phone"></i> Phone Number</label>
           <input type="text" id="singlePhone" placeholder="e.g. 0712345678" />
         </div>
       </div>
 
       <!-- Message -->
       <div class="form-group">
-        <label>Message</label>
+        <label><i class="fas fa-comment-dots"></i> Message</label>
         <textarea id="singleMessage" rows="5" placeholder="Type your message here..."></textarea>
         <div class="char-count"><span id="singleCharCount">0</span> characters</div>
       </div>
 
       <!-- Quick Templates -->
       <div class="form-group">
-        <label>Quick Templates</label>
+        <label><i class="fas fa-copy"></i> Quick Templates</label>
         <div class="templates">
-          <button class="template-btn" onclick="useTemplate('order_ready')">📦 Order Ready</button>
-          <button class="template-btn" onclick="useTemplate('payment_reminder')">💳 Payment Reminder</button>
-          <button class="template-btn" onclick="useTemplate('promotion')">🎉 Promotion</button>
-          <button class="template-btn" onclick="useTemplate('followup')">💬 Follow Up</button>
+          <button class="template-btn" onclick="useTemplate('order_ready')">
+            <i class="fas fa-box"></i> Order Ready
+          </button>
+          <button class="template-btn" onclick="useTemplate('payment_reminder')">
+            <i class="fas fa-credit-card"></i> Payment Reminder
+          </button>
+          <button class="template-btn" onclick="useTemplate('promotion')">
+            <i class="fas fa-tag"></i> Promotion
+          </button>
+          <button class="template-btn" onclick="useTemplate('followup')">
+            <i class="fas fa-smile"></i> Follow Up
+          </button>
         </div>
       </div>
 
       <button class="wa-send-btn" onclick="sendSingle()" id="singleSendBtn">
-        <span>📤 Send Message</span>
+        <i class="fab fa-whatsapp"></i> Send Message
       </button>
 
       <div id="singleResult" class="result-box" style="display:none;"></div>
     </div>
   </div>
 
-  <!-- ── Bulk Message Tab ─────────────────────────────────────── -->
+  <!-- Bulk Message Tab -->
   <div id="tab-bulk" class="wa-tab-content">
     <div class="wa-card">
-      <h2 class="card-title">Send to All Customers</h2>
+      <h2 class="card-title">
+        <i class="fas fa-bullhorn"></i>
+        Send to All Customers
+      </h2>
 
       <div class="bulk-info">
-        <span>📋</span>
+        <i class="fas fa-info-circle"></i>
         <div>
           <strong>{{ total_customers }} customers</strong> will receive this message.
           Use <code>{name}</code> to personalize — it'll be replaced with each customer's first name.
@@ -113,18 +568,24 @@
 
       <!-- Message -->
       <div class="form-group">
-        <label>Message</label>
+        <label><i class="fas fa-envelope-open-text"></i> Message</label>
         <textarea id="bulkMessage" rows="6" placeholder="Hi {name}! 🎉 We have exciting new arrivals at Hoka's Parlour..."></textarea>
         <div class="char-count"><span id="bulkCharCount">0</span> characters</div>
       </div>
 
       <!-- Quick Templates -->
       <div class="form-group">
-        <label>Quick Templates</label>
+        <label><i class="fas fa-copy"></i> Quick Templates</label>
         <div class="templates">
-          <button class="template-btn" onclick="useBulkTemplate('new_arrivals')">👗 New Arrivals</button>
-          <button class="template-btn" onclick="useBulkTemplate('sale')">🏷️ Sale Alert</button>
-          <button class="template-btn" onclick="useBulkTemplate('holiday')">🎊 Holiday Promo</button>
+          <button class="template-btn" onclick="useBulkTemplate('new_arrivals')">
+            <i class="fas fa-tshirt"></i> New Arrivals
+          </button>
+          <button class="template-btn" onclick="useBulkTemplate('sale')">
+            <i class="fas fa-percent"></i> Sale Alert
+          </button>
+          <button class="template-btn" onclick="useBulkTemplate('holiday')">
+            <i class="fas fa-gift"></i> Holiday Promo
+          </button>
         </div>
       </div>
 
@@ -137,7 +598,7 @@
       </div>
 
       <button class="wa-send-btn bulk" onclick="sendBulk()" id="bulkSendBtn">
-        <span>📢 Send to All Customers</span>
+        <i class="fas fa-broadcast-tower"></i> Send to All Customers
       </button>
 
       <div id="bulkResult" class="result-box" style="display:none;"></div>
@@ -146,213 +607,46 @@
 
 </div>
 
-
-<style>
-  .wa-wrapper {
-    max-width: 780px;
-    margin: 40px auto;
-    padding: 0 20px 60px;
-    font-family: 'Segoe UI', sans-serif;
-  }
-
-  /* Header */
-  .wa-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .wa-header-left { display: flex; align-items: center; gap: 16px; }
-  .wa-icon {
-    width: 56px; height: 56px;
-    background: #25D366;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    color: white;
-    flex-shrink: 0;
-  }
-  .wa-title { font-size: 1.6rem; font-weight: 700; margin: 0; color: #1a1a1a; }
-  .wa-subtitle { font-size: 0.9rem; color: #666; margin: 2px 0 0; }
-
-  /* Status Badge */
-  .wa-status-badge {
-    display: flex; align-items: center; gap: 8px;
-    background: #f5f5f5;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    font-weight: 500;
-  }
-  .status-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: #ccc;
-    animation: pulse 2s infinite;
-  }
-  .status-dot.online { background: #25D366; }
-  .status-dot.offline { background: #e53e3e; animation: none; }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  /* Tabs */
-  .wa-tabs {
-    display: flex; gap: 4px;
-    background: #f5f5f5;
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 24px;
-  }
-  .wa-tab {
-    flex: 1; padding: 10px 16px;
-    border: none; background: transparent;
-    border-radius: 9px; cursor: pointer;
-    font-size: 0.95rem; font-weight: 500;
-    color: #666; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .wa-tab.active { background: white; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-  .customer-count {
-    background: #25D366; color: white;
-    font-size: 0.75rem; padding: 2px 8px;
-    border-radius: 20px; font-weight: 600;
-  }
-
-  /* Tab Content */
-  .wa-tab-content { display: none; }
-  .wa-tab-content.active { display: block; }
-
-  /* Card */
-  .wa-card {
-    background: white;
-    border-radius: 16px;
-    padding: 28px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-  }
-  .card-title {
-    font-size: 1.1rem; font-weight: 600;
-    color: #1a1a1a; margin: 0 0 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  /* Form */
-  .form-group { margin-bottom: 18px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-
-  label {
-    display: block; font-size: 0.85rem;
-    font-weight: 600; color: #444;
-    margin-bottom: 6px;
-  }
-  input, select, textarea {
-    width: 100%; padding: 10px 14px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 10px; font-size: 0.95rem;
-    color: #1a1a1a; background: #fafafa;
-    transition: border-color 0.2s;
-    box-sizing: border-box;
-    font-family: inherit;
-  }
-  input:focus, select:focus, textarea:focus {
-    outline: none; border-color: #25D366;
-    background: white;
-  }
-  textarea { resize: vertical; min-height: 120px; }
-  .char-count { font-size: 0.78rem; color: #999; text-align: right; margin-top: 4px; }
-
-  /* Templates */
-  .templates { display: flex; flex-wrap: wrap; gap: 8px; }
-  .template-btn {
-    padding: 6px 14px; border: 1.5px solid #e0e0e0;
-    border-radius: 20px; background: white;
-    font-size: 0.82rem; cursor: pointer;
-    color: #444; transition: all 0.2s;
-  }
-  .template-btn:hover { border-color: #25D366; color: #25D366; background: #f0fff4; }
-
-  /* Bulk info box */
-  .bulk-info {
-    display: flex; align-items: flex-start; gap: 12px;
-    background: #f0fff4; border: 1.5px solid #c6f6d5;
-    border-radius: 10px; padding: 14px 16px;
-    margin-bottom: 20px; font-size: 0.9rem; color: #276749;
-  }
-  .bulk-info code {
-    background: #c6f6d5; padding: 1px 6px;
-    border-radius: 4px; font-size: 0.85rem;
-  }
-
-  /* Confirm checkbox */
-  .confirm-check {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 20px; font-size: 0.9rem; color: #555;
-  }
-  .confirm-check input { width: auto; }
-
-  /* Send Button */
-  .wa-send-btn {
-    width: 100%; padding: 14px;
-    background: #25D366; color: white;
-    border: none; border-radius: 12px;
-    font-size: 1rem; font-weight: 600;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .wa-send-btn:hover { background: #20c25c; transform: translateY(-1px); }
-  .wa-send-btn:disabled { background: #a0e6b8; cursor: not-allowed; transform: none; }
-  .wa-send-btn.bulk { background: #667eea; }
-  .wa-send-btn.bulk:hover { background: #5a6fd6; }
-  .wa-send-btn.bulk:disabled { background: #b3bcf5; }
-
-  /* Result box */
-  .result-box {
-    margin-top: 16px; padding: 14px 16px;
-    border-radius: 10px; font-size: 0.9rem;
-  }
-  .result-box.success { background: #f0fff4; border: 1.5px solid #c6f6d5; color: #276749; }
-  .result-box.error { background: #fff5f5; border: 1.5px solid #fed7d7; color: #c53030; }
-</style>
-
-
 <script>
   const CSRF_TOKEN = '{{ csrf_token }}';
 
-  // ── Tab Switching ───────────────────────────────────────────
+  // Tab Switching
   function switchTab(tab) {
-    document.querySelectorAll('.wa-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.wa-tab-content').forEach(t => t.classList.remove('active'));
+    const tabs = document.querySelectorAll('.wa-tab');
+    const contents = document.querySelectorAll('.wa-tab-content');
+    
+    tabs.forEach(t => t.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+    
     document.getElementById(`tab-${tab}`).classList.add('active');
     event.currentTarget.classList.add('active');
   }
 
-  // ── Status Check ────────────────────────────────────────────
+  // Status Check
   async function checkStatus() {
     try {
       const res = await fetch('/whatsapp/status/');
       const data = await res.json();
       const dot = document.getElementById('statusDot');
       const text = document.getElementById('statusText');
+      
       if (data.ready) {
         dot.className = 'status-dot online';
-        text.textContent = 'WhatsApp Connected';
+        text.innerHTML = '<i class="fab fa-whatsapp"></i> WhatsApp Connected';
       } else {
         dot.className = 'status-dot offline';
-        text.textContent = data.online ? 'Service Online, WA Not Ready' : 'Service Offline';
+        text.innerHTML = data.online ? '<i class="fas fa-clock"></i> Service Online, WA Not Ready' : '<i class="fas fa-exclamation-triangle"></i> Service Offline';
       }
     } catch {
       document.getElementById('statusDot').className = 'status-dot offline';
-      document.getElementById('statusText').textContent = 'Cannot reach service';
+      document.getElementById('statusText').innerHTML = '<i class="fas fa-ban"></i> Cannot reach service';
     }
   }
+  
   checkStatus();
-  setInterval(checkStatus, 30000); // Check every 30 seconds
+  setInterval(checkStatus, 30000);
 
-  // ── Fill customer from dropdown ─────────────────────────────
+  // Fill customer from dropdown
   function fillCustomer() {
     const select = document.getElementById('customerSelect');
     const option = select.options[select.selectedIndex];
@@ -362,7 +656,7 @@
     }
   }
 
-  // ── Character counters ──────────────────────────────────────
+  // Character counters
   document.getElementById('singleMessage').addEventListener('input', function() {
     document.getElementById('singleCharCount').textContent = this.value.length;
   });
@@ -370,7 +664,7 @@
     document.getElementById('bulkCharCount').textContent = this.value.length;
   });
 
-  // ── Single Templates ────────────────────────────────────────
+  // Single Templates
   const singleTemplates = {
     order_ready: `Hi {name}! 🎉 Your order is ready for delivery.\n\nWe'll be dispatching it soon. Thank you for shopping at Hoka's Parlour! 🛍️`,
     payment_reminder: `Hi {name}! 👋 This is a friendly reminder that your order payment is pending.\n\nPlease complete your payment to avoid cancellation. Thank you! 💛`,
@@ -385,7 +679,7 @@
     document.getElementById('singleCharCount').textContent = msg.length;
   }
 
-  // ── Bulk Templates ──────────────────────────────────────────
+  // Bulk Templates
   const bulkTemplates = {
     new_arrivals: `Hi {name}! 👗 New arrivals are here at Hoka's Parlour!\n\nFresh styles just dropped — shop now before they sell out!\n🛍️ hokasparlour.adcent.online`,
     sale: `Hi {name}! 🏷️ SALE ALERT at Hoka's Parlour!\n\nAmazing deals on selected items. Limited time only — grab yours now!\n👉 hokasparlour.adcent.online`,
@@ -398,7 +692,7 @@
     document.getElementById('bulkCharCount').textContent = msg.length;
   }
 
-  // ── Send Single ─────────────────────────────────────────────
+  // Send Single
   async function sendSingle() {
     const phone = document.getElementById('singlePhone').value.trim();
     const message = document.getElementById('singleMessage').value.trim();
@@ -406,11 +700,11 @@
     const resultBox = document.getElementById('singleResult');
     const btn = document.getElementById('singleSendBtn');
 
-    if (!phone) return showResult(resultBox, 'error', '❌ Please enter a phone number.');
-    if (!message) return showResult(resultBox, 'error', '❌ Please enter a message.');
+    if (!phone) return showResult(resultBox, 'error', '<i class="fas fa-times-circle"></i> Please enter a phone number.');
+    if (!message) return showResult(resultBox, 'error', '<i class="fas fa-times-circle"></i> Please enter a message.');
 
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳ Sending...</span>';
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending...';
 
     try {
       const res = await fetch('/whatsapp/send/', {
@@ -421,32 +715,32 @@
       const data = await res.json();
 
       if (data.success) {
-        showResult(resultBox, 'success', `✅ Message sent successfully to ${name}!`);
+        showResult(resultBox, 'success', `<i class="fas fa-check-circle"></i> Message sent successfully to ${name}!`);
         document.getElementById('singleMessage').value = '';
         document.getElementById('singleCharCount').textContent = '0';
       } else {
-        showResult(resultBox, 'error', `❌ Failed: ${data.error}`);
+        showResult(resultBox, 'error', `<i class="fas fa-exclamation-circle"></i> Failed: ${data.error}`);
       }
     } catch (err) {
-      showResult(resultBox, 'error', `❌ Network error: ${err.message}`);
+      showResult(resultBox, 'error', `<i class="fas fa-network-wired"></i> Network error: ${err.message}`);
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<span>📤 Send Message</span>';
+      btn.innerHTML = '<i class="fab fa-whatsapp"></i> Send Message';
     }
   }
 
-  // ── Send Bulk ───────────────────────────────────────────────
+  // Send Bulk
   async function sendBulk() {
     const message = document.getElementById('bulkMessage').value.trim();
     const confirmed = document.getElementById('bulkConfirm').checked;
     const resultBox = document.getElementById('bulkResult');
     const btn = document.getElementById('bulkSendBtn');
 
-    if (!message) return showResult(resultBox, 'error', '❌ Please enter a message.');
-    if (!confirmed) return showResult(resultBox, 'error', '❌ Please confirm you want to send to all customers.');
+    if (!message) return showResult(resultBox, 'error', '<i class="fas fa-times-circle"></i> Please enter a message.');
+    if (!confirmed) return showResult(resultBox, 'error', '<i class="fas fa-times-circle"></i> Please confirm you want to send to all customers.');
 
     btn.disabled = true;
-    btn.innerHTML = '<span>⏳ Sending to all customers...</span>';
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending to all customers...';
 
     try {
       const res = await fetch('/whatsapp/send-bulk/', {
@@ -457,28 +751,27 @@
       const data = await res.json();
 
       if (data.success) {
-        let msg = `✅ Done! Sent to <strong>${data.sent}</strong> customers.`;
-        if (data.failed > 0) msg += ` <br>⚠️ ${data.failed} failed.`;
+        let msg = `<i class="fas fa-check-circle"></i> Done! Sent to <strong>${data.sent}</strong> customers.`;
+        if (data.failed > 0) msg += `<br><i class="fas fa-exclamation-triangle"></i> ${data.failed} failed.`;
         showResult(resultBox, 'success', msg);
         document.getElementById('bulkConfirm').checked = false;
       } else {
-        showResult(resultBox, 'error', `❌ Failed: ${data.error}`);
+        showResult(resultBox, 'error', `<i class="fas fa-exclamation-circle"></i> Failed: ${data.error}`);
       }
     } catch (err) {
-      showResult(resultBox, 'error', `❌ Network error: ${err.message}`);
+      showResult(resultBox, 'error', `<i class="fas fa-network-wired"></i> Network error: ${err.message}`);
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<span>📢 Send to All Customers</span>';
+      btn.innerHTML = '<i class="fas fa-broadcast-tower"></i> Send to All Customers';
     }
   }
 
-  // ── Show Result ─────────────────────────────────────────────
+  // Show Result
   function showResult(box, type, message) {
-    box.style.display = 'block';
+    box.style.display = 'flex';
     box.className = `result-box ${type}`;
     box.innerHTML = message;
     box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 </script>
-
 {% endblock %}

@@ -1,0 +1,868 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}{{ u.username }} — User Profile{% endblock %}
+
+{% block extra_style %}
+<style>
+  /* User Profile Page Styles - Inherits from base template */
+  
+  .detail-wrap {
+    padding: 0;
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Back Link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 12px;
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+    transition: var(--transition);
+  }
+
+  .back-link:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateX(-4px);
+  }
+
+  /* Profile Hero */
+  .profile-hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 32px;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    transition: var(--transition);
+  }
+
+  .profile-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+  }
+
+  .hero-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 3px solid var(--card);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+  }
+
+  .hero-avatar:hover {
+    transform: scale(1.05);
+  }
+
+  .hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-info {
+    flex: 1;
+    min-width: 240px;
+  }
+
+  .hero-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    font-family: 'Playfair Display', serif;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .hero-name span {
+    color: var(--accent);
+  }
+
+  .hero-username {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    font-family: monospace;
+    margin-top: 4px;
+  }
+
+  .hero-email {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-left: auto;
+    align-items: center;
+    padding: 12px 24px;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .hero-stat {
+    text-align: center;
+    position: relative;
+  }
+
+  .hero-stat::after {
+    content: '';
+    position: absolute;
+    right: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 30px;
+    background: var(--border);
+  }
+
+  .hero-stat:last-child::after {
+    display: none;
+  }
+
+  .hero-stat-val {
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    line-height: 1.2;
+    color: var(--text);
+  }
+
+  .hero-stat-lbl {
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  /* Grid Layout */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .detail-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Cards - using base styles */
+  .detail-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .detail-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+  }
+
+  .card-header {
+    padding: 16px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-header i {
+    color: var(--accent);
+  }
+
+  .card-body {
+    padding: 20px 24px;
+  }
+
+  /* Info Rows */
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-key {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .info-val {
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-align: right;
+    color: var(--text);
+    word-break: break-word;
+  }
+
+  /* Badge System - extending base */
+  .badge-custom {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-family: 'Courier New', monospace;
+    transition: var(--transition);
+  }
+
+  .badge-success-custom {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .badge-danger-custom {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  .badge-warning-custom {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+
+  .badge-info-custom {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+
+  .badge-neutral-custom {
+    background: var(--surface);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+  }
+
+  .badge-accent-custom {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  /* Order Items */
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+    transition: var(--transition);
+  }
+
+  .order-item:hover {
+    background: var(--surface);
+    transform: translateX(4px);
+  }
+
+  .order-item:last-child {
+    border-bottom: none;
+  }
+
+  .order-num {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .order-date {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+
+  .order-total {
+    font-family: 'Courier New', monospace;
+    font-weight: 800;
+    color: var(--success);
+    font-size: 0.9rem;
+  }
+
+  /* Product Rows */
+  .product-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+  }
+
+  .product-row:hover {
+    background: var(--surface);
+    transform: translateX(4px);
+  }
+
+  .product-row:last-child {
+    border-bottom: none;
+  }
+
+  .product-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--surface);
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    transition: var(--transition);
+  }
+
+  .product-thumb:hover {
+    transform: scale(1.05);
+  }
+
+  .product-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .product-price {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    font-family: monospace;
+    margin-top: 2px;
+  }
+
+  /* Promo Bar */
+  .promo-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--border);
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .promo-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-light));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* Empty State */
+  .empty-msg {
+    color: var(--text-soft);
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 16px 0;
+    text-align: center;
+  }
+
+  /* Full Width Card */
+  .span-2 {
+    grid-column: span 2;
+  }
+
+  @media (max-width: 900px) {
+    .span-2 {
+      grid-column: span 1;
+    }
+    .profile-hero {
+      padding: 20px;
+    }
+    .hero-stats {
+      margin-left: 0;
+      width: 100%;
+      justify-content: space-around;
+    }
+    .hero-stat::after {
+      display: none;
+    }
+    .hero-name {
+      font-size: 1.4rem;
+    }
+  }
+
+  /* Status badges using base status classes */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-custom {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary-custom {
+    background: var(--accent);
+    color: white;
+    border: none;
+  }
+
+  .btn-primary-custom:hover {
+    background: var(--accent-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .btn-secondary-custom {
+    background: var(--card);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary-custom:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--text-soft);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrap">
+
+  <a href="{% url 'hokaadmin:user_profiles' %}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to all users
+  </a>
+
+  <!-- Profile Hero -->
+  <div class="profile-hero">
+    <div class="hero-avatar">
+      {% if profile and profile.profile_picture %}
+        <img src="{{ profile.profile_picture.url }}" alt="{{ u.username }}">
+      {% else %}
+        {{ u.username|slice:":2"|upper }}
+      {% endif %}
+    </div>
+
+    <div class="hero-info">
+      <div class="hero-name">
+        {% if u.get_full_name %}{{ u.get_full_name }}{% else %}{{ u.username }}{% endif %}
+      </div>
+      <div class="hero-username">@{{ u.username }}</div>
+      <div class="hero-email"><i class="fas fa-envelope"></i> {{ u.email }}</div>
+      <div class="hero-badges">
+        {% if u.is_active %}
+          <span class="status-badge paid"><i class="fas fa-check-circle"></i> Active</span>
+        {% else %}
+          <span class="status-badge cancelled"><i class="fas fa-times-circle"></i> Inactive</span>
+        {% endif %}
+        {% if agent %}
+          {% if agent.status == 'approved' %}
+            <span class="status-badge shipped"><i class="fas fa-user-check"></i> Agent ✓</span>
+          {% elif agent.status == 'pending' %}
+            <span class="status-badge pending"><i class="fas fa-clock"></i> Agent Pending</span>
+          {% else %}
+            <span class="status-badge cancelled"><i class="fas fa-ban"></i> Agent Suspended</span>
+          {% endif %}
+        {% endif %}
+        {% if promo and promo.is_active %}
+          <span class="status-badge pending"><i class="fas fa-ticket-alt"></i> Promo Active</span>
+        {% endif %}
+        {% if profile and profile.whatsapp_joined %}
+          <span class="status-badge paid"><i class="fab fa-whatsapp"></i> WhatsApp ✓</span>
+        {% endif %}
+        {% if profile and profile.gender == 'M' %}
+          <span class="status-badge shipped"><i class="fas fa-mars"></i> Male</span>
+        {% elif profile and profile.gender == 'F' %}
+          <span class="status-badge"><i class="fas fa-venus"></i> Female</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">{{ order_history.count }}</div>
+        <div class="hero-stat-lbl">Orders</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" style="color: var(--success);">
+          KES {{ total_spent|floatformat:0 }}
+        </div>
+        <div class="hero-stat-lbl">Total Spent</div>
+      </div>
+      {% if promo %}
+      <div class="hero-stat">
+        <div class="hero-stat-val" style="color: var(--accent);">
+          {{ promo.promo_purchases_count }}/5
+        </div>
+        <div class="hero-stat-lbl">Promo Used</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Detail Grid -->
+  <div class="detail-grid">
+
+    <!-- Profile Info Card -->
+    <div class="detail-card">
+      <div class="card-header">
+        <i class="fas fa-user-circle"></i> Profile Details
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-key">Username</span>
+          <span class="info-val" style="font-family: monospace;">{{ u.username }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Email</span>
+          <span class="info-val">{{ u.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Phone</span>
+          <span class="info-val">{{ profile.phone_number|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">WhatsApp</span>
+          <span class="info-val">{{ profile.whatsapp_number|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Address</span>
+          <span class="info-val" style="max-width: 260px; text-align: right;">
+            {{ profile.delivery_address|default:"—" }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Gender</span>
+          <span class="info-val">{{ profile.get_gender_display|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Age</span>
+          <span class="info-val">{{ profile.age|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Joined</span>
+          <span class="info-val">{{ u.date_joined|date:"d M Y, H:i" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Last Login</span>
+          <span class="info-val">{{ u.last_login|date:"d M Y, H:i"|default:"Never" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Payment Method</span>
+          <span class="info-val">{{ profile.preferred_payment_method|default:"—"|upper }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Promo & Agent Card -->
+    <div class="detail-card">
+      <div class="card-header">
+        <i class="fas fa-ticket-alt"></i> Promo & Agent Status
+      </div>
+      <div class="card-body">
+        {% if promo %}
+          <div class="info-row">
+            <span class="info-key">Agent Code Used</span>
+            <span class="info-val" style="font-family: monospace;">
+              {% if promo.agent %}{{ promo.agent.referral_code }}{% else %}—{% endif %}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Promo Purchases</span>
+            <span class="info-val">{{ promo.promo_purchases_count }} / 5</span>
+          </div>
+          <div class="promo-bar">
+            <div class="promo-bar-fill" style="width: {% widthratio promo.promo_purchases_count 5 100 %}%;"></div>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Status</span>
+            <span class="info-val">
+              {% if promo.is_active %}
+                <span class="status-badge paid">Active — {{ promo.remaining_promo_purchases }} left</span>
+              {% else %}
+                <span class="status-badge cancelled">Used up</span>
+              {% endif %}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Started</span>
+            <span class="info-val">{{ promo.created_at|date:"d M Y" }}</span>
+          </div>
+        {% else %}
+          <p class="empty-msg"><i class="fas fa-info-circle"></i> No promo code used.</p>
+        {% endif %}
+
+        <div style="border-top: 1px solid var(--border); margin-top: 14px; padding-top: 14px;">
+          {% if agent %}
+            <div class="info-row">
+              <span class="info-key">Referral Code</span>
+              <span class="info-val" style="font-family: monospace; font-weight: bold;">
+                {{ agent.referral_code|default:"pending" }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">Agent Status</span>
+              <span class="info-val">
+                {% if agent.status == 'approved' %}
+                  <span class="status-badge paid">Approved</span>
+                {% elif agent.status == 'pending' %}
+                  <span class="status-badge pending">Pending</span>
+                {% else %}
+                  <span class="status-badge cancelled">Suspended</span>
+                {% endif %}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">Total Referrals</span>
+              <span class="info-val">{{ agent.total_referrals }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">M-Pesa #</span>
+              <span class="info-val">{{ agent.mpesa_number|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-key">Applied</span>
+              <span class="info-val">{{ agent.created_at|date:"d M Y" }}</span>
+            </div>
+          {% else %}
+            <p class="empty-msg"><i class="fas fa-user-slash"></i> Not an agent.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Order History -->
+    <div class="detail-card span-2">
+      <div class="card-header">
+        <i class="fas fa-shopping-bag"></i> Recent Orders ({{ order_history|length }})
+      </div>
+      <div class="card-body">
+        {% if order_history %}
+          {% for h in order_history %}
+          <div class="order-item">
+            <div>
+              <div class="order-num">#{{ h.order.id }}</div>
+              <div class="order-date">{{ h.order.created_at|date:"d M Y, H:i" }}</div>
+            </div>
+            <div>
+              {% if h.order.order_status == 'delivered' %}
+                <span class="status-badge paid">Delivered</span>
+              {% elif h.order.order_status == 'pending' %}
+                <span class="status-badge pending">Pending</span>
+              {% elif h.order.order_status == 'dispatched' %}
+                <span class="status-badge shipped">Dispatched</span>
+              {% else %}
+                <span class="status-badge cancelled">{{ h.order.order_status }}</span>
+              {% endif %}
+            </div>
+            <div>
+              {% if h.order.is_paid %}
+                <span class="status-badge paid"><i class="fas fa-check"></i> Paid</span>
+              {% else %}
+                <span class="status-badge cancelled"><i class="fas fa-times"></i> Unpaid</span>
+              {% endif %}
+            </div>
+            <div class="order-total">KES {{ h.order.get_total|floatformat:0 }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="empty-msg"><i class="fas fa-inbox"></i> No orders found.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Wishlist -->
+    <div class="detail-card">
+      <div class="card-header">
+        <i class="fas fa-heart"></i> Wishlist ({{ wishlist|length }})
+      </div>
+      <div class="card-body">
+        {% if wishlist %}
+          {% for item in wishlist %}
+          <div class="product-row">
+            {% if item.product.image %}
+              <img class="product-thumb" src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+            {% else %}
+              <div class="product-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">
+                <i class="fas fa-tshirt"></i>
+              </div>
+            {% endif %}
+            <div style="flex: 1;">
+              <div class="product-name">{{ item.product.name }}</div>
+              <div class="product-price">KES {{ item.product.price }}</div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-soft);">
+              {{ item.added_at|date:"d M" }}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="empty-msg"><i class="fas fa-heart-broken"></i> Wishlist is empty.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recently Viewed -->
+    <div class="detail-card">
+      <div class="card-header">
+        <i class="fas fa-eye"></i> Recently Viewed ({{ recent_views|length }})
+      </div>
+      <div class="card-body">
+        {% if recent_views %}
+          {% for view in recent_views %}
+          <div class="product-row">
+            {% if view.product.image %}
+              <img class="product-thumb" src="{{ view.product.image.url }}" alt="{{ view.product.name }}">
+            {% else %}
+              <div class="product-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">
+                <i class="fas fa-tshirt"></i>
+              </div>
+            {% endif %}
+            <div style="flex: 1;">
+              <div class="product-name">{{ view.product.name }}</div>
+              <div class="product-price">KES {{ view.product.price }}</div>
+            </div>
+            <div style="font-size: 0.7rem; color: var(--text-soft);">
+              {{ view.viewed_at|date:"d M, H:i" }}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="empty-msg"><i class="fas fa-history"></i> No views recorded.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Preferences -->
+    {% if preferences %}
+    <div class="detail-card">
+      <div class="card-header">
+        <i class="fas fa-sliders-h"></i> Shopping Preferences
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-key">Gender</span>
+          <span class="info-val">{{ preferences.get_gender_display|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Age Range</span>
+          <span class="info-val">{{ preferences.age_range|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Style</span>
+          <span class="info-val">{{ preferences.get_style_display|default:"—" }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Fav Categories</span>
+          <span class="info-val">
+            {% for cat in preferences.favourite_categories.all %}
+              <span class="status-badge" style="background: var(--surface);">{{ cat.name }}</span>
+            {% empty %}—{% endfor %}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

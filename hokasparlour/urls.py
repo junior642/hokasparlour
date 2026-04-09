@@ -11,11 +11,10 @@ from two_factor.admin import AdminSiteOTPRequired
 import os
 
 
-# ── Secure Admin: requires 2FA + 30 min session timeout ──────────────────────
+# ── Secure Admin: requires 2FA + 2hr session timeout ─────────────────────────
 class SecureAdminSite(AdminSiteOTPRequired):
     def each_context(self, request):
         context = super().each_context(request)
-        # Force 2hrs-minute session timeout for admin users
         request.session.set_expiry(3600)
         return context
 
@@ -38,7 +37,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('hoka-secure-panel-2024/', admin.site.urls),
     path('whatsapp/', include('whatsapphoka.urls')),
-    path('', include(tf_urls)),
+    path('account/', include(tf_urls)),  # MFA routes scoped to /account/ — admin only
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),
     path('finance/', include('finance.urls', namespace='finance')),

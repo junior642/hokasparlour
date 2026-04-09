@@ -510,6 +510,18 @@ class Profile(models.Model):
     default_delivery_location = models.CharField(max_length=200, blank=True)
     profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
 
+    gender = models.CharField(
+    max_length=1,
+    choices=[('M', 'Male'), ('F', 'Female'), ('U', 'Unisex')],
+    blank=True
+    )
+    age = models.PositiveIntegerField(null=True, blank=True)
+
+    whatsapp_number = models.CharField(max_length=20, blank=True)
+    whatsapp_otp = models.CharField(max_length=6, blank=True)
+    whatsapp_otp_created_at = models.DateTimeField(null=True, blank=True)
+
+
     whatsapp_joined = models.BooleanField(default=False)
     whatsapp_popup_dismissed_at = models.DateTimeField(null=True, blank=True)
 
@@ -900,3 +912,100 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username} → {self.product.name}"
+
+
+
+
+
+# ── New: tracks every product detail page visit ───────────────────────────────
+class ProductView(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_views')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='views_log')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+    session_key = models.CharField(max_length=40, blank=True)  # for anonymous users
+
+    class Meta:
+        ordering = ['-viewed_at']
+        indexes = [models.Index(fields=['user', 'viewed_at'])]
+
+    def __str__(self):
+        return f"{self.user.username} viewed {self.product.name}"
+
+
+# ── New: stores questionnaire answers ────────────────────────────────────────
+class UserPreference(models.Model):
+    STYLE_CHOICES = [
+        ('casual', 'Casual'),
+        ('formal', 'Formal'),
+        ('streetwear', 'Streetwear'),
+        ('sporty', 'Sporty'),
+        ('mixed', 'Mixed / No preference'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='preferences')
+    gender = models.CharField(max_length=1, choices=[('M','Male'),('F','Female'),('U','Unisex')], blank=True)
+    age_range = models.CharField(
+        max_length=10,
+        choices=[('13-17','13-17'),('18-24','18-24'),('25-34','25-34'),('35-44','35-44'),('45+','45+')],
+        blank=True
+    )
+    style = models.CharField(max_length=20, choices=STYLE_CHOICES, blank=True)
+    favourite_categories = models.ManyToManyField('Category', blank=True, related_name='preferred_by')
+    completed_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s preferences"        
+
+
+
+class ContactMessage(models.Model):
+    STATUS_CHOICES = [
+        ('unread',   'Unread'),
+        ('read',     'Read'),
+        ('replied',  'Replied'),
+        ('archived', 'Archived'),
+    ]
+
+    SUBJECT_CHOICES = [
+        ('order',    'Order Inquiry'),
+        ('return',   'Return / Exchange'),
+        ('payment',  'Payment Issue'),
+        ('delivery', 'Delivery Issue'),
+        ('product',  'Product Question'),
+        ('other',    'Other'),
+    ]
+
+    full_name    = models.CharField(max_length=200)
+    email        = models.EmailField()
+    phone        = models.CharField(max_length=20, blank=True)
+    subject      = models.CharField(max_length=100, choices=SUBJECT_CHOICES, default='other')
+    order_number = models.CharField(max_length=50, blank=True)
+    message      = models.TextField()
+    receipt_note = models.CharField(max_length=200, blank=True)
+
+    status       = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unread')
+    admin_notes  = models.TextField(blank=True, help_text="Internal notes visible only to admin")
+
+    # Link to a registered user if they were logged in
+    user         = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='contact_messages'
+    )
+
+    ip_address   = models.GenericIPAddressField(null=True, blank=True)
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Contact Message'
+        verbose_name_plural = 'Contact Messages'
+
+    def __str__(self):
+        return f"{self.full_name} — {self.get_subject_display()} ({self.created_at.strftime('%d %b %Y')})"
+
+    def is_unread(self):
+        return self.status == 'unread'        

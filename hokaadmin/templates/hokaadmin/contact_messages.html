@@ -1,0 +1,900 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}Contact Messages — Hoka Admin{% endblock %}
+
+{% block extra_style %}
+<style>
+  /* Contact Messages Styles - Inherits from base template */
+  
+  .inbox-wrap {
+    padding: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .page-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .page-sub {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .result-count {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Stats Strip - Pills */
+  .stats-strip {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .stat-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    position: relative;
+  }
+
+  .stat-pill:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-2px);
+  }
+
+  .stat-pill.active {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .stat-pill.active .sp-label,
+  .stat-pill.active .sp-val {
+    color: white;
+  }
+
+  .sp-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .sp-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    transition: color 0.2s;
+  }
+
+  .sp-val {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    transition: color 0.2s;
+    min-width: 24px;
+    text-align: right;
+  }
+
+  .unread-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--accent);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 20px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+  }
+
+  /* Controls */
+  .controls {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-wrap {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    padding: 0.7rem 1rem 0.7rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', monospace;
+    font-size: 0.85rem;
+    background: var(--surface);
+    color: var(--text);
+    transition: var(--transition);
+    outline: none;
+  }
+
+  .search-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-soft);
+    font-size: 0.9rem;
+  }
+
+  .filter-select {
+    padding: 0.7rem 2rem 0.7rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', monospace;
+    font-size: 0.85rem;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition);
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+  }
+
+  .filter-select:focus,
+  .filter-select.active {
+    border-color: var(--accent);
+  }
+
+  .search-btn {
+    padding: 0.7rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .search-btn:hover {
+    background: var(--accent-light);
+    transform: translateY(-1px);
+  }
+
+  .clear-btn {
+    padding: 0.7rem 1.25rem;
+    background: var(--surface);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+  }
+
+  .clear-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Messages List */
+  .messages-list {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .list-header {
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+  }
+
+  /* Message Cards */
+  .msg-card {
+    display: grid;
+    grid-template-columns: 4px 48px 1fr auto;
+    gap: 0 16px;
+    padding: 1.125rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    transition: var(--transition);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+  }
+
+  .msg-card:last-child {
+    border-bottom: none;
+  }
+
+  .msg-card:hover {
+    background: var(--surface);
+    transform: translateX(4px);
+  }
+
+  .msg-card.unread {
+    background: linear-gradient(90deg, var(--accent-soft) 0%, var(--card) 5%);
+  }
+
+  /* Left accent bar */
+  .msg-accent-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    border-radius: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .msg-card.unread .msg-accent-bar {
+    opacity: 1;
+    background: var(--accent);
+  }
+
+  .msg-card.replied .msg-accent-bar {
+    opacity: 1;
+    background: var(--success);
+  }
+
+  /* Avatar */
+  .msg-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+    transition: var(--transition);
+  }
+
+  .msg-card:hover .msg-avatar {
+    transform: scale(1.05);
+  }
+
+  /* Message Body */
+  .msg-body {
+    min-width: 0;
+  }
+
+  .msg-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .msg-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .msg-card.unread .msg-name {
+    color: var(--accent);
+  }
+
+  .msg-email {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+  }
+
+  .msg-preview {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 500px;
+  }
+
+  .msg-card.unread .msg-preview {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Meta Info */
+  .msg-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .msg-time {
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    white-space: nowrap;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .badge-unread {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  .badge-read {
+    background: var(--border);
+    color: var(--text-soft);
+  }
+
+  .badge-replied {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .badge-archived {
+    background: var(--surface);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+  }
+
+  /* Subject Badges */
+  .badge-order {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+
+  .badge-return {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+
+  .badge-payment {
+    background: #fef3cd;
+    color: #856404;
+  }
+
+  .badge-delivery {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .badge-product {
+    background: #e8daef;
+    color: #5b2c6f;
+  }
+
+  .badge-other {
+    background: var(--border);
+    color: var(--text-soft);
+  }
+
+  /* Quick Status Actions */
+  .quick-status {
+    display: none;
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    gap: 6px;
+    z-index: 10;
+  }
+
+  .msg-card:hover .quick-status {
+    display: flex;
+  }
+
+  .qs-btn {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.68rem;
+    font-family: 'Inter', monospace;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--card);
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .qs-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .qs-btn.replied:hover {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+
+  .qs-btn.archived:hover {
+    background: var(--text-soft);
+    border-color: var(--text-soft);
+    color: white;
+  }
+
+  /* Empty State */
+  .empty-inbox {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-soft);
+  }
+
+  .empty-inbox .ei-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  .empty-inbox p {
+    font-size: 0.9rem;
+  }
+
+  /* List Footer */
+  .list-footer {
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Animations */
+  @keyframes cardIn {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .msg-card {
+    animation: cardIn 0.3s ease both;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .inbox-wrap {
+      padding: 0;
+    }
+    
+    .msg-card {
+      grid-template-columns: 4px 40px 1fr;
+    }
+    
+    .msg-meta {
+      display: none;
+    }
+    
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .search-wrap {
+      width: 100%;
+    }
+    
+    .filter-select,
+    .search-btn,
+    .clear-btn {
+      width: 100%;
+    }
+    
+    .stats-strip {
+      gap: 8px;
+    }
+    
+    .stat-pill {
+      padding: 6px 12px;
+    }
+    
+    .sp-label {
+      font-size: 0.65rem;
+    }
+    
+    .sp-val {
+      font-size: 0.8rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .msg-top {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    
+    .msg-preview {
+      white-space: normal;
+      max-width: 100%;
+    }
+    
+    .quick-status {
+      position: static;
+      transform: none;
+      margin-top: 8px;
+      justify-content: flex-start;
+    }
+    
+    .msg-card:hover .quick-status {
+      display: flex;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inbox-wrap">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Contact <em>Inbox</em></h1>
+      <p class="page-sub">
+        <i class="fas fa-envelope-open-text"></i>
+        Customer messages &amp; enquiries
+      </p>
+    </div>
+    <span class="result-count">
+      <i class="fas fa-comments"></i> {{ total_count }} message{{ total_count|pluralize }}
+    </span>
+  </div>
+
+  <!-- Stats Pills -->
+  <div class="stats-strip">
+    <a href="?status=all" class="stat-pill {% if status_filter == 'all' %}active{% endif %}">
+      <span class="sp-dot" style="background: var(--text-soft);"></span>
+      <span class="sp-label">All</span>
+      <span class="sp-val">{{ stats.total }}</span>
+    </a>
+    <a href="?status=unread" class="stat-pill {% if status_filter == 'unread' %}active{% endif %}">
+      {% if stats.unread %}
+        <span class="unread-badge">!</span>
+      {% endif %}
+      <span class="sp-dot" style="background: var(--accent);"></span>
+      <span class="sp-label">Unread</span>
+      <span class="sp-val">{{ stats.unread }}</span>
+    </a>
+    <a href="?status=read" class="stat-pill {% if status_filter == 'read' %}active{% endif %}">
+      <span class="sp-dot" style="background: #888;"></span>
+      <span class="sp-label">Read</span>
+      <span class="sp-val">{{ stats.read }}</span>
+    </a>
+    <a href="?status=replied" class="stat-pill {% if status_filter == 'replied' %}active{% endif %}">
+      <span class="sp-dot" style="background: var(--success);"></span>
+      <span class="sp-label">Replied</span>
+      <span class="sp-val">{{ stats.replied }}</span>
+    </a>
+    <a href="?status=archived" class="stat-pill {% if status_filter == 'archived' %}active{% endif %}">
+      <span class="sp-dot" style="background: #bbb;"></span>
+      <span class="sp-label">Archived</span>
+      <span class="sp-val">{{ stats.archived }}</span>
+    </a>
+    <a href="?date=today" class="stat-pill {% if date_filter == 'today' %}active{% endif %}">
+      <span class="sp-dot" style="background: var(--warning);"></span>
+      <span class="sp-label">Today</span>
+      <span class="sp-val">{{ stats.today }}</span>
+    </a>
+  </div>
+
+  <!-- Controls -->
+  <form method="get" class="controls">
+    <div class="search-wrap">
+      <span class="search-icon"><i class="fas fa-search"></i></span>
+      <input
+        type="text"
+        name="q"
+        value="{{ search }}"
+        placeholder="Search by name, email, message, order #…"
+        id="inbox-search"
+        autocomplete="off"
+      >
+    </div>
+
+    <select name="subject" class="filter-select {% if subject_filter != 'all' %}active{% endif %}">
+      <option value="all" {% if subject_filter == 'all' %}selected{% endif %}>All subjects</option>
+      {% for val, label in subject_choices %}
+      <option value="{{ val }}" {% if subject_filter == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="date" class="filter-select {% if date_filter != 'all' %}active{% endif %}">
+      <option value="all"   {% if date_filter == 'all'   %}selected{% endif %}>All time</option>
+      <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+      <option value="week"  {% if date_filter == 'week'  %}selected{% endif %}>This week</option>
+      <option value="month" {% if date_filter == 'month' %}selected{% endif %}>This month</option>
+    </select>
+
+    <!-- Preserve status filter when searching -->
+    <input type="hidden" name="status" value="{{ status_filter }}">
+
+    <button type="submit" class="search-btn">
+      <i class="fas fa-search"></i> Search
+    </button>
+    <a href="{% url 'hokaadmin:contact_messages' %}" class="clear-btn">
+      <i class="fas fa-times"></i> Clear
+    </a>
+  </form>
+
+  <!-- Messages List -->
+  <div class="messages-list">
+    <div class="list-header">
+      <span>
+        <i class="fas fa-inbox"></i> INBOX — {{ total_count }} RESULT{{ total_count|pluralize }}
+      </span>
+      {% if search %}
+        <span><i class="fas fa-filter"></i> SEARCH: "{{ search }}"</span>
+      {% endif %}
+    </div>
+
+    {% if messages_qs %}
+      {% for msg in messages_qs %}
+      <a
+        href="{% url 'hokaadmin:contact_message_detail' msg.id %}"
+        class="msg-card {{ msg.status }}"
+        data-id="{{ msg.id }}"
+      >
+        <div class="msg-accent-bar"></div>
+
+        <!-- Avatar -->
+        <div class="msg-avatar">
+          {{ msg.full_name|slice:":2"|upper }}
+        </div>
+
+        <!-- Body -->
+        <div class="msg-body">
+          <div class="msg-top">
+            <span class="msg-name">{{ msg.full_name }}</span>
+            <span class="msg-email">{{ msg.email }}</span>
+            {% if msg.order_number %}
+              <span class="badge badge-order">
+                <i class="fas fa-hashtag"></i> {{ msg.order_number }}
+              </span>
+            {% endif %}
+            <span class="badge badge-{{ msg.subject }}">
+              <i class="fas fa-tag"></i> {{ msg.get_subject_display }}
+            </span>
+          </div>
+          <div class="msg-preview">{{ msg.message|truncatechars:120 }}</div>
+        </div>
+
+        <!-- Meta -->
+        <div class="msg-meta">
+          <span class="msg-time">
+            <i class="far fa-clock"></i> {{ msg.created_at|date:"d M, H:i" }}
+          </span>
+          <span class="badge badge-{{ msg.status }}">
+            {% if msg.status == 'unread' %}
+              <i class="fas fa-circle"></i>
+            {% elif msg.status == 'replied' %}
+              <i class="fas fa-reply"></i>
+            {% elif msg.status == 'archived' %}
+              <i class="fas fa-archive"></i>
+            {% else %}
+              <i class="fas fa-check"></i>
+            {% endif %}
+            {{ msg.get_status_display }}
+          </span>
+        </div>
+
+        <!-- Quick actions (shown on hover) -->
+        <div class="quick-status" onclick="event.preventDefault(); event.stopPropagation();">
+          {% if msg.status != 'replied' %}
+          <button class="qs-btn replied" onclick="quickStatus({{ msg.id }}, 'replied', this)">
+            <i class="fas fa-reply"></i> Reply
+          </button>
+          {% endif %}
+          {% if msg.status != 'archived' %}
+          <button class="qs-btn archived" onclick="quickStatus({{ msg.id }}, 'archived', this)">
+            <i class="fas fa-archive"></i> Archive
+          </button>
+          {% endif %}
+          {% if msg.status == 'archived' %}
+          <button class="qs-btn" onclick="quickStatus({{ msg.id }}, 'unread', this)">
+            <i class="fas fa-undo"></i> Restore
+          </button>
+          {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+
+      <div class="list-footer">
+        <span><i class="fas fa-envelope"></i> Showing {{ total_count }} message{{ total_count|pluralize }}</span>
+        <span id="live-count"></span>
+      </div>
+
+    {% else %}
+      <div class="empty-inbox">
+        <div class="ei-icon">📭</div>
+        <p>No messages match the current filters.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* Live client-side search */
+const searchInput = document.getElementById('inbox-search');
+const cards = Array.from(document.querySelectorAll('.msg-card'));
+const liveCount = document.getElementById('live-count');
+
+let timer;
+if (searchInput) {
+  searchInput.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      const q = this.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const show = !q || text.includes(q);
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+      if (liveCount) {
+        liveCount.textContent = q ? `Live: ${visible} match${visible !== 1 ? 'es' : ''}` : '';
+      }
+    }, 100);
+  });
+}
+
+/* Quick status AJAX */
+function quickStatus(msgId, newStatus, btn) {
+  const card = btn.closest('.msg-card');
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                    document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+  fetch(`/hokaadmin/contacts/${msgId}/status/`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRFToken': csrfToken
+    },
+    body: `status=${newStatus}`
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      // Update card class
+      card.className = card.className.replace(/\bunread\b|\bread\b|\breplied\b|\barchived\b/g, '').trim();
+      card.classList.add(newStatus);
+      
+      // Update status badge
+      const badge = card.querySelector('.badge.badge-unread, .badge.badge-read, .badge.badge-replied, .badge.badge-archived');
+      if (badge) {
+        badge.className = `badge badge-${newStatus}`;
+        // Update badge text and icon
+        const statusText = data.label || newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+        let icon = '';
+        if (newStatus === 'unread') icon = '<i class="fas fa-circle"></i> ';
+        else if (newStatus === 'replied') icon = '<i class="fas fa-reply"></i> ';
+        else if (newStatus === 'archived') icon = '<i class="fas fa-archive"></i> ';
+        else icon = '<i class="fas fa-check"></i> ';
+        badge.innerHTML = icon + statusText;
+      }
+      
+      // Update stats pills (reload page to reflect accurate counts)
+      setTimeout(() => window.location.reload(), 500);
+    }
+  })
+  .catch(err => console.error('Error updating status:', err));
+}
+</script>
+{% endblock %}

@@ -1,1 +1,4 @@
 pip install requests django-allauth PyJWT cryptography whitenoise pillow django-environ
+
+
+python manage.py shell -c "from django.contrib.sites.models import Site; print(list(Site.objects.values('id','domain','name')))"

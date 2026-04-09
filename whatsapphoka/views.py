@@ -125,3 +125,7 @@ def whatsapp_status(request):
         return JsonResponse({'online': True, 'ready': data.get('ready', False)})
     except Exception:
         return JsonResponse({'online': False, 'ready': False})
+
+
+
+        

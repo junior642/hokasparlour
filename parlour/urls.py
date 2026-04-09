@@ -30,6 +30,7 @@ urlpatterns = [
     path('profile/orders/', views.order_history, name='order_history'),
     path('profile/save-for-later/', views.save_for_later, name='save_for_later'),
     path('profile/load-saved/', views.load_saved_items, name='load_saved_items'),
+    path('for-you/', views.for_you, name='for_you'),
     path('about/', views.about, name='about'),
     path('terms/', views.terms, name='terms'),
     path('privacy/', views.privacy, name='privacy'),
@@ -39,6 +40,10 @@ urlpatterns = [
     path('shipping/', views.delivery, name='shipping'),
     path('product/<int:product_id>/', views.product_detail, name='product_detail'),
     path('ad/<int:ad_id>/click/', views.ad_click, name='ad_click'),
+
+    path('profile/whatsapp/connect/',    views.whatsapp_connect,    name='whatsapp_connect'),
+    path('profile/whatsapp/verify/',     views.whatsapp_verify,     name='whatsapp_verify'),
+    path('profile/whatsapp/disconnect/', views.whatsapp_disconnect, name='whatsapp_disconnect'),
 
     path('orders/', views.orders_dashboard, name='orders_dashboard'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),

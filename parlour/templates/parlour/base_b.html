@@ -1213,20 +1213,20 @@
                         <span>All Orders</span>
                         <span class="badge">12</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="/orders/?status=pending" class="nav-item">
                         <i class="fas fa-clock"></i>
                         <span>Pending</span>
                         <span class="badge">5</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="/orders/?status=processing" class="nav-item">
                         <i class="fas fa-cog"></i>
                         <span>Processing</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="/orders/?status=dispatched" class="nav-item">
                         <i class="fas fa-truck"></i>
                         <span>Shipped</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="/orders/?status=delivered" class="nav-item">
                         <i class="fas fa-check-circle"></i>
                         <span>Delivered</span>
                     </a>
@@ -1234,7 +1234,7 @@
 
                 <div class="nav-section">
                     <div class="nav-section-title">CUSTOMERS</div>
-                    <a href="#" class="nav-item">
+                    <a href="/admin-dashboard/users/" class="nav-item">
                         <i class="fas fa-users"></i>
                         <span>All Customers</span>
                         <span class="badge">156</span>
@@ -1243,10 +1243,15 @@
                         <i class="fas fa-star"></i>
                         <span>Reviews</span>
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="/admin-dashboard/contacts/" class="nav-item">
                         <i class="fas fa-headset"></i>
                         <span>Support</span>
                         <span class="badge">2</span>
+                    </a>
+                    <a href="/whatsapp/" class="nav-item">
+                        <i class="fas fa-headset"></i>
+                        <span>whatsAPP</span>
+                        
                     </a>
                 </div>
 
@@ -1266,31 +1271,33 @@
                     </a>
                 </div>
 
-                <!-- Finance Dropdown -->
-                <div class="nav-dropdown">
-                    <a href="#" class="dropdown-toggle">
-                        <i class="fas fa-coins"></i> Finance <i class="fas fa-chevron-down"></i>
+               <!-- Finance Section - Now like MARKETING section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">FINANCE</div>
+                    <a href="{% url 'finance:dashboard' %}" class="nav-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Finance Dashboard</span>
                     </a>
-                    <div class="dropdown-menu">
-                        <a href="{% url 'finance:dashboard' %}">
-                            <i class="fas fa-chart-line"></i> Finance Dashboard
-                        </a>
-                        <a href="{% url 'finance:monthly_summary' %}">
-                            <i class="fas fa-calendar-alt"></i> Monthly Summary
-                        </a>
-                        <a href="{% url 'finance:log_expense' %}">
-                            <i class="fas fa-receipt"></i> Log Expense
-                        </a>
-                        <a href="{% url 'finance:log_capital' %}">
-                            <i class="fas fa-coins"></i> Capital Entry
-                        </a>
-                        <a href="{% url 'finance:create_budget' %}">
-                            <i class="fas fa-chart-pie"></i> Create Budget
-                        </a>
-                        <a href="{% url 'finance:categories' %}">
-                            <i class="fas fa-tags"></i> Categories
-                        </a>
-                    </div>
+                    <a href="{% url 'finance:monthly_summary' %}" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Monthly Summary</span>
+                    </a>
+                    <a href="{% url 'finance:log_expense' %}" class="nav-item">
+                        <i class="fas fa-receipt"></i>
+                        <span>Log Expense</span>
+                    </a>
+                    <a href="{% url 'finance:log_capital' %}" class="nav-item">
+                        <i class="fas fa-coins"></i>
+                        <span>Capital Entry</span>
+                    </a>
+                    <a href="{% url 'finance:create_budget' %}" class="nav-item">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Create Budget</span>
+                    </a>
+                    <a href="{% url 'finance:categories' %}" class="nav-item">
+                        <i class="fas fa-tags"></i>
+                        <span>Categories</span>
+                    </a>
                 </div>
 
                 <div class="nav-section">

@@ -1,159 +1,467 @@
-{% comment %}=== SAVE AS: finance/templates/finance/log_expense.html ==={% endcomment %}
-{% extends 'base.html' %}
+{% extends 'parlour/base_b.html' %}
 {% load static %}
-{% block title %}Log Expense{% endblock %}
-{% block extra_css %}
+
+{% block title %}Log Expense — Hoka Finance{% endblock %}
+
+{% block extra_style %}
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@300;400;500;600&display=swap');
-:root{--bg:#f7f4ef;--s1:#fff;--s2:#eeebe4;--border:#ddd8cf;--accent:#1c1c1c;--gold:#b8860b;--green:#1a6b3c;--red:#b91c1c;--text:#1c1c1c;--muted:#7a7369;}
-*{box-sizing:border-box;margin:0;padding:0;}
-.form-page{background:var(--bg);min-height:100vh;font-family:'Inconsolata',monospace;color:var(--text);padding:36px 24px 80px;}
-.form-inner{max-width:600px;margin:0 auto;}
-.back-link{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--muted);font-size:13px;margin-bottom:28px;transition:color .15s;}
-.back-link:hover{color:var(--accent);}
-.form-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:8px;}
-.form-title span{color:var(--green);}
-.form-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;}
-.f-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
-.f-card-head{padding:16px 22px;border-bottom:1px solid var(--border);}
-.f-card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;}
-.f-card-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:600;}
-.form-input,.form-select,.form-textarea{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inconsolata',monospace;font-size:14px;outline:none;transition:border-color .15s;width:100%;}
-.form-input:focus,.form-select:focus{border-color:var(--green);}
-.budget-info{background:rgba(26,107,60,.06);border:1px solid rgba(26,107,60,.2);border-radius:10px;padding:14px;font-size:13px;}
-.budget-info strong{color:var(--green);}
-.submit-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .15s;}
-.submit-btn:hover{opacity:.85;}
+  /* Log Expense Page Styles - Inherits from base template */
+  
+  .form-page {
+    padding: 0;
+    max-width: 700px;
+    margin: 0 auto;
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Back Link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 12px;
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 24px;
+    transition: var(--transition);
+  }
+
+  .back-link:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateX(-4px);
+  }
+
+  /* Form Header */
+  .form-header {
+    margin-bottom: 28px;
+  }
+
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .form-title span {
+    color: var(--success);
+    background: linear-gradient(135deg, var(--success), #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .form-sub {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* Budget Info Card */
+  .budget-info {
+    background: linear-gradient(135deg, var(--success-soft), rgba(16, 185, 129, 0.05));
+    border: 1px solid var(--success);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .budget-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .budget-label i {
+    color: var(--success);
+    font-size: 1rem;
+  }
+
+  .budget-amount {
+    font-size: 1.5rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    color: var(--success);
+  }
+
+  .budget-remaining {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .budget-remaining strong {
+    color: var(--success);
+    font-size: 1.25rem;
+  }
+
+  /* Form Card */
+  .f-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: var(--transition);
+  }
+
+  .f-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+  }
+
+  .f-card-head {
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .f-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .f-card-title i {
+    color: var(--success);
+    font-size: 1.2rem;
+  }
+
+  .f-card-body {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Form Groups */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .form-label i {
+    color: var(--success);
+    font-size: 0.8rem;
+  }
+
+  .form-label .required {
+    color: var(--danger);
+    font-size: 0.8rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'Inter', monospace;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    outline: none;
+    width: 100%;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px var(--success-soft);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--text-soft);
+    opacity: 0.5;
+  }
+
+  /* Select dropdown styling */
+  .form-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2rem;
+  }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Error Messages */
+  .error-message {
+    background: var(--danger-soft);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Success Message */
+  .success-message {
+    background: var(--success-soft);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .form-page {
+      padding: 0;
+    }
+    
+    .f-card-head,
+    .f-card-body {
+      padding: 1.25rem;
+    }
+    
+    .budget-info {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .form-title {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Option styling in select */
+  .form-select option {
+    background: var(--card);
+    color: var(--text);
+    padding: 0.5rem;
+  }
 </style>
 {% endblock %}
+
 {% block content %}
-<div class="form-page"><div class="form-inner">
-<a href="{% url 'finance:dashboard' %}" class="back-link">← Back to Dashboard</a>
-<h1 class="form-title">Log <span>Expense</span></h1>
-<p class="form-sub">Record a business expense</p>
-<div class="budget-info">
-    Budget: <strong>{{ budget }}</strong> &mdash;
-    Remaining: <strong>KSH {{ budget.remaining|floatformat:0 }}</strong>
-</div>
-<form method="post" style="margin-top:20px;">{% csrf_token %}
-<div class="f-card">
-    <div class="f-card-head"><div class="f-card-title">Expense Details</div></div>
-    <div class="f-card-body">
-        <div class="form-group">
-            <label class="form-label">Category</label>
-            <select name="category" class="form-select" required>
-                <option value="">Select category…</option>
-                {% for cat in categories %}
-                <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Amount (KSH)</label>
-            <input type="number" name="amount" step="0.01" placeholder="0.00" class="form-input" required>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Description</label>
-            <input type="text" name="description" placeholder="What was this expense for?" class="form-input" required>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Date</label>
-            <input type="date" name="date" value="{{ today }}" class="form-input">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Receipt / Notes (optional)</label>
-            <input type="text" name="receipt_note" placeholder="Receipt number or extra notes" class="form-input">
-        </div>
+<div class="form-page">
+
+  <a href="{% url 'finance:dashboard' %}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+
+  <div class="form-header">
+    <h1 class="form-title">
+      Log <span>Expense</span>
+    </h1>
+    <p class="form-sub">
+      <i class="fas fa-receipt"></i> Record a business expense
+    </p>
+  </div>
+
+  <!-- Budget Info Card -->
+  <div class="budget-info">
+    <div class="budget-label">
+      <i class="fas fa-chart-line"></i>
+      Budget Status
     </div>
-</div>
-<button type="submit" class="submit-btn">Log Expense</button>
-</form>
-</div></div>
-{% endblock %}
-
-
-{% comment %}=== SAVE AS: finance/templates/finance/log_capital.html ==={% endcomment %}
-
-
-{% extends 'base.html' %}
-{% load static %}
-{% block title %}Log Capital Entry{% endblock %}
-{% block extra_css %}
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inconsolata:wght@300;400;500;600&display=swap');
-:root{--bg:#f7f4ef;--s1:#fff;--s2:#eeebe4;--border:#ddd8cf;--accent:#1c1c1c;--gold:#b8860b;--green:#1a6b3c;--red:#b91c1c;--blue:#1e40af;--text:#1c1c1c;--muted:#7a7369;}
-*{box-sizing:border-box;margin:0;padding:0;}
-.form-page{background:var(--bg);min-height:100vh;font-family:'Inconsolata',monospace;color:var(--text);padding:36px 24px 80px;}
-.form-inner{max-width:600px;margin:0 auto;}
-.back-link{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--muted);font-size:13px;margin-bottom:28px;transition:color .15s;}
-.back-link:hover{color:var(--accent);}
-.form-title{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-2px;margin-bottom:8px;}
-.form-title span{color:var(--blue);}
-.form-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;}
-.f-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
-.f-card-head{padding:16px 22px;border-bottom:1px solid var(--border);}
-.f-card-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;}
-.f-card-body{padding:22px;display:flex;flex-direction:column;gap:16px;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);font-weight:600;}
-.form-input,.form-select{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Inconsolata',monospace;font-size:14px;outline:none;transition:border-color .15s;width:100%;}
-.form-input:focus,.form-select:focus{border-color:var(--blue);}
-.type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.type-opt{position:relative;}
-.type-opt input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
-.type-label{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;text-align:center;}
-.type-opt input:checked + .type-label.in-label{border-color:var(--green);background:rgba(26,107,60,.06);color:var(--green);}
-.type-opt input:checked + .type-label.out-label{border-color:var(--red);background:rgba(185,28,28,.06);color:var(--red);}
-.type-icon{font-size:28px;}
-.type-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
-.submit-btn{width:100%;background:var(--accent);color:var(--bg);border:none;border-radius:10px;padding:14px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;cursor:pointer;transition:opacity .15s;}
-.submit-btn:hover{opacity:.85;}
-</style>
-{% endblock %}
-{% block content %}
-<div class="form-page"><div class="form-inner">
-<a href="{% url 'finance:dashboard' %}" class="back-link">← Back to Dashboard</a>
-<h1 class="form-title">Capital <span>Entry</span></h1>
-<p class="form-sub">Record money in or out of the business</p>
-<form method="post">{% csrf_token %}
-<div class="f-card">
-    <div class="f-card-head"><div class="f-card-title">Entry Type</div></div>
-    <div class="f-card-body">
-        <div class="type-toggle">
-            <div class="type-opt">
-                <input type="radio" name="entry_type" id="type_in" value="in" checked>
-                <label for="type_in" class="type-label in-label">
-                    <span class="type-icon">💵</span>
-                    <span class="type-name">Money In</span>
-                    <span style="font-size:11px;color:var(--muted);">Adding to business</span>
-                </label>
-            </div>
-            <div class="type-opt">
-                <input type="radio" name="entry_type" id="type_out" value="out">
-                <label for="type_out" class="type-label out-label">
-                    <span class="type-icon">💸</span>
-                    <span class="type-name">Money Out</span>
-                    <span style="font-size:11px;color:var(--muted);">Taking from business</span>
-                </label>
-            </div>
+    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+      <div>
+        <div class="budget-label" style="font-size: 0.65rem;">Total Budget</div>
+        <div class="budget-amount">KSH {{ budget|floatformat:0 }}</div>
+      </div>
+      <div>
+        <div class="budget-label" style="font-size: 0.65rem;">Remaining</div>
+        <div class="budget-remaining">
+          <strong>KSH {{ budget.remaining|floatformat:0 }}</strong>
         </div>
-        <div class="form-group">
-            <label class="form-label">Amount (KSH)</label>
-            <input type="number" name="amount" step="0.01" placeholder="0.00" class="form-input" required>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Description</label>
-            <input type="text" name="description" placeholder="e.g. Added savings for stock purchase" class="form-input" required>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Date</label>
-            <input type="date" name="date" value="{{ today }}" class="form-input">
-        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Display Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Expense Form -->
+  <form method="post">
+    {% csrf_token %}
+    
+    <div class="f-card">
+      <div class="f-card-head">
+        <div class="f-card-title">
+          <i class="fas fa-pen-alt"></i>
+          Expense Details
+        </div>
+      </div>
+      
+      <div class="f-card-body">
+        <!-- Category Field -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-tag"></i>
+            Category <span class="required">*</span>
+          </label>
+          <select name="category" class="form-select" required>
+            <option value="">Select category…</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.icon }} {{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Amount Field -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-coins"></i>
+            Amount (KSH) <span class="required">*</span>
+          </label>
+          <input 
+            type="number" 
+            name="amount" 
+            step="0.01" 
+            placeholder="0.00" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <!-- Description Field -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-align-left"></i>
+            Description <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            name="description" 
+            placeholder="What was this expense for?" 
+            class="form-input" 
+            required
+          >
+        </div>
+
+        <!-- Date Field -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-calendar-alt"></i>
+            Date
+          </label>
+          <input 
+            type="date" 
+            name="date" 
+            value="{{ today }}" 
+            class="form-input"
+          >
+        </div>
+
+        <!-- Receipt/Notes Field -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-sticky-note"></i>
+            Receipt / Notes
+          </label>
+          <input 
+            type="text" 
+            name="receipt_note" 
+            placeholder="Receipt number or extra notes" 
+            class="form-input"
+          >
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">
+      <i class="fas fa-save"></i>
+      Log Expense
+    </button>
+  </form>
+
 </div>
-<button type="submit" class="submit-btn">Save Entry</button>
-</form>
-</div></div>
 {% endblock %}

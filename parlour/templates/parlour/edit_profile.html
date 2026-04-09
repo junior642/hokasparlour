@@ -937,6 +937,171 @@
                 </div>
             </div>
             
+            <div class="bg-[var(--card)] rounded-3xl border border-[var(--border)] p-6">
+  <h3 class="font-bold text-[var(--text)] mb-1 flex items-center gap-2">
+    <i class="fab fa-whatsapp text-green-500"></i> WhatsApp
+  </h3>
+
+  {% if user.profile.whatsapp_joined %}
+  <!-- ── Connected state ── -->
+  <div class="flex items-center justify-between mt-3">
+    <div>
+      <span class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full">
+        Connected
+      </span>
+      <p class="text-sm text-[var(--text-soft)] mt-1">{{ user.profile.whatsapp_number }}</p>
+    </div>
+    <button onclick="disconnectWhatsApp()"
+            class="text-xs text-red-500 hover:text-red-700 font-semibold transition-all">
+      Disconnect
+    </button>
+  </div>
+
+  {% else %}
+  <!-- ── Not connected state ── -->
+  <p class="text-sm text-[var(--text-soft)] mt-1 mb-4">
+    Connect your WhatsApp to receive order updates and offers directly.
+  </p>
+
+  <!-- Step 1: Enter number -->
+  <div id="wa-step-1">
+    <div class="flex gap-2">
+      <input type="tel" id="wa-number" placeholder="+254 700 000 000"
+             class="flex-1 p-3 rounded-2xl border-2 border-[var(--border)] bg-[var(--bg)]
+                    text-[var(--text)] text-sm focus:outline-none focus:border-[var(--accent)]
+                    transition-all">
+      <button onclick="sendWhatsAppOTP()"
+              id="wa-send-btn"
+              class="px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-2xl
+                     hover:bg-green-600 transition-all whitespace-nowrap">
+        Send code
+      </button>
+    </div>
+    <p id="wa-step1-msg" class="text-xs mt-2 hidden"></p>
+  </div>
+
+  <!-- Step 2: Enter OTP (hidden until OTP sent) -->
+  <div id="wa-step-2" class="hidden mt-3">
+    <p class="text-xs text-[var(--text-soft)] mb-2">
+      Enter the 6-digit code sent to your WhatsApp
+    </p>
+    <div class="flex gap-2">
+      <input type="text" id="wa-otp" placeholder="000000" maxlength="6"
+             class="flex-1 p-3 rounded-2xl border-2 border-[var(--border)] bg-[var(--bg)]
+                    text-[var(--text)] text-sm text-center tracking-widest font-mono
+                    focus:outline-none focus:border-[var(--accent)] transition-all">
+      <button onclick="verifyWhatsAppOTP()"
+              class="px-4 py-2 bg-[var(--accent)] text-white text-sm font-semibold
+                     rounded-2xl hover:bg-[var(--accent-light)] transition-all">
+        Verify
+      </button>
+    </div>
+    <p id="wa-step2-msg" class="text-xs mt-2 hidden"></p>
+    <button onclick="resetWAForm()"
+            class="text-xs text-[var(--text-soft)] mt-2 hover:text-[var(--accent)] transition-all">
+      Use a different number
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+
+async function sendWhatsAppOTP() {
+  const phone = document.getElementById('wa-number').value.trim();
+  const btn = document.getElementById('wa-send-btn');
+  const msg = document.getElementById('wa-step1-msg');
+
+  if (!phone) {
+    showMsg(msg, 'Please enter your WhatsApp number.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const res = await fetch('{% url "whatsapp_connect" %}', {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `whatsapp_number=${encodeURIComponent(phone)}`
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('wa-step-1').classList.add('hidden');
+      document.getElementById('wa-step-2').classList.remove('hidden');
+    } else {
+      showMsg(msg, data.error, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Send code';
+    }
+  } catch (e) {
+    showMsg(msg, 'Something went wrong. Try again.', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Send code';
+  }
+}
+
+async function verifyWhatsAppOTP() {
+  const otp = document.getElementById('wa-otp').value.trim();
+  const msg = document.getElementById('wa-step2-msg');
+
+  if (!otp || otp.length !== 6) {
+    showMsg(msg, 'Please enter the 6-digit code.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch('{% url "whatsapp_verify" %}', {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `otp=${encodeURIComponent(otp)}`
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      showMsg(msg, data.message, 'success');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      showMsg(msg, data.error, 'error');
+    }
+  } catch (e) {
+    showMsg(msg, 'Something went wrong. Try again.', 'error');
+  }
+}
+
+async function disconnectWhatsApp() {
+  if (!confirm('Disconnect your WhatsApp from Hoka\'s Parlour?')) return;
+
+  const res = await fetch('{% url "whatsapp_disconnect" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': csrfToken}
+  });
+  const data = await res.json();
+  if (data.success) location.reload();
+}
+
+function resetWAForm() {
+  document.getElementById('wa-step-1').classList.remove('hidden');
+  document.getElementById('wa-step-2').classList.add('hidden');
+  document.getElementById('wa-otp').value = '';
+  document.getElementById('wa-number').value = '';
+  const btn = document.getElementById('wa-send-btn');
+  btn.disabled = false;
+  btn.textContent = 'Send code';
+}
+
+function showMsg(el, text, type) {
+  el.textContent = text;
+  el.className = `text-xs mt-2 ${type === 'error' ? 'text-red-500' : 'text-green-600'}`;
+  el.classList.remove('hidden');
+}
+</script>
+
+
+
             <!-- Current Profile Picture -->
             {% if request.user.profile.profile_picture %}
             <div class="profile-picture-card">
@@ -958,6 +1123,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
 function toggleDropdown() {

@@ -1,0 +1,933 @@
+{% extends 'parlour/base_b.html' %}
+{% load static %}
+
+{% block title %}User Profiles — Hoka Admin{% endblock %}
+
+{% block extra_style %}
+<style>
+  /* User Profiles Page Styles - Inherits from base template */
+  
+  .profiles-wrap {
+    padding: 0;
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stats Cards */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-light);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+  }
+
+  .stat-card.green::before { background: var(--success); }
+  .stat-card.gold::before  { background: var(--warning); }
+  .stat-card.blue::before  { background: var(--info); }
+
+  .stat-icon {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 1rem;
+    font-size: 2rem;
+    opacity: 0.08;
+    pointer-events: none;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-sub {
+    font-size: 0.7rem;
+    color: var(--text-soft);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Filter Controls */
+  .controls-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: var(--transition);
+  }
+
+  .controls-wrap:hover {
+    border-color: var(--accent-light);
+  }
+
+  .search-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    outline: none;
+  }
+
+  .search-box input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-soft);
+    font-size: 0.9rem;
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-soft);
+    font-size: 1rem;
+    padding: 4px;
+    display: none;
+    transition: color 0.2s;
+  }
+
+  .search-clear:hover {
+    color: var(--danger);
+  }
+
+  .search-clear.visible { display: block; }
+
+  .search-submit-btn {
+    padding: 0.75rem 1.75rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+
+  .search-submit-btn:hover { 
+    background: var(--accent-light);
+    transform: translateY(-1px);
+  }
+
+  .clear-filters-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--surface);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 500;
+  }
+
+  .clear-filters-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .filters-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    min-width: 130px;
+  }
+
+  .filter-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    font-weight: 700;
+  }
+
+  .filter-group select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.83rem;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    outline: none;
+    transition: var(--transition);
+    font-weight: 500;
+  }
+
+  .filter-group select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+  }
+
+  .filter-group select.active-filter {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Active Filter Chips */
+  .active-filters-bar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .active-filters-bar:empty { display: none; }
+
+  .filter-chip {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.72rem;
+    padding: 0.375rem 0.875rem 0.375rem 1rem;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: var(--transition);
+  }
+
+  .filter-chip:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .filter-chip-remove {
+    cursor: pointer;
+    opacity: 0.7;
+    font-size: 0.875rem;
+    line-height: 1;
+    transition: all 0.15s;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .filter-chip-remove:hover { 
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Table Styles */
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .admin-table thead th {
+    padding: 1rem 1rem;
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    border-bottom: 2px solid var(--border);
+    font-weight: 700;
+  }
+
+  .admin-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+  }
+
+  .admin-table tbody tr:hover {
+    background: var(--surface);
+  }
+
+  .user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+    transition: var(--transition);
+  }
+
+  tr:hover .user-avatar {
+    transform: scale(1.05);
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .user-name {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--text);
+    display: block;
+    line-height: 1.3;
+  }
+
+  .user-email {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    display: block;
+  }
+
+  /* Promo Bar */
+  .promo-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .promo-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    width: 50px;
+    overflow: hidden;
+  }
+
+  .promo-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .promo-bar-text {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .money {
+    font-weight: 800;
+    color: var(--success);
+    font-size: 0.9rem;
+  }
+
+  .money.zero { 
+    color: var(--text-soft); 
+    font-weight: 500; 
+  }
+
+  /* Action Buttons */
+  .action-btn {
+    padding: 0.375rem 0.875rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    text-decoration: none;
+    color: var(--text-soft);
+    transition: var(--transition);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .action-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    color: var(--text-soft);
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .col-hide-md { display: none; }
+  }
+
+  @media (max-width: 1200px) {
+    .col-hide-lg { display: none; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profiles-wrap">
+
+  <!-- Page Header -->
+  <div class="page-header" style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.75rem; font-weight: 700; font-family: 'Playfair Display', serif; color: var(--text);">
+        User <span style="color: var(--accent);">Profiles</span>
+      </h1>
+      <p style="color: var(--text-soft); margin-top: 0.25rem; font-size: 0.9rem;">
+        Manage, filter and analyse your customer base
+      </p>
+    </div>
+    <span style="background: var(--accent-soft); color: var(--accent); padding: 0.375rem 1rem; border-radius: 30px; font-size: 0.75rem; font-weight: 700;">
+      {{ total_count }} result{% if total_count != 1 %}s{% endif %}
+    </span>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value">{{ stats.total_users }}</div>
+      <div class="stat-sub">all time</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">🌟</div>
+      <div class="stat-label">New Today</div>
+      <div class="stat-value">{{ stats.new_today }}</div>
+      <div class="stat-sub">joined today</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon">📈</div>
+      <div class="stat-label">This Week</div>
+      <div class="stat-value">{{ stats.new_this_week }}</div>
+      <div class="stat-sub">new signups</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon">🎟️</div>
+      <div class="stat-label">Active Promo</div>
+      <div class="stat-value">{{ stats.promo_active }}</div>
+      <div class="stat-sub">promo users</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon">🤝</div>
+      <div class="stat-label">Agents</div>
+      <div class="stat-value">{{ stats.agents_approved }}</div>
+      <div class="stat-sub">approved</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon">💬</div>
+      <div class="stat-label">WhatsApp</div>
+      <div class="stat-value">{{ stats.wa_joined }}</div>
+      <div class="stat-sub">joined group</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-wrap">
+    <form method="get" id="filter-form">
+      <div class="search-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            name="q"
+            id="live-search"
+            placeholder="Search by name, email, phone…"
+            value="{{ search_query }}"
+            autocomplete="off"
+          >
+          <button type="button" class="search-clear {% if search_query %}visible{% endif %}" id="clear-search" title="Clear search">✕</button>
+        </div>
+        <button type="submit" class="search-submit-btn">Search</button>
+        <a href="{% url 'hokaadmin:user_profiles' %}" class="clear-filters-btn">Clear all filters</a>
+      </div>
+
+      <input type="hidden" name="joined"    value="{{ filters.joined }}">
+      <input type="hidden" name="promo"     value="{{ filters.promo }}">
+      <input type="hidden" name="gender"    value="{{ filters.gender }}">
+      <input type="hidden" name="agent"     value="{{ filters.agent }}">
+      <input type="hidden" name="whatsapp"  value="{{ filters.whatsapp }}">
+      <input type="hidden" name="purchases" value="{{ filters.purchases }}">
+      <input type="hidden" name="sort"      value="{{ filters.sort }}">
+    </form>
+
+    <div class="filters-row">
+      <div class="filter-group">
+        <span class="filter-label">📅 Joined</span>
+        <select id="f-joined" data-param="joined" onchange="applyFilter(this)">
+          <option value="all"     {% if filters.joined == 'all'     %}selected{% endif %}>All time</option>
+          <option value="today"   {% if filters.joined == 'today'   %}selected{% endif %}>Today</option>
+          <option value="week"    {% if filters.joined == 'week'    %}selected{% endif %}>This week</option>
+          <option value="month"   {% if filters.joined == 'month'   %}selected{% endif %}>This month</option>
+          <option value="3months" {% if filters.joined == '3months' %}selected{% endif %}>Last 3 months</option>
+          <option value="6months" {% if filters.joined == '6months' %}selected{% endif %}>Last 6 months</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">🎟️ Promo</span>
+        <select id="f-promo" data-param="promo" onchange="applyFilter(this)">
+          <option value="all"     {% if filters.promo == 'all'     %}selected{% endif %}>All</option>
+          <option value="active"  {% if filters.promo == 'active'  %}selected{% endif %}>Active promo</option>
+          <option value="used_up" {% if filters.promo == 'used_up' %}selected{% endif %}>Used up (5/5)</option>
+          <option value="has_any" {% if filters.promo == 'has_any' %}selected{% endif %}>Has promo code</option>
+          <option value="none"    {% if filters.promo == 'none'    %}selected{% endif %}>No promo</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">🛍️ Purchases</span>
+        <select id="f-purchases" data-param="purchases" onchange="applyFilter(this)">
+          <option value="all"   {% if filters.purchases == 'all'   %}selected{% endif %}>Any count</option>
+          <option value="zero"  {% if filters.purchases == 'zero'  %}selected{% endif %}>Never bought</option>
+          <option value="1to3"  {% if filters.purchases == '1to3'  %}selected{% endif %}>1 – 3 orders</option>
+          <option value="4plus" {% if filters.purchases == '4plus' %}selected{% endif %}>4+ orders</option>
+          <option value="10plus"{% if filters.purchases == '10plus'%}selected{% endif %}>10+ orders</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">👤 Gender</span>
+        <select id="f-gender" data-param="gender" onchange="applyFilter(this)">
+          <option value="all" {% if filters.gender == 'all' %}selected{% endif %}>All</option>
+          <option value="M"   {% if filters.gender == 'M'   %}selected{% endif %}>Male</option>
+          <option value="F"   {% if filters.gender == 'F'   %}selected{% endif %}>Female</option>
+          <option value="U"   {% if filters.gender == 'U'   %}selected{% endif %}>Unisex</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">🤝 Agent</span>
+        <select id="f-agent" data-param="agent" onchange="applyFilter(this)">
+          <option value="all"     {% if filters.agent == 'all'     %}selected{% endif %}>All</option>
+          <option value="yes"     {% if filters.agent == 'yes'     %}selected{% endif %}>Approved</option>
+          <option value="pending" {% if filters.agent == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="no"      {% if filters.agent == 'no'      %}selected{% endif %}>Not agent</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">💬 WhatsApp</span>
+        <select id="f-whatsapp" data-param="whatsapp" onchange="applyFilter(this)">
+          <option value="all" {% if filters.whatsapp == 'all' %}selected{% endif %}>All</option>
+          <option value="yes" {% if filters.whatsapp == 'yes' %}selected{% endif %}>Joined</option>
+          <option value="no"  {% if filters.whatsapp == 'no'  %}selected{% endif %}>Not joined</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">↕️ Sort by</span>
+        <select id="f-sort" data-param="sort" onchange="applyFilter(this)">
+          <option value="newest"           {% if filters.sort == 'newest'           %}selected{% endif %}>Newest first</option>
+          <option value="oldest"           {% if filters.sort == 'oldest'           %}selected{% endif %}>Oldest first</option>
+          <option value="total_spent_desc" {% if filters.sort == 'total_spent_desc' %}selected{% endif %}>Highest spend</option>
+          <option value="total_spent_asc"  {% if filters.sort == 'total_spent_asc'  %}selected{% endif %}>Lowest spend</option>
+          <option value="orders_desc"      {% if filters.sort == 'orders_desc'      %}selected{% endif %}>Most orders</option>
+          <option value="orders_asc"       {% if filters.sort == 'orders_asc'       %}selected{% endif %}>Fewest orders</option>
+          <option value="promo_desc"       {% if filters.sort == 'promo_desc'       %}selected{% endif %}>Most promo used</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Filter Chips -->
+  <div class="active-filters-bar" id="active-chips"></div>
+
+  <!-- User Table -->
+  <div class="table-wrap" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+    <div class="table-header-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border);">
+      <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-soft); letter-spacing: 0.05em;">
+        SHOWING {{ total_count }} USER{% if total_count != 1 %}S{% endif %}{% if search_query %} · SEARCH: "{{ search_query }}"{% endif %}
+      </span>
+      <button class="export-btn" onclick="exportCSV()" style="padding: 0.375rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: var(--transition);">
+        ⬇ Export CSV
+      </button>
+    </div>
+
+    {% if enriched_users %}
+    <div style="overflow-x: auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Phone</th>
+            <th class="col-hide-md">Gender</th>
+            <th>Orders</th>
+            <th>Total Spent</th>
+            <th>Promo</th>
+            <th class="col-hide-md">Agent</th>
+            <th class="col-hide-lg">WhatsApp</th>
+            <th>Joined</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          {% for item in enriched_users %}
+          <tr data-name="{{ item.user.get_full_name|lower }} {{ item.user.username|lower }}" data-email="{{ item.user.email|lower }}" data-phone="{{ item.profile.phone_number|default:'' }}">
+            <td style="padding: 0.875rem 1rem;">
+              <div class="user-cell">
+                <div class="user-avatar">
+                  {% if item.profile and item.profile.profile_picture %}
+                    <img src="{{ item.profile.profile_picture.url }}" alt="">
+                  {% else %}
+                    {{ item.user.username|slice:":2"|upper }}
+                  {% endif %}
+                </div>
+                <div>
+                  <span class="user-name">
+                    {% if item.user.get_full_name %}
+                      {{ item.user.get_full_name }}
+                    {% else %}
+                      {{ item.user.username }}
+                    {% endif %}
+                  </span>
+                  <span class="user-email">{{ item.user.email }}</span>
+                </div>
+              </div>
+            </td>
+            <td style="padding: 0.875rem 1rem;">
+              {% if item.profile and item.profile.phone_number %}
+                <span style="font-family: monospace; font-size: 0.82rem; font-weight: 500;">{{ item.profile.phone_number }}</span>
+              {% else %}
+                <span style="color: var(--text-soft); font-style: italic; font-size: 0.78rem;">—</span>
+              {% endif %}
+            </td>
+            <td class="col-hide-md" style="padding: 0.875rem 1rem;">
+              {% if item.profile and item.profile.gender %}
+                {% if item.profile.gender == 'M' %}
+                  <span class="status-badge shipped">♂ M</span>
+                {% elif item.profile.gender == 'F' %}
+                  <span class="status-badge" style="background: var(--accent-soft); color: var(--accent);">♀ F</span>
+                {% else %}
+                  <span class="status-badge cancelled">⚬ U</span>
+                {% endif %}
+              {% else %}
+                <span style="color: var(--text-soft);">—</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.875rem 1rem;">
+              <span style="font-family: monospace; font-weight: 800; font-size: 0.9rem;">{{ item.total_orders }}</span>
+              {% if item.total_orders == 0 %}
+                <span class="status-badge cancelled" style="margin-left: 0.25rem;">new</span>
+              {% elif item.total_orders >= 10 %}
+                <span class="status-badge pending" style="margin-left: 0.25rem;">⭐ vip</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.875rem 1rem;">
+              <span class="money {% if item.total_spent == 0 %}zero{% endif %}">
+                KES {{ item.total_spent|floatformat:0 }}
+              </span>
+            </td>
+            <td style="padding: 0.875rem 1rem;">
+              {% if item.promo %}
+                <div class="promo-bar-wrap">
+                  <div class="promo-bar">
+                    <div class="promo-bar-fill" style="width: {% widthratio item.promo.promo_purchases_count 5 100 %}%"></div>
+                  </div>
+                  <span class="promo-bar-text">
+                    {{ item.promo.promo_purchases_count }}/5
+                    {% if item.promo.is_active %}
+                      <span class="status-badge paid" style="margin-left: 0.125rem;">active</span>
+                    {% else %}
+                      <span class="status-badge cancelled" style="margin-left: 0.125rem;">done</span>
+                    {% endif %}
+                  </span>
+                </div>
+              {% else %}
+                <span style="color: var(--text-soft); font-style: italic; font-size: 0.78rem;">none</span>
+              {% endif %}
+            </td>
+            <td class="col-hide-md" style="padding: 0.875rem 1rem;">
+              {% if item.agent %}
+                {% if item.agent.status == 'approved' %}
+                  <span class="status-badge paid">✓ agent</span>
+                  <div style="font-size: 0.65rem; color: var(--text-soft); margin-top: 0.25rem; font-family: monospace;">{{ item.agent.referral_code }}</div>
+                {% elif item.agent.status == 'pending' %}
+                  <span class="status-badge pending">⏳ pending</span>
+                {% else %}
+                  <span class="status-badge cancelled">⚠ suspended</span>
+                {% endif %}
+              {% else %}
+                <span style="color: var(--text-soft);">—</span>
+              {% endif %}
+            </td>
+            <td class="col-hide-lg" style="padding: 0.875rem 1rem;">
+              {% if item.profile and item.profile.whatsapp_joined %}
+                <span class="status-badge paid">✓ joined</span>
+              {% else %}
+                <span class="status-badge cancelled">✗ no</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.875rem 1rem; white-space: nowrap; font-size: 0.78rem; color: var(--text-soft); font-weight: 500;">
+              {{ item.user.date_joined|date:"d M Y" }}
+            </td>
+            <td style="padding: 0.875rem 1rem;">
+              <a href="{% url 'hokaadmin:user_profile_detail' item.user.id %}" class="action-btn">View →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--surface); font-size: 0.8rem; color: var(--text-soft);">
+      <span>Showing all {{ total_count }} users</span>
+      <span id="live-count" style="display:none;"></span>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">👤</div>
+      <p style="font-size: 0.9rem;">No users match the current filters.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const FILTER_LABELS = {
+  joined:    { all:'', today:'Today', week:'This week', month:'This month', '3months':'Last 3mo', '6months':'Last 6mo' },
+  promo:     { all:'', active:'Active promo', used_up:'Promo used up', has_any:'Has promo', none:'No promo' },
+  purchases: { all:'', zero:'Never bought', '1to3':'1-3 orders', '4plus':'4+ orders', '10plus':'10+ orders' },
+  gender:    { all:'', M:'Male', F:'Female', U:'Unisex' },
+  agent:     { all:'', yes:'Agent ✓', pending:'Agent pending', no:'Not agent' },
+  whatsapp:  { all:'', yes:'WhatsApp ✓', no:'No WhatsApp' },
+  sort:      { newest:'', oldest:'Sort: Oldest', total_spent_desc:'Sort: Highest spend', total_spent_asc:'Sort: Lowest spend',
+               orders_desc:'Sort: Most orders', orders_asc:'Sort: Fewest orders', promo_desc:'Sort: Most promo' }
+};
+
+function getParams() {
+  return new URLSearchParams(window.location.search);
+}
+
+function applyFilter(sel) {
+  const params = getParams();
+  params.set(sel.dataset.param, sel.value);
+  params.delete('page');
+  window.location.search = params.toString();
+}
+
+function renderChips() {
+  const params = getParams();
+  const container = document.getElementById('active-chips');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const chipFor = (param, val) => {
+    const label = FILTER_LABELS[param]?.[val];
+    if (!label || val === 'all' || (param === 'sort' && val === 'newest')) return;
+    const chip = document.createElement('span');
+    chip.className = 'filter-chip';
+    chip.innerHTML = `${label} <span class="filter-chip-remove" title="Remove">✕</span>`;
+    chip.querySelector('.filter-chip-remove').addEventListener('click', () => {
+      const p = getParams();
+      p.set(param, 'all');
+      window.location.search = p.toString();
+    });
+    container.appendChild(chip);
+  };
+
+  ['joined','promo','purchases','gender','agent','whatsapp','sort'].forEach(param => {
+    chipFor(param, params.get(param) || 'all');
+  });
+
+  const q = params.get('q');
+  if (q) {
+    const chip = document.createElement('span');
+    chip.className = 'filter-chip';
+    chip.innerHTML = `Search: "${q}" <span class="filter-chip-remove">✕</span>`;
+    chip.querySelector('.filter-chip-remove').addEventListener('click', () => {
+      const p = getParams();
+      p.delete('q');
+      window.location.search = p.toString();
+    });
+    container.appendChild(chip);
+  }
+}
+
+renderChips();
+
+document.querySelectorAll('[data-param]').forEach(sel => {
+  if (sel.value !== 'all' && sel.value !== 'newest') {
+    sel.classList.add('active-filter');
+  }
+});
+
+const searchInput = document.getElementById('live-search');
+const clearBtn = document.getElementById('clear-search');
+const tableBody = document.getElementById('table-body');
+const liveCount = document.getElementById('live-count');
+const rows = tableBody ? Array.from(tableBody.querySelectorAll('tr')) : [];
+
+let searchTimer;
+if (searchInput) {
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => liveSearch(this.value.trim()), 120);
+    if (clearBtn) clearBtn.classList.toggle('visible', this.value.length > 0);
+  });
+}
+
+function liveSearch(query) {
+  let visible = 0;
+  const lq = query.toLowerCase();
+
+  rows.forEach(row => {
+    const name = row.dataset.name || '';
+    const email = row.dataset.email || '';
+    const phone = row.dataset.phone || '';
+    const match = !lq || name.includes(lq) || email.includes(lq) || phone.includes(lq);
+    row.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+
+  if (liveCount) {
+    if (query) {
+      liveCount.style.display = 'inline';
+      liveCount.textContent = `· Live: ${visible} match${visible !== 1 ? 'es' : ''}`;
+    } else {
+      liveCount.style.display = 'none';
+    }
+  }
+}
+
+if (clearBtn) {
+  clearBtn.addEventListener('click', () => {
+    if (searchInput) {
+      searchInput.value = '';
+      clearBtn.classList.remove('visible');
+      liveSearch('');
+      searchInput.focus();
+    }
+  });
+}
+
+function exportCSV() {
+  if (!tableBody) return;
+  const visibleRows = rows.filter(r => r.style.display !== 'none');
+  const lines = ['Name,Email,Phone,Gender,Orders,Total Spent,Promo,Agent,WhatsApp,Joined'];
+
+  visibleRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const name = cells[0]?.querySelector('.user-name')?.textContent.trim() || '';
+    const email = cells[0]?.querySelector('.user-email')?.textContent.trim() || '';
+    const phone = cells[1]?.textContent.trim() || '';
+    const gender = cells[2]?.textContent.trim() || '';
+    const orders = cells[3]?.textContent.trim().replace(/\s+/g, ' ') || '';
+    const spent = cells[4]?.textContent.trim() || '';
+    const promo = cells[5]?.textContent.trim().replace(/\s+/g, ' ') || '';
+    const agent = cells[6]?.textContent.trim() || '';
+    const wa = cells[7]?.textContent.trim() || '';
+    const joined = cells[8]?.textContent.trim() || '';
+    lines.push([name,email,phone,gender,orders,spent,promo,agent,wa,joined].map(v => `"${v.replace(/"/g,'""')}"`).join(','));
+  });
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'hoka_users_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+</script>
+{% endblock %}

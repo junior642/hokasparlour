@@ -1,0 +1,135 @@
+{% extends 'parlour/base.html' %}
+{% block title %}For You — Hoka's Parlour{% endblock %}
+
+{% block content %}
+
+{% if show_quiz %}
+<!-- ── Onboarding Questionnaire ─────────────────────────────────────── -->
+<div class="max-w-lg mx-auto mt-8 px-4">
+  <div class="bg-[var(--card)] rounded-3xl border border-[var(--border)] p-8">
+    
+    <div class="text-center mb-8">
+      <span class="text-4xl">✨</span>
+      <h1 class="text-2xl font-bold mt-3 text-[var(--text)]">Personalise your experience</h1>
+      <p class="text-[var(--text-soft)] mt-2 text-sm">Quick 4-question quiz — takes 30 seconds</p>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="save_preferences" value="1">
+
+      <!-- Gender -->
+      <div class="mb-6">
+        <label class="block mb-3 font-semibold text-sm text-[var(--text)]">I shop for</label>
+        <div class="grid grid-cols-3 gap-2">
+          {% for val, label in prefs_gender_choices %}
+          <label class="flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-[var(--border)] cursor-pointer has-[:checked]:border-[var(--accent)] has-[:checked]:bg-[var(--accent-soft)] transition-all text-center">
+            <input type="radio" name="gender" value="{{ val }}" class="sr-only">
+            <span class="text-sm font-medium text-[var(--text)]">{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Age range -->
+      <div class="mb-6">
+        <label class="block mb-3 font-semibold text-sm text-[var(--text)]">Age range</label>
+        <div class="flex flex-wrap gap-2">
+          {% for val, label in age_choices %}
+          <label class="px-4 py-2 rounded-full border-2 border-[var(--border)] cursor-pointer has-[:checked]:border-[var(--accent)] has-[:checked]:bg-[var(--accent-soft)] transition-all text-sm font-medium text-[var(--text)]">
+            <input type="radio" name="age_range" value="{{ val }}" class="sr-only">
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Style -->
+      <div class="mb-6">
+        <label class="block mb-3 font-semibold text-sm text-[var(--text)]">My style is</label>
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {% for val, label in style_choices %}
+          <label class="flex items-center gap-2 p-3 rounded-2xl border-2 border-[var(--border)] cursor-pointer has-[:checked]:border-[var(--accent)] has-[:checked]:bg-[var(--accent-soft)] transition-all">
+            <input type="radio" name="style" value="{{ val }}" class="sr-only">
+            <span class="text-sm font-medium text-[var(--text)]">{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Favourite categories -->
+      <div class="mb-8">
+        <label class="block mb-3 font-semibold text-sm text-[var(--text)]">Categories I love <span class="text-[var(--text-soft)] font-normal">(pick any)</span></label>
+        <div class="flex flex-wrap gap-2">
+          {% for cat in categories %}
+          <label class="px-4 py-2 rounded-full border-2 border-[var(--border)] cursor-pointer has-[:checked]:border-[var(--accent)] has-[:checked]:bg-[var(--accent-soft)] transition-all text-sm font-medium text-[var(--text)]">
+            <input type="checkbox" name="categories" value="{{ cat.id }}" class="sr-only">
+            {{ cat.name }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="submit"
+              class="w-full py-4 bg-[var(--accent)] text-white font-semibold rounded-2xl hover:bg-[var(--accent-light)] transition-all">
+        Show my picks
+      </button>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<!-- ── For You Recommendations ────────────────────────────────────── -->
+
+<div class="mb-6 flex items-center justify-between">
+  <h1 class="text-2xl font-bold text-[var(--text)] flex items-center gap-2">
+    <span>✨</span> For You
+  </h1>
+  <a href="?retake=1" class="text-xs text-[var(--text-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-1">
+    <i class="fas fa-sliders-h text-xs"></i> Update preferences
+  </a>
+</div>
+
+<!-- Promo strip -->
+{% if promo_products %}
+<section class="mb-8 bg-[var(--accent-soft)] rounded-2xl p-4 border border-[var(--accent)] border-opacity-30">
+  <div class="flex items-center gap-2 mb-3">
+    <span class="bg-[var(--accent)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+      {{ promo_remaining }} promo left
+    </span>
+    <h2 class="text-sm font-bold text-[var(--text)]">Your special price is active</h2>
+  </div>
+  <div class="grid grid-cols-3 lg:grid-cols-5 gap-2">
+    {% for product in promo_products %}{% include 'includes/product_card.html' %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Macro to render a product row -->
+{% for section in for_you_sections %}
+{% if section.products %}
+<section class="mb-8">
+  <h2 class="text-sm lg:text-lg font-bold text-[var(--text)] flex items-center gap-2 mb-3">
+    <span class="w-1 h-4 bg-[var(--accent)] rounded-full inline-block"></span>
+    {{ section.title }}
+  </h2>
+  <div class="grid grid-cols-3 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2 lg:gap-4">
+    {% for product in section.products %}{% include 'includes/product_card.html' %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endfor %}
+
+{% endif %}
+
+<!-- Handle retake quiz -->
+{% if request.GET.retake %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    fetch('/for-you/reset-prefs/', {method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'}})
+      .then(() => location.reload());
+  });
+</script>
+{% endif %}
+
+{% endblock %}

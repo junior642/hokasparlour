@@ -15,6 +15,15 @@ import random
 import logging
 from django.contrib.admin.views.decorators import staff_member_required
 from .models import Agent, PromoUsage
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q, Max
+from collections import defaultdict
+from .models import (
+    Product, Category, Order, OrderItem, OrderHistory,
+    Advertisement, AdImage, AdImpression, MpesaPayment,
+    Profile, EmailOTP, ProductView, UserPreference,
+    Agent, PromoUsage, Wishlist,
+)
 
 def home(request):
     from django.db.models import Sum
@@ -175,7 +184,163 @@ def home(request):
     return render(request, 'parlour/home.html', context)
 
 
+# ── New: For You view ─────────────────────────────────────────────────────────
+from django.db.models import Count, Q
+from collections import defaultdict
 
+@login_required
+def for_you(request):
+    user = request.user
+
+    # Handle retake — delete prefs and show quiz again
+    if request.GET.get('retake') == '1':
+        UserPreference.objects.filter(user=user).delete()
+        return redirect('for_you')
+
+    # Handle questionnaire POST
+    if request.method == 'POST' and 'save_preferences' in request.POST:
+        prefs, _ = UserPreference.objects.get_or_create(user=user)
+        prefs.gender = request.POST.get('gender', '')
+        prefs.age_range = request.POST.get('age_range', '')
+        prefs.style = request.POST.get('style', '')
+        cat_ids = request.POST.getlist('categories')
+        prefs.favourite_categories.set(cat_ids)
+        prefs.save()
+        # Also sync to Profile
+        profile = user.profile
+        profile.gender = prefs.gender
+        profile.save(update_fields=['gender'])
+        return redirect('for_you')
+
+    # Shared quiz context (used in both show_quiz and main view)
+    quiz_context = {
+        'prefs_gender_choices': [('M', 'Male'), ('F', 'Female'), ('U', 'Unisex')],
+        'age_choices': UserPreference._meta.get_field('age_range').choices,
+        'style_choices': UserPreference._meta.get_field('style').choices,
+        'categories': Category.objects.all(),
+    }
+
+    # Check if questionnaire done
+    try:
+        prefs = user.preferences
+        has_prefs = True
+    except Exception:
+        has_prefs = False
+        prefs = None
+
+    if not has_prefs:
+        return render(request, 'parlour/for_you.html', {
+            'show_quiz': True,
+            **quiz_context,
+        })
+
+    # ── Signal 1: Promo strip ────────────────────────────────────────────────
+    promo_products = []
+    remaining = 0
+    try:
+        promo = user.promousage
+        if promo.is_active and promo.promo_purchases_count < 5:
+            remaining = 5 - promo.promo_purchases_count
+            promo_products = list(Product.objects.filter(
+                discount_price__isnull=False
+            ).order_by('?')[:10])
+    except Exception:
+        pass
+
+    # ── Signal 2: Buy again ──────────────────────────────────────────────────
+    bought_ids = list(
+        OrderItem.objects.filter(order__orderhistory__user=user, order__is_paid=True)
+        .values('product_id')
+        .annotate(times=Count('product_id'))
+        .order_by('-times')
+        .values_list('product_id', flat=True)[:8]
+    )
+    buy_again = list(Product.objects.filter(id__in=bought_ids))
+
+    # ── Signal 3: Recently viewed (unique products, deduplicated) ────────────
+    viewed_ids = list(
+        ProductView.objects.filter(user=user)
+        .values('product_id')
+        .annotate(last=Max('viewed_at'))
+        .order_by('-last')
+        .values_list('product_id', flat=True)[:10]
+    )
+    recently_viewed = list(Product.objects.filter(id__in=viewed_ids).exclude(id__in=bought_ids))
+
+    # ── Signal 4: Wishlist → same-category new arrivals ──────────────────────
+    wishlist_cat_ids = list(
+        user.wishlist_items.values_list('product__category_id', flat=True).distinct()
+    )
+    wishlist_recommendations = list(
+        Product.objects.filter(category_id__in=wishlist_cat_ids)
+        .exclude(id__in=bought_ids)
+        .exclude(wishlisted_by__user=user)
+        .order_by('-created_at')[:10]
+    ) if wishlist_cat_ids else []
+
+    # ── Signal 5: Top category picks ─────────────────────────────────────────
+    top_category = (
+        OrderItem.objects.filter(order__orderhistory__user=user, order__is_paid=True)
+        .values('product__category')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+        .first()
+    )
+    top_category_products = []
+    top_cat_name = ''
+    if top_category and top_category['product__category']:
+        cat_id = top_category['product__category']
+        top_cat_name = Category.objects.get(id=cat_id).name
+        top_category_products = list(
+            Product.objects.filter(category_id=cat_id)
+            .exclude(id__in=bought_ids)
+            .order_by('-created_at')[:10]
+        )
+
+    # ── Signal 6: Collaborative — others also bought ─────────────────────────
+    collab = []
+    if bought_ids:
+        collab_ids = list(
+            OrderItem.objects.filter(
+                order__orderitem__product_id__in=bought_ids,
+                order__is_paid=True
+            )
+            .exclude(product_id__in=bought_ids)
+            .values('product_id')
+            .annotate(score=Count('product_id'))
+            .order_by('-score')
+            .values_list('product_id', flat=True)[:10]
+        )
+        collab = list(Product.objects.filter(id__in=collab_ids))
+
+    # ── Signal 7: Gender-matched picks ───────────────────────────────────────
+    gender = prefs.gender or getattr(user.profile, 'gender', '')
+    gender_picks = []
+    if gender:
+        gender_picks = list(
+            Product.objects.filter(gender=gender)
+            .exclude(id__in=bought_ids)
+            .order_by('-created_at')[:10]
+        )
+
+    for_you_sections = [
+        {'title': '🔁 Buy again',                 'products': buy_again},
+        {'title': '👀 Recently viewed',            'products': recently_viewed},
+        {'title': '❤️ From your wishlist',         'products': wishlist_recommendations},
+        {'title': f'🏷️ More from {top_cat_name}', 'products': top_category_products},
+        {'title': '🤝 Others also bought',         'products': collab},
+        {'title': '✨ Picked for you',             'products': gender_picks},
+    ]
+
+    return render(request, 'parlour/for_you.html', {
+        'show_quiz': False,
+        'prefs': prefs,
+        'promo_products': promo_products,
+        'promo_remaining': remaining,
+        'for_you_sections': for_you_sections,
+        # pass quiz context so "Update preferences" re-renders the form correctly
+        **quiz_context,
+    })
     
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -198,6 +363,21 @@ def product_detail(request, product_id):
         id=product.id
     ).order_by('-created_at')[:4]
 
+    # ── Track product view ────────────────────────────────────────
+    if request.user.is_authenticated:
+        # Avoid duplicate entries within the same session visit
+        already_logged = ProductView.objects.filter(
+            user=request.user,
+            product=product,
+            viewed_at__gte=timezone.now() - timedelta(hours=1)
+        ).exists()
+        if not already_logged:
+            ProductView.objects.create(
+                user=request.user,
+                product=product,
+                session_key=request.session.session_key or ''
+            )
+
     # ── Pricing info ──────────────────────────────────────────────
     user_promo = None
     if request.user.is_authenticated:
@@ -218,9 +398,10 @@ def product_detail(request, product_id):
         'recommended_products': recommended_products,
         'user_promo': user_promo,
         'prices': prices,
-        'delivery_info': delivery_info,     # ← NEW
+        'delivery_info': delivery_info,
     }
     return render(request, 'parlour/product_detail.html', context)
+
 
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
@@ -1593,157 +1774,88 @@ def load_saved_items(request):
 
 from django.core.mail import EmailMessage
 from django.conf import settings
+from parlour.models import ContactMessage  # adjust import path to match your app
 import logging
 
 logger = logging.getLogger(__name__)
 
 def contact(request):
-    """Contact Us page with styled HTML email handling"""
+    """Contact Us page with styled HTML email handling + DB save"""
     if request.method == 'POST':
-        full_name = request.POST.get('full_name')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone', '')
-        subject = request.POST.get('subject')
-        order_number = request.POST.get('order_number', '')
-        message = request.POST.get('message')
+        full_name    = request.POST.get('full_name', '').strip()
+        email        = request.POST.get('email', '').strip()
+        phone        = request.POST.get('phone', '').strip()
+        subject      = request.POST.get('subject', 'other')
+        order_number = request.POST.get('order_number', '').strip()
+        message      = request.POST.get('message', '').strip()
 
-        # Email to store owner (Notification)
-        admin_email_subject = f"New Contact: {subject} - {full_name}"
-        
+        # ── Save to database ──────────────────────────────────────
+        contact_msg = ContactMessage.objects.create(
+            full_name    = full_name,
+            email        = email,
+            phone        = phone,
+            subject      = subject,
+            order_number = order_number,
+            message      = message,
+            user         = request.user if request.user.is_authenticated else None,
+            ip_address   = request.META.get('REMOTE_ADDR'),
+        )
+
+        # ── Email to store owner (Notification) ───────────────────
+        admin_email_subject = f"New Contact: {contact_msg.get_subject_display()} - {full_name}"
+
         admin_html_message = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <style>
-                body {{
-                    font-family: 'Inter', Arial, sans-serif;
-                    background: #f5f5f5;
-                    margin: 0;
-                    padding: 20px;
-                }}
-                .container {{
-                    max-width: 600px;
-                    margin: 0 auto;
-                    background: white;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                }}
-                .header {{
-                    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-                    color: white;
-                    padding: 30px;
-                    text-align: center;
-                }}
-                .header h1 {{
-                    margin: 0;
-                    font-size: 24px;
-                }}
-                .badge {{
-                    display: inline-block;
-                    background: rgba(255,255,255,0.2);
-                    padding: 5px 15px;
-                    border-radius: 20px;
-                    font-size: 12px;
-                    margin-top: 10px;
-                }}
-                .content {{
-                    padding: 30px;
-                }}
-                .info-grid {{
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 15px;
-                    margin: 20px 0;
-                }}
-                .info-item {{
-                    background: #f8f9fa;
-                    padding: 15px;
-                    border-radius: 8px;
-                    border-left: 3px solid #dc3545;
-                }}
-                .info-item strong {{
-                    display: block;
-                    color: #666;
-                    font-size: 11px;
-                    text-transform: uppercase;
-                    margin-bottom: 5px;
-                }}
-                .info-item span {{
-                    color: #333;
-                    font-size: 15px;
-                }}
-                .message-box {{
-                    background: #fff3cd;
-                    border: 1px solid #ffc107;
-                    border-radius: 8px;
-                    padding: 20px;
-                    margin: 20px 0;
-                }}
-                .message-box h3 {{
-                    color: #856404;
-                    margin: 0 0 15px 0;
-                    font-size: 16px;
-                }}
-                .footer {{
-                    background: #f8f9fa;
-                    padding: 20px;
-                    text-align: center;
-                    color: #666;
-                    font-size: 13px;
-                }}
+                body {{font-family: 'Inter', Arial, sans-serif;background: #f5f5f5;margin: 0;padding: 20px;}}
+                .container {{max-width: 600px;margin: 0 auto;background: white;border-radius: 12px;overflow: hidden;box-shadow: 0 4px 12px rgba(0,0,0,0.1);}}
+                .header {{background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);color: white;padding: 30px;text-align: center;}}
+                .header h1 {{margin: 0;font-size: 24px;}}
+                .badge {{display: inline-block;background: rgba(255,255,255,0.2);padding: 5px 15px;border-radius: 20px;font-size: 12px;margin-top: 10px;}}
+                .content {{padding: 30px;}}
+                .info-grid {{display: grid;grid-template-columns: 1fr 1fr;gap: 15px;margin: 20px 0;}}
+                .info-item {{background: #f8f9fa;padding: 15px;border-radius: 8px;border-left: 3px solid #dc3545;}}
+                .info-item strong {{display: block;color: #666;font-size: 11px;text-transform: uppercase;margin-bottom: 5px;}}
+                .info-item span {{color: #333;font-size: 15px;}}
+                .message-box {{background: #fff3cd;border: 1px solid #ffc107;border-radius: 8px;padding: 20px;margin: 20px 0;}}
+                .message-box h3 {{color: #856404;margin: 0 0 15px 0;font-size: 16px;}}
+                .footer {{background: #f8f9fa;padding: 20px;text-align: center;color: #666;font-size: 13px;}}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
                     <h1>🔔 New Contact Form Submission</h1>
-                    <div class="badge">Hoka's Parlour Website</div>
+                    <div class="badge">Hoka's Parlour Website · Ref #{contact_msg.id}</div>
                 </div>
-                
                 <div class="content">
                     <h2 style="color: #333; margin-bottom: 20px;">Contact Details</h2>
-                    
                     <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Full Name</strong>
-                            <span>{full_name}</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Email</strong>
-                            <span>{email}</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Phone</strong>
-                            <span>{phone if phone else 'Not provided'}</span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Subject</strong>
-                            <span>{subject}</span>
-                        </div>
+                        <div class="info-item"><strong>Full Name</strong><span>{full_name}</span></div>
+                        <div class="info-item"><strong>Email</strong><span>{email}</span></div>
+                        <div class="info-item"><strong>Phone</strong><span>{phone if phone else 'Not provided'}</span></div>
+                        <div class="info-item"><strong>Subject</strong><span>{contact_msg.get_subject_display()}</span></div>
                     </div>
-                    
                     {f'''
                     <div style="background: #e8f5e9; border-left: 3px solid #4caf50; padding: 12px 15px; border-radius: 4px; margin: 15px 0;">
                         <strong style="color: #2e7d32; font-size: 13px;">Order Number:</strong>
                         <span style="color: #1b5e20; font-size: 15px; margin-left: 10px;">#{order_number}</span>
                     </div>
                     ''' if order_number else ''}
-                    
                     <div class="message-box">
                         <h3>📩 Message</h3>
                         <p style="color: #333; line-height: 1.6; margin: 0; white-space: pre-wrap;">{message}</p>
                     </div>
-                    
                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 20px;">
                         <p style="margin: 0; color: #666; font-size: 14px;">
                             <strong>Quick Actions:</strong><br>
-                            Reply to: <a href="mailto:{email}" style="color: #dc3545; text-decoration: none;">{email}</a>
-                            {f'<br>Call: <a href="tel:{phone}" style="color: #dc3545; text-decoration: none;">{phone}</a>' if phone else ''}
+                            Reply to: <a href="mailto:{email}" style="color: #dc3545;">{email}</a>
+                            {f'<br>Call: <a href="tel:{phone}" style="color: #dc3545;">{phone}</a>' if phone else ''}
                         </p>
                     </div>
                 </div>
-                
                 <div class="footer">
                     <p style="margin: 5px 0;">Hoka's Parlour Admin Panel</p>
                     <p style="margin: 5px 0; color: #999;">This is an automated notification</p>
@@ -1752,112 +1864,32 @@ def contact(request):
         </body>
         </html>
         """
-        
-        # Customer auto-reply (Styled)
+
+        # ── Customer auto-reply ───────────────────────────────────
         customer_html_message = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <style>
-                body {{
-                    font-family: 'Inter', Arial, sans-serif;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    margin: 0;
-                    padding: 20px;
-                }}
-                .container {{
-                    max-width: 600px;
-                    margin: 0 auto;
-                    background: white;
-                    border-radius: 16px;
-                    overflow: hidden;
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-                }}
-                .header {{
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 40px 30px;
-                    text-align: center;
-                }}
-                .logo {{
-                    font-size: 32px;
-                    font-weight: 800;
-                    margin-bottom: 10px;
-                    font-family: 'Playfair Display', serif;
-                }}
-                .logo span {{
-                    color: #ffd700;
-                }}
-                .content {{
-                    padding: 40px 30px;
-                }}
-                .success-box {{
-                    background: #d4edda;
-                    border: 1px solid #c3e6cb;
-                    border-left: 4px solid #28a745;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin: 20px 0;
-                    text-align: center;
-                }}
-                .success-box h2 {{
-                    color: #155724;
-                    margin: 0 0 10px 0;
-                    font-size: 22px;
-                }}
-                .info-box {{
-                    background: #f8f9fa;
-                    padding: 20px;
-                    border-radius: 8px;
-                    margin: 20px 0;
-                }}
-                .info-box h3 {{
-                    color: #333;
-                    margin: 0 0 15px 0;
-                    font-size: 18px;
-                }}
-                .detail-row {{
-                    display: flex;
-                    justify-content: space-between;
-                    padding: 10px 0;
-                    border-bottom: 1px solid #e0e0e0;
-                }}
-                .detail-row:last-child {{
-                    border-bottom: none;
-                }}
-                .detail-row strong {{
-                    color: #666;
-                }}
-                .detail-row span {{
-                    color: #333;
-                    font-weight: 600;
-                }}
-                .contact-box {{
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 25px;
-                    border-radius: 8px;
-                    margin: 20px 0;
-                }}
-                .contact-box h3 {{
-                    margin: 0 0 15px 0;
-                    font-size: 18px;
-                }}
-                .contact-box p {{
-                    margin: 8px 0;
-                    font-size: 15px;
-                }}
-                .footer {{
-                    background: #f8f9fa;
-                    padding: 30px;
-                    text-align: center;
-                    border-top: 1px solid #eee;
-                }}
-                .footer p {{
-                    color: #666;
-                    margin: 5px 0;
-                    font-size: 14px;
-                }}
+                body {{font-family: 'Inter', Arial, sans-serif;background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);margin: 0;padding: 20px;}}
+                .container {{max-width: 600px;margin: 0 auto;background: white;border-radius: 16px;overflow: hidden;box-shadow: 0 20px 40px rgba(0,0,0,0.15);}}
+                .header {{background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);color: white;padding: 40px 30px;text-align: center;}}
+                .logo {{font-size: 32px;font-weight: 800;margin-bottom: 10px;}}
+                .logo span {{color: #ffd700;}}
+                .content {{padding: 40px 30px;}}
+                .success-box {{background: #d4edda;border: 1px solid #c3e6cb;border-left: 4px solid #28a745;padding: 20px;border-radius: 8px;margin: 20px 0;text-align: center;}}
+                .success-box h2 {{color: #155724;margin: 0 0 10px 0;font-size: 22px;}}
+                .info-box {{background: #f8f9fa;padding: 20px;border-radius: 8px;margin: 20px 0;}}
+                .info-box h3 {{color: #333;margin: 0 0 15px 0;font-size: 18px;}}
+                .detail-row {{display: flex;justify-content: space-between;padding: 10px 0;border-bottom: 1px solid #e0e0e0;}}
+                .detail-row:last-child {{border-bottom: none;}}
+                .detail-row strong {{color: #666;}}
+                .detail-row span {{color: #333;font-weight: 600;}}
+                .contact-box {{background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);color: white;padding: 25px;border-radius: 8px;margin: 20px 0;}}
+                .contact-box h3 {{margin: 0 0 15px 0;font-size: 18px;}}
+                .contact-box p {{margin: 8px 0;font-size: 15px;}}
+                .footer {{background: #f8f9fa;padding: 30px;text-align: center;border-top: 1px solid #eee;}}
+                .footer p {{color: #666;margin: 5px 0;font-size: 14px;}}
             </style>
         </head>
         <body>
@@ -1866,26 +1898,27 @@ def contact(request):
                     <div class="logo">HOKA'S<span>PARLOUR</span></div>
                     <p style="margin: 10px 0 0 0; font-size: 16px;">Premium Fashion & Streetwear</p>
                 </div>
-                
                 <div class="content">
                     <div class="success-box">
                         <h2>✓ Message Received!</h2>
                         <p style="color: #155724; margin: 0;">Thank you for contacting us, {full_name}</p>
                     </div>
-                    
                     <p style="color: #666; line-height: 1.6; font-size: 16px;">
                         Dear <strong>{full_name}</strong>,<br><br>
                         Thank you for reaching out to Hoka's Parlour! We have successfully received your message and our team will review it shortly.
                     </p>
-                    
                     <div class="info-box">
                         <h3>📋 Your Enquiry Details</h3>
                         <div class="detail-row">
-                            <strong>Subject:</strong>
-                            <span>{subject}</span>
+                            <strong>Reference #:</strong>
+                            <span>{contact_msg.id}</span>
                         </div>
                         <div class="detail-row">
-                            <strong>Reference:</strong>
+                            <strong>Subject:</strong>
+                            <span>{contact_msg.get_subject_display()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <strong>Order Ref:</strong>
                             <span>{order_number if order_number else 'General Inquiry'}</span>
                         </div>
                         <div class="detail-row">
@@ -1893,31 +1926,25 @@ def contact(request):
                             <span>Within 24 hours</span>
                         </div>
                     </div>
-                    
                     <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin: 20px 0;">
                         <p style="color: #856404; margin: 0; line-height: 1.6;">
-                            <strong>⏰ Response Time:</strong> Our team typically responds within 24 hours during business days. 
+                            <strong>⏰ Response Time:</strong> Our team typically responds within 24 hours during business days.
                             For urgent matters, please use the contact information below.
                         </p>
                     </div>
-                    
                     <div class="contact-box">
                         <h3>📞 Need Immediate Assistance?</h3>
                         <p><strong>Email:</strong> hokasparlour@gmail.com</p>
                         <p><strong>Business Hours:</strong> Monday - Saturday, 9AM - 6PM</p>
                     </div>
-                    
                     <p style="color: #666; text-align: center; font-size: 14px; margin-top: 30px;">
                         We appreciate your patience and look forward to assisting you!
                     </p>
                 </div>
-                
                 <div class="footer">
                     <p style="font-weight: 600; color: #333; font-size: 16px;">Hoka's Parlour</p>
                     <p>Premium Fashion & Streetwear</p>
-                    <p style="color: #999; font-size: 12px; margin-top: 15px;">
-                        © 2026 Hoka's Parlour. All rights reserved.
-                    </p>
+                    <p style="color: #999; font-size: 12px; margin-top: 15px;">© 2026 Hoka's Parlour. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -1934,7 +1961,7 @@ def contact(request):
             )
             admin_email.content_subtype = "html"
             admin_email.send(fail_silently=False)
-            
+
             # Send auto-reply to customer
             customer_email = EmailMessage(
                 subject="Thank you for contacting Hoka's Parlour ✓",
@@ -1946,11 +1973,12 @@ def contact(request):
             customer_email.send(fail_silently=False)
 
             messages.success(request, '✓ Thank you! Your message has been sent. We will respond within 24 hours.')
-            logger.info(f"Contact form submitted by {full_name} ({email})")
+            logger.info(f"Contact form submitted by {full_name} ({email}) — saved as #{contact_msg.id}")
 
         except Exception as e:
-            messages.error(request, 'Sorry, there was an error sending your message. Please try again.')
-            logger.error(f"Contact form error: {e}")
+            # Message is already saved to DB even if email fails
+            messages.error(request, 'Your message was saved but we could not send a confirmation email. We will still get back to you.')
+            logger.error(f"Contact form email error (msg #{contact_msg.id}): {e}")
 
         return redirect('contact')
 
@@ -2991,3 +3019,102 @@ def wishlist_page(request):
         products = list(Product.objects.filter(id__in=session_wishlist))
 
     return render(request, 'parlour/wishlist.html', {'products': products})    
+
+
+
+import random
+from django.utils import timezone
+from datetime import timedelta
+
+@login_required
+def whatsapp_connect(request):
+    """Step 1 — send OTP to the WhatsApp number the user provides."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    phone = request.POST.get('whatsapp_number', '').strip()
+    if not phone:
+        return JsonResponse({'success': False, 'error': 'Phone number required'}, status=400)
+
+    # Normalise — strip spaces/dashes, ensure it starts with +
+    phone = phone.replace(' ', '').replace('-', '')
+    if not phone.startswith('+'):
+        phone = '+' + phone
+
+    otp = str(random.randint(100000, 999999))
+
+    profile = request.user.profile
+    profile.whatsapp_number = phone
+    profile.whatsapp_otp = otp
+    profile.whatsapp_otp_created_at = timezone.now()
+    profile.whatsapp_joined = False  # reset until verified
+    profile.save(update_fields=[
+        'whatsapp_number', 'whatsapp_otp',
+        'whatsapp_otp_created_at', 'whatsapp_joined'
+    ])
+
+    # Send OTP via your existing WhatsApp service
+    from whatsapphoka.service import send_whatsapp_message
+    message = (
+        f"Hi {request.user.first_name or request.user.username}! "
+        f"Your Hoka's Parlour verification code is: *{otp}*\n\n"
+        f"This code expires in 10 minutes. Do not share it with anyone."
+    )
+    result = send_whatsapp_message(phone, message)
+
+    if result.get('success'):
+        return JsonResponse({'success': True, 'message': 'OTP sent! Check your WhatsApp.'})
+    else:
+        return JsonResponse({
+            'success': False,
+            'error': 'Could not send WhatsApp message. Check the number and try again.'
+        }, status=500)
+
+
+@login_required
+def whatsapp_verify(request):
+    """Step 2 — verify the OTP the user enters."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    entered_otp = request.POST.get('otp', '').strip()
+    profile = request.user.profile
+
+    if not profile.whatsapp_otp or not profile.whatsapp_otp_created_at:
+        return JsonResponse({'success': False, 'error': 'No OTP found. Please request a new one.'}, status=400)
+
+    # Check expiry — 10 minutes
+    expiry = profile.whatsapp_otp_created_at + timedelta(minutes=10)
+    if timezone.now() > expiry:
+        profile.whatsapp_otp = ''
+        profile.save(update_fields=['whatsapp_otp'])
+        return JsonResponse({'success': False, 'error': 'OTP expired. Please request a new one.'}, status=400)
+
+    if entered_otp != profile.whatsapp_otp:
+        return JsonResponse({'success': False, 'error': 'Incorrect code. Please try again.'}, status=400)
+
+    # All good — mark as verified
+    profile.whatsapp_joined = True
+    profile.whatsapp_otp = ''  # clear OTP after use
+    profile.whatsapp_otp_created_at = None
+    profile.save(update_fields=['whatsapp_joined', 'whatsapp_otp', 'whatsapp_otp_created_at'])
+
+    return JsonResponse({'success': True, 'message': 'WhatsApp connected successfully!'})
+
+
+@login_required
+def whatsapp_disconnect(request):
+    """Let user disconnect their WhatsApp."""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST required'}, status=405)
+
+    profile = request.user.profile
+    profile.whatsapp_joined = False
+    profile.whatsapp_number = ''
+    profile.whatsapp_otp = ''
+    profile.whatsapp_otp_created_at = None
+    profile.save(update_fields=[
+        'whatsapp_joined', 'whatsapp_number',
+        'whatsapp_otp', 'whatsapp_otp_created_at'
+    ])
+    return JsonResponse({'success': True, 'message': 'WhatsApp disconnected.'})    
