@@ -8,10 +8,10 @@
 
 
     <!-- ---------- PRIMARY META TAGS ---------- -->
-    <title>{% block title %}Hoka's Parlour – Modern Fusion Fashion for MMU Students, Rongai Nairobi{% endblock %}</title>
-    <meta name="description" content="{% block description %}Hoka's Parlour: Trendy, affordable fusion fashion located in Rongai, Nairobi. Official MMU student partner. Shop modern streetwear, campus styles & accessories.{% endblock %}">
-    <meta name="keywords" content="{% block keywords %}Hoka's Parlour, MMU fashion, Rongai Nairobi, campus wear, student fashion, Kenyan streetwear, affordable clothes Nairobi, university fashion, fusion fashion{% endblock %}">
-    <meta name="author" content="Hoka's Parlour">
+    <title>{% block title %}Qunimart – Modern Fusion Fashion for MMU Students, Rongai Nairobi{% endblock %}</title>
+    <meta name="description" content="{% block description %}Qunimart: Trendy, affordable fusion fashion located in Rongai, Nairobi. Official MMU student partner. Shop modern streetwear, campus styles & accessories.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}Qunimart, MMU fashion, Rongai Nairobi, campus wear, student fashion, Kenyan streetwear, affordable clothes Nairobi, university fashion, fusion fashion{% endblock %}">
+    <meta name="author" content="Qunimart">
     <meta name="robots" content="index, follow">
     <meta name="revisit-after" content="7 days">
     <meta name="language" content="English">
@@ -20,8 +20,8 @@
 
     <!-- ---------- OPEN GRAPH / FACEBOOK & WHATSAPP ---------- -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Hoka's Parlour">
-    <meta property="og:title" content="{% block og_title %}Hoka's Parlour – MMU's Premier Fashion Destination{% endblock %}">
+    <meta property="og:site_name" content="Qunimart">
+    <meta property="og:title" content="{% block og_title %}Qunimart – MMU's Premier Fashion Destination{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Shop the latest fusion fashion in Rongai, Nairobi. Official MMU student partner. Quality streetwear & campus style.{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
     <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og_image.jpg' %}{% endblock %}">
@@ -29,17 +29,17 @@
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Hoka's Parlour – Fashion for MMU Students, Rongai Nairobi">
+    <meta property="og:image:alt" content="Qunimart – Fashion for MMU Students, Rongai Nairobi">
     <meta property="og:locale" content="en_KE">
 
     <!-- ---------- TWITTER CARDS ---------- -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@hokasparlour">
-    <meta name="twitter:creator" content="@hokasparlour">
-    <meta name="twitter:title" content="{% block twitter_title %}Hoka's Parlour – Fashion for MMU Students{% endblock %}">
+    <meta name="twitter:site" content="@qunimart">
+    <meta name="twitter:creator" content="@qunimart">
+    <meta name="twitter:title" content="{% block twitter_title %}QUNI MART – Fashion for MMU Students{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}Trendy fusion fashion in Rongai. Shop campus wear, streetwear & accessories. 🇰🇪{% endblock %}">
     <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og_image.jpg' %}">
-    <meta name="twitter:image:alt" content="Hoka's Parlour Fashion">
+    <meta name="twitter:image:alt" content="QUNI MART Fashion">
 
     <!-- ---------- GEO TAGS ---------- -->
     <meta name="geo.region" content="KE-19">
@@ -75,8 +75,20 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Hoka's Parlour">
+    <meta name="apple-mobile-web-app-title" content="Qunimart">
     <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J70YC5FTEX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-J70YC5FTEX');
+</script>
+
+
 
     <style>
         /* -----------------------------------------------
@@ -656,7 +668,7 @@
 ">
     <img src="/static/icons/icon-72x72.png" style="width:48px;height:48px;border-radius:10px;flex-shrink:0;">
     <div style="flex:1;">
-        <div style="font-weight:700;font-size:15px;">Install Hoka's Parlour</div>
+        <div style="font-weight:700;font-size:15px;">Install Qunimart</div>
         <div style="font-size:12px;opacity:0.85;margin-top:2px;">Shop faster from your home screen!</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
@@ -976,7 +988,7 @@ document.addEventListener('keydown', function(e) {
 
         <!-- Input -->
         <div style="display:flex;gap:8px;margin-bottom:12px;">
-            <input type="text" id="promo-input" placeholder="e.g. HOKA-AB12"
+            <input type="text" id="promo-input" placeholder="e.g. QUNI-AB12"
                 style="flex:1;padding:12px 16px;border:2px solid #e0e0e0;
                 border-radius:8px;font-size:15px;outline:none;text-transform:uppercase;"
                 oninput="this.value=this.value.toUpperCase()">
@@ -1337,7 +1349,7 @@ document.addEventListener('keydown', function(e) {
     <header>
         <div class="header-container">
             <div class="logo">
-                <a href="{% url 'home' %}"><img src="{% static 'favicon/logo.png' %}" alt="HOKA'S PARLOUR">HOKA'S<span> PARLOUR</span></a>
+                <a href="{% url 'home' %}"><img src="{% static 'favicon/logo.png' %}" alt="QUNIMART">QUNI<span>MART</span></a>
             </div>
             
             <!-- Hamburger Button -->
@@ -1408,7 +1420,7 @@ document.addEventListener('keydown', function(e) {
     <!-- MOBILE NAVIGATION DRAWER -->
     <div class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-header">
-            <span class="mobile-nav-logo">HOKA'S<span> PARLOUR</span></span>
+            <span class="mobile-nav-logo">QUNI<span>MART</span></span>
             <button class="close-btn" id="closeNavBtn" aria-label="Close menu">
                 <i class="fas fa-times"></i>
             </button>
@@ -1512,11 +1524,11 @@ document.addEventListener('keydown', function(e) {
         <div class="footer-container">
             <div class="footer-grid">
                 <div class="footer-about">
-                    <div class="footer-logo">HOKA'S<span> PARLOUR</span></div>
+                    <div class="footer-logo">QUNI<span>MART</span></div>
                     <p>Modern fusion fashion for MMU students. Rongai, Nairobi.</p>
                     <div class="footer-contact">
                         <p><i class="fas fa-map-pin" style="color: var(--accent);"></i> Rongai, Kajiado</p>
-                        <p><i class="fas fa-envelope" style="color: var(--accent);"></i> hokasparlour@gmail.com</p>
+                        <p><i class="fas fa-envelope" style="color: var(--accent);"></i> qunimart@gmail.com</p>
                         <p><i class="fas fa-phone-alt" style="color: var(--accent);"></i> 0783072098</p>
                     </div>
                 </div>
@@ -1544,10 +1556,10 @@ document.addEventListener('keydown', function(e) {
                 <div>
                     <h4 class="text-base mb-3 font-bold" style="color: var(--text);">FOLLOW US</h4>
                     <div class="social-list">
-                        <a href="https://www.instagram.com/hokasparlour/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="https://www.tiktok.com/@hokasparlour?is_from_webapp=1&sender_device=pc" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-                        <a href="https://x.com/hokasparlour" aria-label="X"><i class="fab fa-x-twitter"></i></a>
-                        <a href="https://www.facebook.com/people/Hokas-Parlour/61587286749833/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/qunimart/" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@qunimart?is_from_webapp=1&sender_device=pc" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://x.com/qunimart" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+                        <a href="https://www.facebook.com/people/QUNI-MART/61587286749833/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="https://wa.me/254783072098" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                     <p class="mt-4 text-xs" style="color: var(--text-soft);">
@@ -1557,7 +1569,7 @@ document.addEventListener('keydown', function(e) {
             </div>
             
             <div class="footer-bottom">
-                <span>© 2025 Hoka's Parlour</span>
+                <span>© 2025 Qunimart</span>
                 <span class="purple-heart"><i class="fas fa-heart"></i> MMU</span>
             </div>
         </div>

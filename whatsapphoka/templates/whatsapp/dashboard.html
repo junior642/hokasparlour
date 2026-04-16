@@ -1,7 +1,8 @@
 {% extends 'parlour/base_b.html' %}
+
 {% load static %}
 
-{% block title %}WhatsApp Messenger — Hoka's Parlour{% endblock %}
+{% block title %}WhatsApp Messenger — Qunimart{% endblock %}
 
 {% block extra_style %}
 <style>
@@ -569,7 +570,7 @@
       <!-- Message -->
       <div class="form-group">
         <label><i class="fas fa-envelope-open-text"></i> Message</label>
-        <textarea id="bulkMessage" rows="6" placeholder="Hi {name}! 🎉 We have exciting new arrivals at Hoka's Parlour..."></textarea>
+        <textarea id="bulkMessage" rows="6" placeholder="Hi {name}! 🎉 We have exciting new arrivals at Qunimart..."></textarea>
         <div class="char-count"><span id="bulkCharCount">0</span> characters</div>
       </div>
 
@@ -666,10 +667,10 @@
 
   // Single Templates
   const singleTemplates = {
-    order_ready: `Hi {name}! 🎉 Your order is ready for delivery.\n\nWe'll be dispatching it soon. Thank you for shopping at Hoka's Parlour! 🛍️`,
+    order_ready: `Hi {name}! 🎉 Your order is ready for delivery.\n\nWe'll be dispatching it soon. Thank you for shopping at Qunimart! 🛍️`,
     payment_reminder: `Hi {name}! 👋 This is a friendly reminder that your order payment is pending.\n\nPlease complete your payment to avoid cancellation. Thank you! 💛`,
-    promotion: `Hi {name}! 🎊 We have an exclusive offer just for you!\n\nVisit us at hokasparlour.adcent.online to see our latest collection. Don't miss out! 🛍️`,
-    followup: `Hi {name}! 😊 We hope you're enjoying your recent purchase from Hoka's Parlour!\n\nWe'd love to hear your feedback. Feel free to reply to this message. 💕`,
+    promotion: `Hi {name}! 🎊 We have an exclusive offer just for you!\n\nVisit us at qunimart.adcent.online to see our latest collection. Don't miss out! 🛍️`,
+    followup: `Hi {name}! 😊 We hope you're enjoying your recent purchase from Qunimart!\n\nWe'd love to hear your feedback. Feel free to reply to this message. 💕`,
   };
 
   function useTemplate(key) {
@@ -681,9 +682,9 @@
 
   // Bulk Templates
   const bulkTemplates = {
-    new_arrivals: `Hi {name}! 👗 New arrivals are here at Hoka's Parlour!\n\nFresh styles just dropped — shop now before they sell out!\n🛍️ hokasparlour.adcent.online`,
-    sale: `Hi {name}! 🏷️ SALE ALERT at Hoka's Parlour!\n\nAmazing deals on selected items. Limited time only — grab yours now!\n👉 hokasparlour.adcent.online`,
-    holiday: `Hi {name}! 🎊 Holiday special at Hoka's Parlour!\n\nTreat yourself or a loved one this season with our exclusive collection.\n💕 hokasparlour.adcent.online`,
+    new_arrivals: `Hi {name}! 👗 New arrivals are here at Qunimart!\n\nFresh styles just dropped — shop now before they sell out!\n🛍️ qunimart.adcent.online`,
+    sale: `Hi {name}! 🏷️ SALE ALERT at Qunimart!\n\nAmazing deals on selected items. Limited time only — grab yours now!\n👉 qunimart.adcent.online`,
+    holiday: `Hi {name}! 🎊 Holiday special at Qunimart!\n\nTreat yourself or a loved one this season with our exclusive collection.\n💕 qunimart.adcent.online`,
   };
 
   function useBulkTemplate(key) {
@@ -774,4 +775,9 @@
     box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 </script>
+<<<<<<< HEAD
 {% endblock %}
+=======
+
+{% endblock %}
+>>>>>>> 9bcfb7d (server update)

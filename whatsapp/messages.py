@@ -19,7 +19,7 @@ def order_confirmation_message(order) -> str:
     pickup_location = store_settings['location']
 
     message = (
-        f"✅ *Order Confirmed — Hoka's Parlour*\n\n"
+        f"✅ *Order Confirmed — Qunimart*\n\n"
         f"Hi {order.customer_name}! 🎉 Your order has been received.\n\n"
         f"━━━━━━━━━━━━━━━━━━\n"
         f"🧾 *Order #{order.id}*\n"
@@ -40,22 +40,22 @@ def order_status_update_message(order) -> str:
 
     status_messages = {
         'processing': (
-            f"⚙️ *Order Update — Hoka's Parlour*\n\n"
+            f"⚙️ *Order Update — Qunimart*\n\n"
             f"Hi {order.customer_name}! Your order *#{order.id}* is now being *processed*.\n\n"
             f"We're preparing your items and will notify you once dispatched. 🏪"
         ),
         'dispatched': (
-            f"🚚 *Order Dispatched — Hoka's Parlour*\n\n"
+            f"🚚 *Order Dispatched — Qunimart*\n\n"
             f"Hi {order.customer_name}! Great news! Your order *#{order.id}* is on its way. 🎉\n\n"
             f"📬 Delivering to: {order.delivery_address}\n\n"
             f"You'll receive it soon. Thank you for your patience! 💛"
         ),
         'delivered': (
-            f"✅ *Order Delivered — Hoka's Parlour*\n\n"
+            f"✅ *Order Delivered — Qunimart*\n\n"
             f"Hi {order.customer_name}! Your order *#{order.id}* has been *delivered*. 📦\n\n"
             f"We hope you love your items! 😊\n"
             f"If you have any issues, reply to this message or call us at {_get_store_phone()}.\n\n"
-            f"Thank you for shopping with Hoka's Parlour! 🛍️💕"
+            f"Thank you for shopping with Qunimart! 🛍️💕"
         ),
     }
 
@@ -66,7 +66,7 @@ def payment_confirmed_message(order) -> str:
     """Sent when M-Pesa payment is confirmed."""
     total = order.get_total()
     return (
-        f"💳 *Payment Confirmed — Hoka's Parlour*\n\n"
+        f"💳 *Payment Confirmed — Qunimart*\n\n"
         f"Hi {order.customer_name}! We've received your payment of *KES {total:,.0f}* "
         f"for order *#{order.id}*. ✅\n\n"
         f"Your order is now being processed. We'll keep you updated! 🙏"
