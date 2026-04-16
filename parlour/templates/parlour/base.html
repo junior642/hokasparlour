@@ -1154,8 +1154,185 @@ function joinWhatsappFromPromo() {
 {% endif %}
 
 
+
+
 </head>
 <body class="font-sans antialiased">
+
+
+    <!-- Signup Promo Popup (shows after 60s if not logged in) -->
+{% if not user.is_authenticated %}
+<div id="signup-promo-popup" style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(5px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+">
+    <div style="
+        background: white;
+        border-radius: 28px;
+        padding: 40px 32px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 30px 70px rgba(0,0,0,0.3);
+        position: relative;
+        animation: promoSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    ">
+        <!-- Close Button -->
+        <button onclick="closeSignupPromo()" style="
+            position: absolute;
+            top: 16px; right: 18px;
+            background: #f0f0f0;
+            border: none;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            color: #888;
+            display: flex; align-items: center; justify-content: center;
+        ">×</button>
+
+        <!-- Icon -->
+        <div style="
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, #7b2eda, #a78bfa);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 36px;
+            box-shadow: 0 12px 28px rgba(123,46,218,0.35);
+        ">🎁</div>
+
+        <h2 style="
+            margin: 0 0 8px;
+            color: #1a1a2e;
+            font-size: 24px;
+            font-weight: 800;
+            font-family: 'Playfair Display', serif;
+            letter-spacing: -0.5px;
+        ">You're Missing Out!</h2>
+
+        <p style="
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 0 0 24px;
+        ">
+            Sign up today and use promo code below to unlock <strong style="color: #7b2eda;">exclusive discounts</strong> on your first order! 🛍️
+        </p>
+
+        <!-- Promo Code Badge -->
+        <div style="
+            background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+            border: 2px dashed #a78bfa;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 24px;
+        ">
+            <div style="font-size: 12px; color: #7b2eda; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Your Promo Code</div>
+            <div style="
+                font-size: 32px;
+                font-weight: 900;
+                color: #7b2eda;
+                letter-spacing: 4px;
+                font-family: 'Playfair Display', serif;
+            ">HOKA</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Enter this at signup to get your discount</div>
+        </div>
+
+        <!-- Perks -->
+        <div style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 28px;
+            text-align: left;
+        ">
+            <div style="background:#f8fafc; padding:12px; border-radius:12px;">
+                <div style="font-size:20px; margin-bottom:4px;">✨</div>
+                <div style="font-weight:600; color:#0f172a; font-size:13px;">Instant Discount</div>
+                <div style="color:#64748b; font-size:11px;">On your first order</div>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:12px;">
+                <div style="font-size:20px; margin-bottom:4px;">🚀</div>
+                <div style="font-weight:600; color:#0f172a; font-size:13px;">Early Access</div>
+                <div style="color:#64748b; font-size:11px;">New arrivals first</div>
+            </div>
+        </div>
+
+        <!-- CTA Button -->
+        <a href="{% url 'signup' %}" style="
+            display: block;
+            background: linear-gradient(135deg, #7b2eda, #a78bfa);
+            color: white;
+            padding: 15px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 10px 25px rgba(123,46,218,0.35);
+            transition: all 0.3s;
+        "
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 15px 30px rgba(123,46,218,0.45)'"
+        onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 10px 25px rgba(123,46,218,0.35)'">
+            🎉 Sign Up &amp; Use Code HOKA
+        </a>
+
+        <button onclick="closeSignupPromo()" style="
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: pointer;
+            padding: 8px 16px;
+            font-weight: 500;
+        ">Maybe later</button>
+    </div>
+</div>
+
+<style>
+@keyframes promoSlideUp {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+</style>
+
+<script>
+(function() {
+    // Don't show if already dismissed this session
+    if (sessionStorage.getItem('signupPromoDismissed')) return;
+
+    setTimeout(function() {
+        const popup = document.getElementById('signup-promo-popup');
+        if (popup) {
+            popup.style.display = 'flex';
+        }
+    }, 30000); // 60 seconds
+})();
+
+function closeSignupPromo() {
+    document.getElementById('signup-promo-popup').style.display = 'none';
+    sessionStorage.setItem('signupPromoDismissed', 'true');
+}
+
+// Close on backdrop click
+document.getElementById('signup-promo-popup').addEventListener('click', function(e) {
+    if (e.target === this) closeSignupPromo();
+});
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeSignupPromo();
+});
+</script>
+{% endif %}
     <!-- HEADER -->
     <header>
         <div class="header-container">

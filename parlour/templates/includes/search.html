@@ -1,10 +1,9 @@
-<!-- Search Bar Component with Live JavaScript Search - Sticky Version -->
+<!-- Search Bar Component with Dropdown Results Panel -->
 <style>
-    /* Search bar wrapper with theme-matching background */
     .search-bar-sticky-wrapper {
         position: sticky;
         top: 0;
-        z-index: 50; /* Reduced from 1000 to be below hamburger menu (usually 100+) */
+        z-index: 50;
         background: var(--bg);
         border-bottom: 1px solid var(--border);
         padding: 1rem 0;
@@ -14,32 +13,21 @@
         width: 100%;
     }
 
-    /* Add slight shadow when scrolled - using theme accent */
     .search-bar-sticky-wrapper.scrolled {
         box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.15);
         border-bottom-color: var(--accent-light);
     }
 
-    /* Container for content alignment */
     .search-bar-container {
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 1.5rem;
         width: 100%;
+        position: relative;
     }
 
-    /* Enhanced search input */
     .filter-group {
         margin: 0;
-    }
-
-    .filter-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: var(--text);
-        letter-spacing: 0.3px;
     }
 
     .relative {
@@ -57,12 +45,17 @@
         transition: all 0.3s ease;
         outline: none;
         box-shadow: var(--shadow-sm);
+        box-sizing: border-box;
     }
 
     #liveSearch:focus {
         border-color: var(--accent);
         box-shadow: 0 0 0 4px var(--accent-soft);
-        transform: translateY(-1px);
+    }
+
+    #liveSearch.results-open {
+        border-radius: 16px 16px 0 0;
+        border-bottom-color: var(--border);
     }
 
     #liveSearch::placeholder {
@@ -71,7 +64,6 @@
         opacity: 0.7;
     }
 
-    /* Animated search icon */
     .absolute.left-3 {
         position: absolute;
         left: 1rem;
@@ -81,14 +73,9 @@
         transition: all 0.3s ease;
         font-size: 1rem;
         z-index: 1;
+        pointer-events: none;
     }
 
-    #liveSearch:focus ~ .absolute.left-3 {
-        color: var(--accent-light);
-        transform: translateY(-50%) scale(1.1);
-    }
-
-    /* Action buttons container */
     .search-actions {
         position: absolute;
         right: 1rem;
@@ -100,14 +87,12 @@
         z-index: 1;
     }
 
-    /* Loading spinner animation */
     #searchSpinner i {
         animation: spin 0.8s linear infinite;
         color: var(--accent);
         font-size: 1.1rem;
     }
 
-    /* Clear button */
     #clearSearch {
         background: transparent;
         border: none;
@@ -126,149 +111,244 @@
         transform: scale(1.1);
     }
 
-    /* Search results count */
-    #searchResultsCount {
-        margin-top: 0.75rem;
-        font-size: 0.85rem;
-        color: var(--text-soft);
-        padding-left: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    /* ============================================
+       DROPDOWN RESULTS PANEL
+       ============================================ */
+    #searchDropdown {
+        position: absolute;
+        top: 100%;
+        left: 1.5rem;
+        right: 1.5rem;
+        background: var(--card, #fff);
+        border: 2px solid var(--accent);
+        border-top: none;
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        z-index: 200;
+        display: none;
+        overflow: hidden;
     }
 
-    #resultsCount {
+    #searchDropdown.open {
+        display: block;
+        animation: dropdownSlide 0.2s ease;
+    }
+
+    @keyframes dropdownSlide {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Dropdown header */
+    .dropdown-header {
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dropdown-header .result-label {
+        font-size: 0.8rem;
+        color: var(--text-soft);
+        font-weight: 500;
+    }
+
+    .dropdown-header .result-count {
         background: var(--accent-soft);
         color: var(--accent);
-        padding: 0.2rem 0.6rem;
+        padding: 0.15rem 0.6rem;
         border-radius: 50px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 0.75rem;
     }
 
-    /* Active search indicator with animation */
-    #activeSearchIndicator {
-        margin-top: 0.75rem;
-        animation: slideDown 0.3s ease;
-        position: relative;
-        z-index: 40;
+    /* ---- 2-row horizontal scroll grid ---- */
+    #dropdownResults {
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0.75rem 0.75rem 0.5rem;
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) var(--border);
     }
 
-    #activeSearchIndicator > div {
-        background: var(--accent-soft);
-        border: 1px solid var(--accent-light);
-        border-radius: 50px;
-        padding: 0.6rem 1.2rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
+    #dropdownResults::-webkit-scrollbar {
+        height: 5px;
+    }
+    #dropdownResults::-webkit-scrollbar-track {
+        background: var(--border);
+        border-radius: 10px;
+    }
+    #dropdownResults::-webkit-scrollbar-thumb {
+        background: var(--accent);
+        border-radius: 10px;
+    }
+
+    .results-card-grid {
+        display: grid;
+        grid-auto-flow: column;
+        grid-template-rows: repeat(2, auto);
+        grid-auto-columns: 140px;
+        gap: 0.6rem;
+        width: max-content;
+    }
+
+    /* Individual product card in results */
+    .search-result-item {
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+        background: var(--surface, #f9f9f9);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        cursor: pointer;
+        width: 140px;
+    }
+
+    .search-result-item:hover {
+        border-color: var(--accent);
         box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.15);
     }
 
-    #activeSearchIndicator i {
-        color: var(--accent);
-    }
-
-    #activeSearchIndicator span {
-        color: var(--accent);
-        font-weight: 600;
-    }
-
-    #searchTerm {
-        font-style: italic;
-        max-width: 200px;
+    /* Product image in card */
+    .result-thumb {
+        width: 100%;
+        aspect-ratio: 1 / 1;
         overflow: hidden;
-        text-overflow: ellipsis;
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-soft);
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+
+    .result-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Card body */
+    .result-info {
+        padding: 0.4rem 0.5rem 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        flex: 1;
+    }
+
+    .result-name {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--text);
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.3;
+    }
+
+    .result-name mark {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border-radius: 3px;
+        padding: 0 2px;
+        font-weight: 700;
+    }
+
+    .result-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+    }
+
+    .result-category {
+        font-size: 0.62rem;
+        background: var(--accent-soft);
+        color: var(--accent);
+        padding: 0.1rem 0.4rem;
+        border-radius: 50px;
+        font-weight: 500;
         white-space: nowrap;
     }
 
-    /* No results message */
-    #noResultsMessage {
-        animation: fadeIn 0.4s ease;
-        padding: 3rem 2rem;
+    .result-stock-badge {
+        font-size: 0.62rem;
+        padding: 0.1rem 0.4rem;
+        border-radius: 50px;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .result-stock-ready  { background: #d1fae5; color: #065f46; }
+    .result-stock-order  { background: #fef3c7; color: #92400e; }
+    .result-stock-out    { background: #fee2e2; color: #991b1b; }
+
+    .result-price .price-main {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--accent);
+        display: block;
+    }
+
+    .result-price .price-main.discounted { color: #16a34a; }
+
+    .result-price .price-old {
+        font-size: 0.65rem;
+        color: var(--text-soft);
+        text-decoration: line-through;
+        display: block;
+    }
+
+    /* No results state */
+    .dropdown-no-results {
+        padding: 2rem 1rem;
         text-align: center;
-        background: var(--card);
-        border-radius: 24px;
-        border: 1px solid var(--border);
-        margin-top: 1.5rem;
-        position: relative;
-        z-index: 40;
+        color: var(--text-soft);
     }
 
-    #noResultsMessage i {
-        font-size: 3.5rem;
+    .dropdown-no-results i {
+        font-size: 2rem;
         color: var(--accent-light);
-        margin-bottom: 1rem;
-    }
-
-    #noResultsMessage h3 {
-        color: var(--text);
-        font-size: 1.5rem;
+        display: block;
         margin-bottom: 0.5rem;
     }
 
-    #noResultsMessage p {
-        color: var(--text-soft);
-        margin-bottom: 1.5rem;
+    .dropdown-no-results p {
+        font-size: 0.9rem;
+        margin: 0 0 0.25rem;
     }
 
-    #noResultsMessage button {
-        background: var(--accent);
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 50px;
-        font-weight: 600;
+    .dropdown-no-results small {
+        font-size: 0.78rem;
+        opacity: 0.7;
+    }
+
+    /* Footer "view all" link */
+    .dropdown-footer {
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--accent);
         cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        position: relative;
-        z-index: 1;
+        font-weight: 600;
+        transition: background 0.15s ease;
+        display: none;
     }
 
-    #noResultsMessage button:hover {
-        background: var(--accent-light);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(var(--accent-rgb), 0.3);
+    .dropdown-footer:hover {
+        background: var(--accent-soft);
     }
 
-    /* Animations */
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    /* Product card transitions */
-    .product-card {
-        transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .product-card.search-highlight {
-        animation: highlightPulse 1s ease;
-    }
-
-    @keyframes highlightPulse {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 var(--accent-light); }
-        50% { transform: scale(1.02); box-shadow: 0 0 20px var(--accent-light); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 var(--accent-light); }
+    .dropdown-footer.visible {
+        display: block;
     }
 
     /* Hidden utility */
@@ -276,90 +356,10 @@
         display: none !important;
     }
 
-    /* Dark mode specific adjustments */
-    .dark-mode .search-bar-sticky-wrapper {
-        background: var(--bg);
-        border-bottom-color: var(--border);
-    }
-
-    .dark-mode #liveSearch {
-        background: var(--surface);
-        border-color: var(--border);
-        color: var(--text);
-    }
-
-    .dark-mode #liveSearch:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.2);
-    }
-
-    .dark-mode #noResultsMessage {
-        background: var(--card);
-        border-color: var(--border);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .search-bar-sticky-wrapper {
-            padding: 0.75rem 0;
-            z-index: 45;
-        }
-        
-        .search-bar-container {
-            padding: 0 1rem;
-        }
-        
-        #liveSearch {
-            padding: 0.75rem 2.5rem 0.75rem 2.5rem;
-            font-size: 0.9rem;
-        }
-        
-        .absolute.left-3 {
-            left: 0.75rem;
-            font-size: 0.9rem;
-        }
-        
-        .search-actions {
-            right: 0.75rem;
-        }
-        
-        #activeSearchIndicator > div {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        #searchTerm {
-            max-width: 150px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .search-bar-sticky-wrapper {
-            padding: 0.5rem 0;
-            z-index: 45;
-        }
-        
-        .search-bar-container {
-            padding: 0 0.75rem;
-        }
-        
-        #liveSearch {
-            padding: 0.7rem 2rem 0.7rem 2.2rem;
-            font-size: 0.85rem;
-        }
-        
-        .absolute.left-3 {
-            left: 0.6rem;
-            font-size: 0.8rem;
-        }
-        
-        .search-actions {
-            right: 0.6rem;
-        }
-        
-        #searchTerm {
-            max-width: 120px;
-        }
+    /* Animations */
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
     }
 
     /* Ensure hamburger menu appears above search bar */
@@ -368,28 +368,43 @@
     .nav-menu {
         z-index: 100 !important;
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .search-bar-sticky-wrapper { padding: 0.75rem 0; z-index: 45; }
+        .search-bar-container { padding: 0 1rem; }
+        #liveSearch { padding: 0.75rem 2.5rem; font-size: 0.9rem; }
+        #searchDropdown { left: 1rem; right: 1rem; }
+        .results-card-grid { grid-auto-columns: 120px; }
+        .search-result-item { width: 120px; }
+    }
+
+    @media (max-width: 480px) {
+        .search-bar-container { padding: 0 0.75rem; }
+        #liveSearch { padding: 0.7rem 2rem 0.7rem 2.2rem; font-size: 0.85rem; }
+        #searchDropdown { left: 0.75rem; right: 0.75rem; }
+        .results-card-grid { grid-auto-columns: 110px; }
+        .search-result-item { width: 110px; }
+    }
 </style>
 
-<!-- Search Bar HTML with Sticky Wrapper -->
+<!-- Search Bar HTML -->
 <div class="search-bar-sticky-wrapper" id="stickySearchBar">
     <div class="search-bar-container">
         <div class="filter-group">
             <div class="relative">
-                <input type="text" 
+                <input type="text"
                        id="liveSearch"
-                       placeholder="Type to search products by name, category, description..." 
+                       placeholder="Search products by name, category, description..."
                        autocomplete="off">
-                
+
                 <i class="fas fa-search absolute left-3"></i>
-                
+
                 <div class="search-actions">
-                    <!-- Loading spinner (hidden by default) -->
                     <div id="searchSpinner" class="hidden">
                         <i class="fas fa-spinner"></i>
                     </div>
-                    
-                    <!-- Clear search button -->
-                    <button id="clearSearch" 
+                    <button id="clearSearch"
                             class="hidden"
                             onclick="clearSearch()"
                             type="button">
@@ -397,376 +412,287 @@
                     </button>
                 </div>
             </div>
-            
-            <!-- Search results count -->
-            <div id="searchResultsCount" class="hidden">
-                Found <span id="resultsCount">0</span> products
-            </div>
         </div>
 
-        <!-- Active search indicator -->
-        <div id="activeSearchIndicator" class="hidden">
-            <div>
-                <i class="fas fa-search"></i>
-                <span>Searching: "<span id="searchTerm"></span>"</span>
-                <button onclick="clearSearch()" type="button" class="hover:scale-110 transition-transform">
-                    <i class="fas fa-times-circle"></i>
-                </button>
+        <!-- DROPDOWN RESULTS PANEL (appears right below the search bar) -->
+        <div id="searchDropdown">
+            <div class="dropdown-header">
+                <span class="result-label">Results</span>
+                <span class="result-count" id="dropdownCount">0</span>
+            </div>
+            <div id="dropdownResults"></div>
+            <div class="dropdown-footer" id="dropdownFooter" onclick="clearSearch()">
+                <i class="fas fa-times-circle"></i> Close results
             </div>
         </div>
     </div>
 </div>
 
-<!-- No results message (separate from sticky bar) -->
-<div id="noResultsMessage" class="hidden">
-    <i class="fas fa-search"></i>
-    <h3>No products found</h3>
-    <p>No products match your search "<span id="noResultsTerm"></span>"</p>
-    <button onclick="clearSearch()" type="button">
-        <i class="fas fa-undo-alt"></i> Clear Search
-    </button>
-</div>
-
 <script>
-// Live search functionality - Complete Fix
-document.addEventListener('DOMContentLoaded', function() {
-    // Add scroll effect to sticky bar
+document.addEventListener('DOMContentLoaded', function () {
+
     const stickyBar = document.getElementById('stickySearchBar');
     if (stickyBar) {
-        function handleScroll() {
-            if (window.scrollY > 10) {
-                stickyBar.classList.add('scrolled');
-            } else {
-                stickyBar.classList.remove('scrolled');
-            }
-        }
-        window.addEventListener('scroll', handleScroll);
-    }
-    
-    const searchInput = document.getElementById('liveSearch');
-    const searchSpinner = document.getElementById('searchSpinner');
-    const clearButton = document.getElementById('clearSearch');
-    const searchResultsCount = document.getElementById('searchResultsCount');
-    const resultsCountSpan = document.getElementById('resultsCount');
-    const activeSearchIndicator = document.getElementById('activeSearchIndicator');
-    const searchTermSpan = document.getElementById('searchTerm');
-    const noResultsMessage = document.getElementById('noResultsMessage');
-    const noResultsTerm = document.getElementById('noResultsTerm');
-    
-    // Store original HTML for each product section
-    const originalSections = new Map();
-    let allProducts = [];
-    
-    // Function to get all product containers and store original HTML
-    function saveOriginalContent() {
-        originalSections.clear();
-        
-        // Find all section containers that contain products
-        const sections = document.querySelectorAll('section.mb-8, section.mb-6, section.mb-12');
-        
-        sections.forEach((section, index) => {
-            // Store the entire section HTML
-            originalSections.set(section, section.cloneNode(true));
+        window.addEventListener('scroll', function () {
+            stickyBar.classList.toggle('scrolled', window.scrollY > 10);
         });
-        
-        // Also store the top selling section if it exists
-        const topSellingSection = document.querySelector('.mb-6.lg\\:mb-10');
-        if (topSellingSection) {
-            originalSections.set(topSellingSection, topSellingSection.cloneNode(true));
-        }
-        
-        console.log(`Saved ${originalSections.size} sections`);
     }
-    
-    // Function to extract product data from all product cards
+
+    const searchInput    = document.getElementById('liveSearch');
+    const searchSpinner  = document.getElementById('searchSpinner');
+    const clearButton    = document.getElementById('clearSearch');
+    const dropdown       = document.getElementById('searchDropdown');
+    const dropdownRes    = document.getElementById('dropdownResults');
+    const dropdownCount  = document.getElementById('dropdownCount');
+    const dropdownFooter = document.getElementById('dropdownFooter');
+
+    // ------------------------------------------------
+    // Collect product data from the existing page cards
+    // ------------------------------------------------
+    let allProducts = [];
+
     function extractProductData() {
         allProducts = [];
-        const productCards = document.querySelectorAll('.product-card');
-        
-        productCards.forEach((card, index) => {
-            // Find which section this card belongs to
-            let section = card.closest('section');
-            if (!section) {
-                section = card.closest('.mb-8, .mb-6, .mb-12, .mb-6.lg\\:mb-10');
-            }
-            
-            // Extract product name
-            const nameElement = card.querySelector('h3');
-            const name = nameElement ? nameElement.textContent.toLowerCase().trim() : '';
-            
-            // Extract description
-            const descElement = card.querySelector('h3 + p');
-            const description = descElement ? descElement.textContent.toLowerCase().trim() : '';
-            
-            // Extract price
-            let price = '';
-            const priceDiv = card.querySelector('.my-0\\.5.lg\\:my-2');
+        document.querySelectorAll('.product-card').forEach(function (card, index) {
+            const nameEl  = card.querySelector('h3');
+            const descEl  = nameEl ? nameEl.nextElementSibling : null;
+            const imgEl   = card.querySelector('img');
+            const linkEl  = card.closest('a') || card.querySelector('a');
+
+            // Price text
+            let priceText = '';
+            let oldPrice  = '';
+            const priceDiv = card.querySelector('.my-0\\.5\\.lg\\:my-2, [class*="my-0"]');
             if (priceDiv) {
-                const normalPrice = priceDiv.querySelector('.text-xs.lg\\:text-2xl.font-extrabold');
-                const discountPrice = priceDiv.querySelector('.text-xs.lg\\:text-2xl.font-extrabold.text-green-500');
-                if (discountPrice) {
-                    price = discountPrice.textContent.toLowerCase();
-                } else if (normalPrice) {
-                    price = normalPrice.textContent.toLowerCase();
+                const bold = priceDiv.querySelectorAll('[class*="font-extrabold"]');
+                bold.forEach(function(el) {
+                    if (el.classList.contains('text-green-500')) {
+                        priceText = el.textContent.trim();
+                    } else if (!priceText) {
+                        priceText = el.textContent.trim();
+                    }
+                });
+                const struck = priceDiv.querySelector('.line-through');
+                if (struck) oldPrice = struck.textContent.trim();
+            }
+            if (!priceText) {
+                const anyBold = card.querySelector('[class*="font-extrabold"]');
+                if (anyBold) priceText = anyBold.textContent.trim();
+            }
+
+            // Category badge
+            let category = '';
+            const catBadge = card.querySelector('.rounded-full');
+            if (catBadge) category = catBadge.textContent.trim();
+
+            // Stock status
+            let stockText  = '';
+            let stockType  = 'order';
+            const stockEl  = card.querySelector('[class*="fa-box"]');
+            if (stockEl && stockEl.parentElement) {
+                const stockSpan = stockEl.parentElement.querySelector('span');
+                if (stockSpan) {
+                    stockText = stockSpan.textContent.trim();
+                    if (stockSpan.style.color === 'rgb(239, 68, 68)' || stockSpan.textContent.toLowerCase().includes('out')) {
+                        stockType = 'out';
+                    } else if (stockSpan.textContent.toLowerCase().includes('in stock')) {
+                        stockType = 'ready';
+                    }
                 }
             }
-            
+
+            // Link href
+            const href = (linkEl && linkEl.tagName === 'A') ? linkEl.getAttribute('href') : '#';
+
             allProducts.push({
-                id: index,
-                element: card,
-                section: section,
-                name: name,
-                description: description,
-                price: price,
-                html: card.outerHTML
+                name:      nameEl  ? nameEl.textContent.trim()  : '',
+                desc:      descEl  ? descEl.textContent.trim()  : '',
+                imgSrc:    imgEl   ? imgEl.getAttribute('src')  : '',
+                price:     priceText,
+                oldPrice:  oldPrice,
+                category:  category,
+                stockText: stockText,
+                stockType: stockType,
+                href:      href,
+                searchStr: ((nameEl ? nameEl.textContent : '') + ' ' +
+                            (descEl ? descEl.textContent : '') + ' ' +
+                            priceText + ' ' + category).toLowerCase()
             });
         });
-        
-        console.log(`Extracted ${allProducts.length} products`);
-        return allProducts;
     }
-    
-    // Function to restore original content
-    function restoreOriginalContent() {
-        originalSections.forEach((originalSection, section) => {
-            if (section && section.parentNode) {
-                const newSection = originalSection.cloneNode(true);
-                section.parentNode.replaceChild(newSection, section);
-            }
-        });
-        
-        // Re-extract product data after restoration
-        setTimeout(() => {
-            extractProductData();
-        }, 100);
+
+    extractProductData();
+
+    // Retry if no products found yet (lazy-rendered pages)
+    if (allProducts.length === 0) {
+        setTimeout(extractProductData, 1000);
     }
-    
-    // Function to filter and display products
-    function filterAndDisplay(query) {
+
+    // ------------------------------------------------
+    // Highlight matching text
+    // ------------------------------------------------
+    function highlight(text, query) {
+        if (!query) return escHtml(text);
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return escHtml(text).replace(
+            new RegExp('(' + escaped + ')', 'gi'),
+            '<mark>$1</mark>'
+        );
+    }
+
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(str));
+        return d.innerHTML;
+    }
+
+    // ------------------------------------------------
+    // Build dropdown HTML
+    // ------------------------------------------------
+    function buildDropdown(query) {
         query = query.toLowerCase().trim();
-        
-        console.log(`Filtering products for: "${query}"`);
-        
+
         if (!query) {
-            // If no query, restore original content
-            restoreOriginalContent();
-            
-            // Update UI
-            if (clearButton) clearButton.classList.add('hidden');
-            if (activeSearchIndicator) activeSearchIndicator.classList.add('hidden');
-            if (searchResultsCount) searchResultsCount.classList.add('hidden');
-            if (noResultsMessage) noResultsMessage.classList.add('hidden');
-            
+            closeDropdown();
             return;
         }
-        
-        // Filter products
-        const filteredProducts = allProducts.filter(product => {
-            return product.name.includes(query) || 
-                   product.description.includes(query) ||
-                   product.price.includes(query);
+
+        const matches = allProducts.filter(function(p) {
+            return p.searchStr.includes(query);
         });
-        
-        console.log(`Found ${filteredProducts.length} matching products`);
-        
-        // Update results count
-        if (resultsCountSpan) resultsCountSpan.textContent = filteredProducts.length;
-        if (searchResultsCount) {
-            if (filteredProducts.length > 0) {
-                searchResultsCount.classList.remove('hidden');
-            } else {
-                searchResultsCount.classList.add('hidden');
-            }
+
+        dropdownCount.textContent = matches.length;
+
+        if (matches.length === 0) {
+            dropdownRes.innerHTML =
+                '<div class="dropdown-no-results">' +
+                '<i class="fas fa-search"></i>' +
+                '<p>No products found for <strong>' + escHtml(query) + '</strong></p>' +
+                '<small>Try a different keyword</small>' +
+                '</div>';
+            dropdownFooter.classList.remove('visible');
+        } else {
+            // All matches shown in a 2-row grid that scrolls horizontally
+            const cards = matches.map(function(p) {
+                const thumbHtml = p.imgSrc
+                    ? '<img src="' + escHtml(p.imgSrc) + '" alt="' + escHtml(p.name) + '" loading="lazy">'
+                    : '<i class="fas fa-image"></i>';
+
+                const priceHtml = p.oldPrice
+                    ? '<span class="price-old">' + escHtml(p.oldPrice) + '</span>' +
+                      '<span class="price-main discounted">' + escHtml(p.price) + '</span>'
+                    : '<span class="price-main">' + escHtml(p.price) + '</span>';
+
+                const stockClass = p.stockType === 'ready' ? 'result-stock-ready'
+                                 : p.stockType === 'out'   ? 'result-stock-out'
+                                 : 'result-stock-order';
+
+                const stockLabel = p.stockType === 'ready' ? 'Ready'
+                                 : p.stockType === 'out'   ? 'Out of stock'
+                                 : 'On order';
+
+                return '<a href="' + escHtml(p.href) + '" class="search-result-item">' +
+                    '<div class="result-thumb">' + thumbHtml + '</div>' +
+                    '<div class="result-info">' +
+                        '<div class="result-name">' + highlight(p.name, query) + '</div>' +
+                        '<div class="result-meta">' +
+                            (p.category ? '<span class="result-category">' + escHtml(p.category) + '</span>' : '') +
+                            '<span class="result-stock-badge ' + stockClass + '">' + stockLabel + '</span>' +
+                        '</div>' +
+                        '<div class="result-price">' + priceHtml + '</div>' +
+                    '</div>' +
+                    '</a>';
+            }).join('');
+
+            dropdownRes.innerHTML = '<div class="results-card-grid">' + cards + '</div>';
+
+            dropdownFooter.innerHTML = '<i class="fas fa-times-circle"></i> Close results';
+            dropdownFooter.classList.add('visible');
+            dropdownFooter.onclick = clearSearch;
         }
-        
-        // Update active search indicator
-        if (searchTermSpan) searchTermSpan.textContent = query;
-        if (activeSearchIndicator) activeSearchIndicator.classList.remove('hidden');
-        
-        if (filteredProducts.length === 0) {
-            // Show no results message
-            if (noResultsTerm) noResultsTerm.textContent = query;
-            if (noResultsMessage) noResultsMessage.classList.remove('hidden');
-            
-            // Hide all product sections
-            const sections = document.querySelectorAll('section.mb-8, section.mb-6, section.mb-12, .mb-6.lg\\:mb-10');
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            return;
-        }
-        
-        // Hide no results message
-        if (noResultsMessage) noResultsMessage.classList.add('hidden');
-        
-        // Group filtered products by their original section
-        const productsBySection = new Map();
-        filteredProducts.forEach(product => {
-            if (product.section) {
-                if (!productsBySection.has(product.section)) {
-                    productsBySection.set(product.section, []);
-                }
-                productsBySection.get(product.section).push(product);
-            }
-        });
-        
-        // For each section, either show filtered products or hide the section
-        const sections = document.querySelectorAll('section.mb-8, section.mb-6, section.mb-12, .mb-6.lg\\:mb-10');
-        
-        sections.forEach(section => {
-            const products = productsBySection.get(section);
-            
-            if (products && products.length > 0) {
-                // Show this section
-                section.style.display = '';
-                
-                // Find the grid container within this section
-                const gridContainer = section.querySelector('.grid');
-                if (gridContainer) {
-                    // Replace the grid content with filtered products
-                    gridContainer.innerHTML = products.map(product => product.html).join('');
-                }
-            } else {
-                // Hide this section if it has no matching products
-                section.style.display = 'none';
-            }
-        });
-        
-        // Add highlight animation to first result
-        setTimeout(() => {
-            const firstResult = document.querySelector('.product-card');
-            if (firstResult) {
-                firstResult.classList.add('search-highlight');
-                setTimeout(() => {
-                    firstResult.classList.remove('search-highlight');
-                }, 1000);
-            }
-        }, 100);
+
+        openDropdown();
     }
-    
-    // Initialize everything
-    function initializeSearch() {
-        console.log('Initializing search...');
-        
-        // Save original content
-        saveOriginalContent();
-        
-        // Extract product data
-        extractProductData();
-        
-        // Check if we have products
-        if (allProducts.length === 0) {
-            console.warn('No products found, will retry in 1 second...');
-            setTimeout(initializeSearch, 1000);
-            return;
-        }
-        
-        console.log(`Search initialized successfully with ${allProducts.length} products`);
-        
-        // Show clear button if there's text in search input
-        if (searchInput && searchInput.value.trim()) {
-            filterAndDisplay(searchInput.value);
-        }
+
+    function openDropdown() {
+        dropdown.classList.add('open');
+        searchInput.classList.add('results-open');
     }
-    
-    // Set up event listeners
+
+    function closeDropdown() {
+        dropdown.classList.remove('open');
+        searchInput.classList.remove('results-open');
+    }
+
+    // ------------------------------------------------
+    // Event listeners
+    // ------------------------------------------------
     if (searchInput) {
         let searchTimeout;
-        
-        searchInput.addEventListener('input', function(e) {
-            const query = e.target.value;
-            
-            // Show loading spinner
+
+        searchInput.addEventListener('input', function (e) {
+            const q = e.target.value;
+
             if (searchSpinner) searchSpinner.classList.remove('hidden');
-            
-            // Show/hide clear button
-            if (clearButton) {
-                if (query.length > 0) {
-                    clearButton.classList.remove('hidden');
-                } else {
-                    clearButton.classList.add('hidden');
-                }
-            }
-            
-            // Clear previous timeout
+            clearButton && (q.length > 0
+                ? clearButton.classList.remove('hidden')
+                : clearButton.classList.add('hidden'));
+
             clearTimeout(searchTimeout);
-            
-            // Set new timeout for debounce
-            searchTimeout = setTimeout(() => {
-                filterAndDisplay(query);
+            searchTimeout = setTimeout(function () {
+                buildDropdown(q);
                 if (searchSpinner) searchSpinner.classList.add('hidden');
-            }, 300);
+            }, 250);
         });
-        
-        // Handle keyboard shortcut (Escape to clear)
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                clearSearch();
-            }
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { e.preventDefault(); clearSearch(); }
         });
-        
-        // Prevent form submission on enter
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                filterAndDisplay(e.target.value);
-            }
+
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); }
         });
     }
-    
-    // Clear search function
-    window.clearSearch = function() {
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('#stickySearchBar')) {
+            closeDropdown();
+        }
+    });
+
+    // Reopen dropdown if user clicks back in input and there's a query
+    searchInput && searchInput.addEventListener('focus', function () {
+        if (searchInput.value.trim()) {
+            buildDropdown(searchInput.value);
+        }
+    });
+
+    // ------------------------------------------------
+    // Global clearSearch
+    // ------------------------------------------------
+    window.clearSearch = function () {
         if (searchInput) {
             searchInput.value = '';
             searchInput.focus();
-            filterAndDisplay('');
-            
-            if (searchSpinner) searchSpinner.classList.add('hidden');
-            if (clearButton) clearButton.classList.add('hidden');
-            if (activeSearchIndicator) activeSearchIndicator.classList.add('hidden');
-            if (searchResultsCount) searchResultsCount.classList.add('hidden');
-            if (noResultsMessage) noResultsMessage.classList.add('hidden');
         }
+        if (searchSpinner) searchSpinner.classList.add('hidden');
+        if (clearButton)   clearButton.classList.add('hidden');
+        closeDropdown();
     };
-    
-    // Start initialization
-    initializeSearch();
-    
-    // Watch for filter form submissions (category, gender, price filters)
-    const filterForms = document.querySelectorAll('form');
-    filterForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            // Allow the form to submit normally, but reinitialize search after
-            setTimeout(() => {
-                console.log('Filter applied, reinitializing search...');
-                saveOriginalContent();
-                extractProductData();
-                
-                // If there's text in search, reapply filter
-                if (searchInput && searchInput.value.trim()) {
-                    filterAndDisplay(searchInput.value);
-                }
-            }, 500);
+
+    // Re-extract products after filter form submissions (category/gender/price)
+    document.querySelectorAll('form').forEach(function (form) {
+        form.addEventListener('submit', function () {
+            setTimeout(extractProductData, 500);
         });
     });
-    
-    // Also watch for filter links (gender tabs, category links)
-    const filterLinks = document.querySelectorAll('a[href*="category"], a[href*="gender"], a[href*="min_price"], a[href*="max_price"]');
-    filterLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            setTimeout(() => {
-                console.log('Filter link clicked, reinitializing search...');
-                saveOriginalContent();
-                extractProductData();
-                
-                // If there's text in search, reapply filter
-                if (searchInput && searchInput.value.trim()) {
-                    filterAndDisplay(searchInput.value);
-                }
-            }, 500);
+
+    document.querySelectorAll('a[href*="category"], a[href*="gender"], a[href*="min_price"], a[href*="max_price"]')
+        .forEach(function (link) {
+            link.addEventListener('click', function () {
+                setTimeout(extractProductData, 500);
+            });
         });
-    });
 });
 </script>
