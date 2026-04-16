@@ -436,7 +436,34 @@
                         Become an Agent
                     </a>
                 {% endif %}
-            </div>    
+            </div>  
+            {% if user.is_authenticated %}
+            <div class="mt-4 pt-4 border-t border-[var(--border)] flex flex-col gap-2">
+                {% if user.agent.status == 'approved' %}
+                    <a href="{% url 'agent_dashboard' %}"
+                       class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                        <i class="fas fa-users"></i>
+                        Agent Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'become_agent' %}"
+                       class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                        <i class="fas fa-handshake"></i>
+                        Become an Agent
+                    </a>
+                {% endif %}
+
+                {% if request.user.is_authenticated %}
+                    {% with store=request.user.store_set.first %}  {# or however you access it #}
+                        {% if store and store.status == 'approved' %}
+                            <a href="{% url 'seller:seller_dashboard' %}">Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'seller:seller_apply' %}">Become a Seller</a>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+                            </div>    
+            {% endif %}      
             {% endif %}    
         </div>
         {% endif %}
@@ -573,7 +600,17 @@
                         Become an Agent
                     </a>
                 {% endif %}
-            </div>    
+
+                {% if request.user.is_authenticated %}
+                    {% with store=request.user.store_set.first %}  {# or however you access it #}
+                        {% if store and store.status == 'approved' %}
+                            <a href="{% url 'seller:seller_dashboard' %}">Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'seller:seller_apply' %}">Become a Seller</a>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+                            </div>    
             {% endif %}    
         </div>
         {% endif %}

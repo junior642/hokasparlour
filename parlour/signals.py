@@ -236,3 +236,5 @@ def on_user_signed_up(request, user, **kwargs):
             promo_popup_shown=False
         )
         logger.info(f"No referral code — show_promo_popup=True set for {user.username}")
+
+

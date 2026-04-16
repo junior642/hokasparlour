@@ -11,6 +11,7 @@ from two_factor.admin import AdminSiteOTPRequired
 import os
 
 
+
 # ── Secure Admin: requires 2FA + 2hr session timeout ─────────────────────────
 class SecureAdminSite(AdminSiteOTPRequired):
     def each_context(self, request):
@@ -41,6 +42,7 @@ urlpatterns = [
     path('', include('parlour.urls')),
     path('admin-dashboard/', include('hokaadmin.urls')),
     path('finance/', include('finance.urls', namespace='finance')),
+    path('seller/', include('seller.urls', namespace='seller')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path('robots.txt', robots_txt),
 ]

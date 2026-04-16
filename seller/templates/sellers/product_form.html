@@ -1,0 +1,185 @@
+{% extends 'sellers/seller_base.html' %}
+{% block page_content %}
+
+<div class="form-page">
+  <div class="form-card">
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="product-form">
+      {% csrf_token %}
+
+      <div class="form-cols">
+        <!-- Left: core info -->
+        <div class="form-col">
+          <h3 class="form-section-title">Product Info</h3>
+
+          <div class="field-group">
+            <label for="name">Product Name *</label>
+            <input type="text" id="name" name="name"
+                   value="{{ product.name|default:'' }}" required
+                   placeholder="e.g. Samsung 65-inch Smart TV">
+          </div>
+
+          <div class="field-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="5"
+                      placeholder="Describe the product…">{{ product.description|default:'' }}</textarea>
+          </div>
+
+          <div class="field-group">
+            <label for="image">Product Image</label>
+            {% if product.image %}
+              <div class="current-image">
+                <img src="{{ product.image.url }}" alt="Current image">
+                <span class="img-label">Current image — upload a new one to replace</span>
+              </div>
+            {% endif %}
+            <input type="file" id="image" name="image" accept="image/*">
+          </div>
+
+          <div class="toggle-field">
+            <label class="toggle-label">
+              <input type="checkbox" name="is_active"
+                     {% if product.is_active|default:True %}checked{% endif %}>
+              <span class="toggle-switch"></span>
+              <span>List this product publicly</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Right: pricing & stock -->
+        <div class="form-col">
+          <h3 class="form-section-title">Pricing & Stock</h3>
+
+          <div class="field-group">
+            <label for="price">Selling Price (KES) *</label>
+            <div class="input-prefix">
+              <span>KES</span>
+              <input type="number" id="price" name="price" step="0.01" min="0"
+                     value="{{ product.price|default:'' }}" required placeholder="0.00">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="anchor_price">Anchor / Original Price (KES)
+              <span class="field-hint">Shown crossed out — creates a "was/now" look</span>
+            </label>
+            <div class="input-prefix">
+              <span>KES</span>
+              <input type="number" id="anchor_price" name="anchor_price" step="0.01" min="0"
+                     value="{{ product.anchor_price|default:'' }}" placeholder="Optional">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="discount_price">Special / Discount Price (KES)
+              <span class="field-hint">Flash sale or member price</span>
+            </label>
+            <div class="input-prefix">
+              <span>KES</span>
+              <input type="number" id="discount_price" name="discount_price" step="0.01" min="0"
+                     value="{{ product.discount_price|default:'' }}" placeholder="Optional">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="cost">Cost Price (KES)
+              <span class="field-hint">Private — for your profit tracking only</span>
+            </label>
+            <div class="input-prefix">
+              <span>KES</span>
+              <input type="number" id="cost" name="cost" step="0.01" min="0"
+                     value="{{ product.cost|default:'' }}" placeholder="Optional">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="stock">Stock Quantity *</label>
+            <input type="number" id="stock" name="stock" min="0"
+                   value="{{ product.stock|default:'0' }}" required>
+          </div>
+
+          <!-- Live margin preview -->
+          <div class="margin-preview" id="marginPreview">
+            <span class="margin-label">Estimated margin</span>
+            <span class="margin-value" id="marginVal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <a href="{% url 'seller:seller_products' %}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary">
+          {% if product %}Save Changes{% else %}Add Product{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.form-page{max-width:900px;margin:0 auto}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.form-cols{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+@media(max-width:640px){.form-cols{grid-template-columns:1fr}}
+.form-col{display:flex;flex-direction:column;gap:1.25rem}
+.form-section-title{font-size:.95rem;font-weight:700;color:var(--text-primary);margin:0 0 .25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.field-group{display:flex;flex-direction:column;gap:.35rem}
+.field-group label{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.field-hint{font-size:.72rem;color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400;display:block;margin-top:.15rem}
+.field-group input:not([type=checkbox]):not([type=file]),
+.field-group textarea,
+.field-group select{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text-primary);font-size:.92rem;width:100%;box-sizing:border-box;transition:border .2s}
+.field-group input:focus,.field-group textarea:focus{outline:none;border-color:var(--accent)}
+.input-prefix{display:flex;align-items:stretch;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border .2s}
+.input-prefix:focus-within{border-color:var(--accent)}
+.input-prefix span{padding:.7rem 1rem;background:var(--surface);color:var(--text-muted);font-size:.82rem;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center}
+.input-prefix input{border:none;border-radius:0;background:transparent;flex:1}
+.input-prefix input:focus{border:none;outline:none}
+.current-image{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem}
+.current-image img{width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.img-label{font-size:.75rem;color:var(--text-muted)}
+/* Toggle switch */
+.toggle-field{padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+.toggle-label{display:flex;align-items:center;gap:.75rem;cursor:pointer;font-size:.9rem;color:var(--text-primary)}
+.toggle-label input[type=checkbox]{display:none}
+.toggle-switch{width:40px;height:22px;background:var(--border);border-radius:20px;position:relative;flex-shrink:0;transition:background .2s}
+.toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle-label input:checked~.toggle-switch{background:var(--accent)}
+.toggle-label input:checked~.toggle-switch::after{transform:translateX(18px)}
+/* Margin preview */
+.margin-preview{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-top:auto}
+.margin-label{font-size:.78rem;color:var(--text-muted);font-weight:600}
+.margin-value{font-size:1rem;font-weight:700;color:var(--text-primary)}
+/* Footer */
+.form-footer{display:flex;justify-content:flex-end;gap:1rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+</style>
+
+<script>
+const priceEl = document.getElementById('price');
+const costEl  = document.getElementById('cost');
+const display = document.getElementById('marginVal');
+
+function updateMargin(){
+  const price = parseFloat(priceEl.value) || 0;
+  const cost  = parseFloat(costEl.value)  || 0;
+  if(price && cost){
+    const margin = ((price - cost) / price * 100).toFixed(1);
+    const profit = (price - cost).toFixed(2);
+    display.textContent = `${margin}%  (KES ${profit})`;
+    display.style.color = margin > 0 ? '#22c55e' : '#ef4444';
+  } else {
+    display.textContent = '—';
+    display.style.color = 'var(--text-primary)';
+  }
+}
+priceEl.addEventListener('input', updateMargin);
+costEl.addEventListener('input',  updateMargin);
+updateMargin();
+</script>
+{% endblock %}

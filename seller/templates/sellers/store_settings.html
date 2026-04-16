@@ -1,0 +1,159 @@
+{% extends 'sellers/seller_base.html' %}
+{% block page_content %}
+
+<div class="settings-wrap">
+
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="settings-form">
+    {% csrf_token %}
+
+    <!-- Store logo + name -->
+    <div class="settings-section">
+      <h3 class="settings-title">Store Identity</h3>
+
+      <div class="logo-row">
+        <div class="logo-preview">
+          {% if store.logo %}
+            <img src="{{ store.logo.url }}" alt="Store logo" id="logoPreview">
+          {% else %}
+            <div class="logo-placeholder" id="logoPreview">{{ store.store_name|first|upper }}</div>
+          {% endif %}
+        </div>
+        <div class="logo-upload">
+          <label class="upload-btn" for="logo">📁 Upload Logo</label>
+          <input type="file" id="logo" name="logo" accept="image/*" class="hidden-input">
+          <p class="upload-hint">PNG, JPG — recommended 200×200 px</p>
+        </div>
+      </div>
+
+      <div class="fields-row">
+        <div class="field-group">
+          <label for="store_name">Store Name *</label>
+          <input type="text" id="store_name" name="store_name"
+                 value="{{ store.store_name }}" required>
+        </div>
+
+        <div class="field-group">
+          <label>Store Slug</label>
+          <input type="text" value="{{ store.slug }}" disabled
+                 title="Contact admin to change the slug">
+          <span class="field-hint">Not editable — contact admin to change.</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="description">Store Description</label>
+        <textarea id="description" name="description" rows="4"
+                  placeholder="Tell customers what your store is about…">{{ store.description }}</textarea>
+      </div>
+    </div>
+
+    <!-- Contact info -->
+    <div class="settings-section">
+      <h3 class="settings-title">Contact Information</h3>
+
+      <div class="fields-row">
+        <div class="field-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="{{ store.email|default:'' }}"
+                 placeholder="store@example.com">
+        </div>
+
+        <div class="field-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" value="{{ store.phone|default:'' }}"
+                 placeholder="+254 7XX XXX XXX">
+        </div>
+      </div>
+
+      <div class="field-group" style="max-width:340px">
+        <label for="whatsapp">WhatsApp Number
+          <span class="field-hint">Customers can message you directly</span>
+        </label>
+        <input type="tel" id="whatsapp" name="whatsapp" value="{{ store.whatsapp|default:'' }}"
+               placeholder="+254 7XX XXX XXX">
+      </div>
+    </div>
+
+    <!-- Store status info -->
+    <div class="settings-section status-section">
+      <h3 class="settings-title">Store Status</h3>
+      <div class="status-row">
+        <span class="status-dot status-{{ store.status }}"></span>
+        <span class="status-text">{{ store.status|capfirst }}</span>
+        {% if store.status == 'approved' %}
+          <span class="status-since">since {{ store.approved_at|date:"N j, Y" }}</span>
+        {% endif %}
+      </div>
+      <p class="settings-note">To change your store status, contact the Qunimart admin.</p>
+    </div>
+
+    <div class="form-footer">
+      <button type="submit" class="btn-primary">Save Settings</button>
+    </div>
+  </form>
+</div>
+
+<style>
+.settings-wrap{max-width:760px}
+.settings-form{display:flex;flex-direction:column;gap:1.5rem}
+.settings-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.75rem;display:flex;flex-direction:column;gap:1.25rem}
+.settings-title{font-size:.95rem;font-weight:700;color:var(--text-primary);margin:0;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+/* Logo */
+.logo-row{display:flex;align-items:center;gap:1.5rem}
+.logo-preview{width:80px;height:80px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid var(--border)}
+.logo-preview img{width:100%;height:100%;object-fit:cover}
+.logo-placeholder{width:80px;height:80px;background:var(--accent);border-radius:50%;display:grid;place-items:center;font-size:2rem;font-weight:700;color:#fff}
+.logo-upload{display:flex;flex-direction:column;gap:.4rem}
+.upload-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--text-primary);transition:border .2s}
+.upload-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hidden-input{display:none}
+.upload-hint{font-size:.75rem;color:var(--text-muted);margin:0}
+/* Fields */
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+@media(max-width:540px){.fields-row{grid-template-columns:1fr}}
+.field-group{display:flex;flex-direction:column;gap:.35rem}
+.field-group label{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.field-hint{font-size:.72rem;color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400;display:block;margin-top:.1rem}
+.field-group input,.field-group textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text-primary);font-size:.92rem;width:100%;box-sizing:border-box;transition:border .2s}
+.field-group input:focus,.field-group textarea:focus{outline:none;border-color:var(--accent)}
+.field-group input:disabled{opacity:.5;cursor:not-allowed}
+/* Status */
+.status-row{display:flex;align-items:center;gap:.75rem}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.status-approved{background:#22c55e}
+.status-dot.status-pending{background:#f59e0b}
+.status-dot.status-suspended{background:#ef4444}
+.status-text{font-weight:600;color:var(--text-primary)}
+.status-since{font-size:.82rem;color:var(--text-muted)}
+.settings-note{font-size:.8rem;color:var(--text-muted);margin:0}
+.form-footer{display:flex;justify-content:flex-end;padding-top:.5rem}
+</style>
+
+<script>
+// Live logo preview
+document.getElementById('logo').addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('logoPreview');
+    if(prev.tagName === 'IMG'){
+      prev.src = e.target.result;
+    } else {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.alt = 'Logo preview';
+      img.id = 'logoPreview';
+      prev.replaceWith(img);
+    }
+  };
+  reader.readAsDataURL(file);
+});
+</script>
+{% endblock %}

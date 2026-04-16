@@ -1,0 +1,162 @@
+{% extends 'sellers/seller_base.html' %}
+{% block page_content %}
+
+<!-- Stats row -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-icon">📦</span>
+    <div class="stat-info">
+      <span class="stat-value">{{ total_products }}</span>
+      <span class="stat-label">Total Products</span>
+    </div>
+    <span class="stat-badge active">{{ active_products }} active</span>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-icon">🛒</span>
+    <div class="stat-info">
+      <span class="stat-value">{{ total_orders }}</span>
+      <span class="stat-label">Total Orders</span>
+    </div>
+  </div>
+
+  <div class="stat-card accent">
+    <span class="stat-icon">💰</span>
+    <div class="stat-info">
+      <span class="stat-value">KES {{ total_revenue|floatformat:0 }}</span>
+      <span class="stat-label">Revenue (completed)</span>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <span class="stat-icon">⚠️</span>
+    <div class="stat-info">
+      <span class="stat-value">{{ low_stock.count }}</span>
+      <span class="stat-label">Low Stock Items</span>
+    </div>
+    {% if low_stock.count > 0 %}
+      <span class="stat-badge warn">action needed</span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Two column layout -->
+<div class="dash-cols">
+
+  <!-- Recent orders -->
+  <div class="dash-section">
+    <div class="section-header">
+      <h2>Recent Orders</h2>
+      <a href="{% url 'seller:seller_orders' %}" class="section-link">View all →</a>
+    </div>
+
+    {% if recent_orders %}
+      <table class="dash-table">
+        <thead>
+          <tr><th>Order</th><th>Customer</th><th>Product</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for item in recent_orders %}
+          <tr>
+            <td><a href="{% url 'seller_order_detail' item.order.id %}">#{{ item.order.id }}</a></td>
+            <td>{{ item.order.user.get_full_name|default:item.order.user.username }}</td>
+            <td>{{ item.product.name|truncatechars:30 }}</td>
+            <td><span class="badge badge-{{ item.order.status }}">{{ item.order.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <p>No orders yet. Share your store link to get started!</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Low stock alerts -->
+  <div class="dash-section">
+    <div class="section-header">
+      <h2>Low Stock Alerts</h2>
+      <a href="{% url 'seller:seller_products' %}?status=active" class="section-link">View products →</a>
+    </div>
+
+    {% if low_stock %}
+      <ul class="stock-list">
+        {% for p in low_stock %}
+        <li class="stock-item">
+          {% if p.image %}
+            <img src="{{ p.image.url }}" alt="{{ p.name }}" class="stock-img">
+          {% else %}
+            <div class="stock-img-placeholder">📦</div>
+          {% endif %}
+          <div class="stock-info">
+            <span class="stock-name">{{ p.name|truncatechars:35 }}</span>
+            <span class="stock-count {% if p.stock == 0 %}out{% else %}low{% endif %}">
+              {% if p.stock == 0 %}Out of stock{% else %}{{ p.stock }} left{% endif %}
+            </span>
+          </div>
+          <a href="{% url 'seller_product_edit' p.pk %}" class="btn-xs">Update</a>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state">
+        <p>✅ All products are well stocked.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<style>
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1rem;position:relative}
+.stat-card.accent{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.stat-icon{font-size:1.8rem;flex-shrink:0}
+.stat-info{display:flex;flex-direction:column;gap:.15rem}
+.stat-value{font-size:1.5rem;font-weight:700;color:var(--text-primary)}
+.stat-label{font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.stat-badge{position:absolute;top:.75rem;right:.75rem;font-size:.7rem;padding:.2rem .5rem;border-radius:20px;font-weight:600}
+.stat-badge.active{background:rgba(34,197,94,.15);color:#22c55e}
+.stat-badge.warn{background:rgba(245,158,11,.15);color:#f59e0b}
+
+/* Layout */
+.dash-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:768px){.dash-cols{grid-template-columns:1fr}}
+.dash-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.section-header h2{font-size:1rem;font-weight:700;color:var(--text-primary);margin:0}
+.section-link{font-size:.85rem;color:var(--accent);text-decoration:none}
+.section-link:hover{text-decoration:underline}
+
+/* Table */
+.dash-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.dash-table th{text-align:left;padding:.5rem .75rem;color:var(--text-muted);font-weight:600;font-size:.75rem;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.dash-table td{padding:.65rem .75rem;border-bottom:1px solid var(--border);color:var(--text-primary)}
+.dash-table tr:last-child td{border-bottom:none}
+.dash-table a{color:var(--accent);text-decoration:none;font-weight:600}
+
+/* Badges */
+.badge{font-size:.7rem;padding:.25rem .6rem;border-radius:20px;font-weight:600;text-transform:capitalize}
+.badge-pending{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-completed,.badge-delivered{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-cancelled{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-processing{background:rgba(99,102,241,.15);color:#818cf8}
+
+/* Low stock list */
+.stock-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.75rem}
+.stock-item{display:flex;align-items:center;gap:.75rem}
+.stock-img{width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
+.stock-img-placeholder{width:40px;height:40px;background:var(--bg);border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0}
+.stock-info{flex:1;display:flex;flex-direction:column;gap:.15rem}
+.stock-name{font-size:.88rem;color:var(--text-primary);font-weight:500}
+.stock-count{font-size:.78rem;font-weight:600}
+.stock-count.low{color:#f59e0b}
+.stock-count.out{color:#ef4444}
+.btn-xs{font-size:.75rem;padding:.3rem .7rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);text-decoration:none;white-space:nowrap}
+.btn-xs:hover{border-color:var(--accent);color:var(--accent)}
+
+.empty-state{text-align:center;padding:2rem;color:var(--text-muted);font-size:.9rem}
+</style>
+{% endblock %}

@@ -3118,3 +3118,6 @@ def whatsapp_disconnect(request):
         'whatsapp_otp', 'whatsapp_otp_created_at'
     ])
     return JsonResponse({'success': True, 'message': 'WhatsApp disconnected.'})    
+
+
+    

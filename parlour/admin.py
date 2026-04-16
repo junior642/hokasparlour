@@ -5,7 +5,7 @@ from .models import (
     EmailOTP, Profile, OrderHistory, Advertisement, AdImage, AdImpression,
     MpesaPayment
 )
-
+from .models import Store, SellerApplication
 from .models import Category
 
 @admin.register(Category)
@@ -162,6 +162,16 @@ class ProductAdmin(admin.ModelAdmin):
         return obj.is_in_stock()
     is_in_stock.boolean = True
     is_in_stock.short_description = 'In Stock'
+
+    def store_display(self, obj):
+        if obj.store:
+            badge_color = '#e94560' if obj.store.is_default else '#667eea'
+            return format_html(
+                '<span style="background:{};color:white;padding:3px 10px;'
+                'border-radius:12px;font-size:11px;">{}</span>',
+                badge_color, obj.store.store_name
+            )
+        return mark_safe('<span style="color:#ccc;">—</span>')
 
     def image_count(self, obj):
         count = obj.additional_images.count()
@@ -666,3 +676,151 @@ class ContactMessageAdmin(admin.ModelAdmin):
     search_fields = ['full_name', 'email', 'message', 'order_number']
     readonly_fields = ['full_name', 'email', 'phone', 'subject', 'order_number',
                        'message', 'user', 'ip_address', 'created_at']    
+
+from django.utils import timezone
+from .models import Store, SellerApplication
+ 
+ 
+@admin.register(Store)
+class StoreAdmin(admin.ModelAdmin):
+    list_display = (
+        'store_name', 'owner', 'status_badge', 'is_default',
+        'product_count', 'phone', 'email', 'created_at'
+    )
+    list_filter  = ('status', 'is_default', 'created_at')
+    search_fields = ('store_name', 'owner__username', 'owner__email', 'phone', 'email')
+    readonly_fields = ('created_at', 'approved_at', 'slug', 'product_count')
+    ordering = ('-created_at',)
+ 
+    fieldsets = (
+        ('Store Identity', {
+            'fields': ('store_name', 'slug', 'logo', 'description')
+        }),
+        ('Owner', {
+            'fields': ('owner',)
+        }),
+        ('Contact', {
+            'fields': ('phone', 'email', 'whatsapp')
+        }),
+        ('Status', {
+            'fields': ('status', 'is_default', 'approved_at')
+        }),
+        ('Stats', {
+            'fields': ('product_count', 'created_at'),
+            'classes': ('collapse',)
+        }),
+    )
+ 
+    actions = ['approve_stores', 'suspend_stores']
+ 
+    def product_count(self, obj):
+        count = obj.get_product_count()
+        return format_html('<strong>{}</strong> product{}', count, 's' if count != 1 else '')
+    product_count.short_description = 'Products'
+ 
+    def status_badge(self, obj):
+        colors = {
+            'pending':   ('#ffc107', 'black'),
+            'approved':  ('#28a745', 'white'),
+            'suspended': ('#dc3545', 'white'),
+        }
+        bg, text = colors.get(obj.status, ('#999', 'white'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 12px;'
+            'border-radius:12px;font-size:11px;font-weight:600;">{}</span>',
+            bg, text, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+ 
+    def approve_stores(self, request, queryset):
+        count = 0
+        for store in queryset.exclude(status='approved'):
+            store.status = 'approved'
+            store.approved_at = timezone.now()
+            store.save(update_fields=['status', 'approved_at'])
+            count += 1
+        self.message_user(request, f'✅ {count} store(s) approved.')
+    approve_stores.short_description = '✅ Approve selected stores'
+ 
+    def suspend_stores(self, request, queryset):
+        count = queryset.exclude(is_default=True).update(status='suspended')
+        self.message_user(request, f'⛔ {count} store(s) suspended.')
+    suspend_stores.short_description = '⛔ Suspend selected stores'
+ 
+@admin.register(SellerApplication)
+class SellerApplicationAdmin(admin.ModelAdmin):
+    list_display = (
+        'business_name', 'user', 'phone', 'status_badge',
+        'has_store', 'created_at', 'reviewed_at'
+    )
+    list_filter  = ('status', 'created_at')
+    search_fields = ('business_name', 'user__username', 'user__email', 'phone')
+    readonly_fields = ('user', 'business_name', 'phone', 'email', 'reason', 'created_at', 'reviewed_at')
+    ordering = ('-created_at',)
+ 
+    fieldsets = (
+        ('Applicant Info', {
+            'fields': ('user', 'business_name', 'phone', 'email')
+        }),
+        ('Application', {
+            'fields': ('reason',)
+        }),
+        ('Review', {
+            'fields': ('status', 'admin_notes', 'reviewed_at'),
+            'description': (
+                'Use the <strong>Approve</strong> or <strong>Reject</strong> actions below '
+                'to process applications — this will automatically create the store and '
+                'send the applicant an email notification.'
+            )
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',)
+        }),
+    )
+ 
+    actions = ['approve_applications', 'reject_applications']
+ 
+    def has_add_permission(self, request):
+        return False
+ 
+    def status_badge(self, obj):
+        colors = {
+            'pending':  ('#ffc107', 'black'),
+            'approved': ('#28a745', 'white'),
+            'rejected': ('#dc3545', 'white'),
+        }
+        bg, text = colors.get(obj.status, ('#999', 'white'))
+        return format_html(
+            '<span style="background:{};color:{};padding:3px 12px;'
+            'border-radius:12px;font-size:11px;font-weight:600;">{}</span>',
+            bg, text, obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
+ 
+    def has_store(self, obj):
+        try:
+            store = obj.user.store
+            return format_html(
+                '<span style="color:green;">✔ {}</span>', store.store_name
+            )
+        except Exception:
+            return format_html('<span style="color:#ccc;">—</span>')
+    has_store.short_description = 'Store Created'
+ 
+    def approve_applications(self, request, queryset):
+        count = 0
+        for app in queryset.filter(status='pending'):
+            app.approve()  # creates store + sends email
+            count += 1
+        self.message_user(request, f'✅ {count} application(s) approved. Stores created and emails sent.')
+    approve_applications.short_description = '✅ Approve — create store & notify seller'
+ 
+    def reject_applications(self, request, queryset):
+        count = 0
+        for app in queryset.filter(status='pending'):
+            app.reject()  # sends rejection email
+            count += 1
+        self.message_user(request, f'⛔ {count} application(s) rejected. Sellers notified by email.')
+    reject_applications.short_description = '⛔ Reject & notify seller'
+ 

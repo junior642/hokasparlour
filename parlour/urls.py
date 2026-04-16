@@ -91,4 +91,6 @@ urlpatterns = [
     path('validate-promo/', views.validate_promo_code, name='validate_promo_code'),
     path('save-promo/', views.save_promo_code, name='save_promo_code'),
     path('skip-promo/', views.skip_promo_code, name='skip_promo_code'),
+
+    
 ]

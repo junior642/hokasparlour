@@ -1,0 +1,56 @@
+{% extends 'sellers/seller_base.html' %}
+{% block page_content %}
+
+<div class="apply-wrap">
+  <div class="apply-card">
+    <div class="apply-icon">🏪</div>
+    <h1 class="apply-title">Become a Qunimart Seller</h1>
+    <p class="apply-sub">Fill in the form below. Our team reviews every application within 24 hours.</p>
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" class="apply-form">
+      {% csrf_token %}
+
+      <div class="field-group">
+        <label for="business_name">Business / Store Name</label>
+        <input type="text" id="business_name" name="business_name"
+               placeholder="e.g. Fatuma's Electronics" required>
+      </div>
+
+      <div class="field-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone"
+               placeholder="+254 7XX XXX XXX" required>
+      </div>
+
+      <div class="field-group">
+        <label for="reason">Tell us about your business</label>
+        <textarea id="reason" name="reason" rows="5"
+                  placeholder="What will you sell? Where are you based? Any other details..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary btn-full">Submit Application →</button>
+    </form>
+  </div>
+</div>
+
+<style>
+.apply-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh;padding:2rem}
+.apply-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.5rem;width:100%;max-width:500px}
+.apply-icon{font-size:2.5rem;margin-bottom:1rem}
+.apply-title{font-size:1.6rem;font-weight:700;color:var(--text-primary);margin:0 0 .5rem}
+.apply-sub{color:var(--text-muted);margin:0 0 2rem;line-height:1.6}
+.apply-form{display:flex;flex-direction:column;gap:1.25rem}
+.field-group{display:flex;flex-direction:column;gap:.4rem}
+.field-group label{font-size:.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.field-group input,.field-group textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem;color:var(--text-primary);font-size:.95rem;transition:border .2s}
+.field-group input:focus,.field-group textarea:focus{outline:none;border-color:var(--accent)}
+.field-group textarea{resize:vertical}
+.btn-full{width:100%;margin-top:.5rem}
+</style>
+{% endblock %}

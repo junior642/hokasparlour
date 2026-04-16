@@ -1,0 +1,20 @@
+{% extends 'sellers/seller_base.html' %}
+{% block page_content %}
+<div class="status-wrap">
+  <div class="status-card status-pending">
+    <div class="status-icon">⏳</div>
+    <h2>Application Under Review</h2>
+    <p>Your application for <strong>{{ application.business_name }}</strong> was submitted on
+       {{ application.created_at|date:"N j, Y" }}. We'll email you at
+       <strong>{{ request.user.email }}</strong> once it's reviewed — usually within 24 hours.</p>
+    <a href="{% url 'home' %}" class="btn-secondary">← Back to Qunimart</a>
+  </div>
+</div>
+<style>
+.status-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh;padding:2rem}
+.status-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:3rem;max-width:480px;text-align:center}
+.status-icon{font-size:3rem;margin-bottom:1.5rem}
+.status-card h2{font-size:1.5rem;font-weight:700;color:var(--text-primary);margin:0 0 1rem}
+.status-card p{color:var(--text-muted);line-height:1.7;margin:0 0 2rem}
+</style>
+{% endblock %}
