@@ -308,7 +308,7 @@ def send_order_confirmation_email(order):
             </div>
             
             <div class="footer">
-                <p style="font-weight: 600; color: #333; font-size: 16px;">Hoka's Parlour</p>
+                <p style="font-weight: 600; color: #333; font-size: 16px;">Qunimart</p>
                 <p>📍 {pickup_info['location']}</p>
                 <p>📧 {store_settings.store_email} | 📞 {store_settings.store_phone}</p>
                 
@@ -319,7 +319,7 @@ def send_order_confirmation_email(order):
                 </div>
                 
                 <p style="color: #999; font-size: 12px; margin-top: 20px;">
-                    © 2026 Hoka's Parlour. All rights reserved.
+                    © 2026 Qunimart. All rights reserved.
                 </p>
             </div>
         </div>
@@ -331,7 +331,7 @@ def send_order_confirmation_email(order):
     plain_message = f"""
 Dear {order.customer_name},
 
-Thank you for your order at Hoka's Parlour!
+Thank you for your order at Qunimart!
 
 ORDER NUMBER: #{order.id}
 Order Date: {order.created_at.strftime('%B %d, %Y at %I:%M %p')}
@@ -354,7 +354,7 @@ Please bring Order ID #{order.id} when picking up.
 Contact: {store_settings.store_email} | {store_settings.store_phone}
 
 Best regards,
-Hoka's Parlour Team
+Qunimart Team
     """
     
     try:

@@ -1,7 +1,7 @@
 {% extends 'parlour/base.html' %}
 {% load static %}
 
-{% block title %}{{ product.name }} - Hoka's Parlour{% endblock %}
+{% block title %}{{ product.name }} - Qunimart{% endblock %}
 
 {% block content %}
 <style>
@@ -495,13 +495,13 @@ async function shareProduct() {
                 const ext  = blob.type.includes('png') ? 'png' : blob.type.includes('gif') ? 'gif' : 'jpg';
                 const file = new File([blob], `${productName}.${ext}`, { type: blob.type });
                 if (navigator.canShare({ files: [file] })) {
-                    await navigator.share({ title: productName, text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`, url: productUrl, files: [file] });
+                    await navigator.share({ title: productName, text: `Check out ${productName} on Qunimart!\n${productDesc}`, url: productUrl, files: [file] });
                     btn.innerHTML = '<i class="fas fa-check"></i> Shared!';
                     setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
                     return;
                 }
             }
-            await navigator.share({ title: productName, text: `Check out ${productName} on Hoka's Parlour!\n${productDesc}`, url: productUrl });
+            await navigator.share({ title: productName, text: `Check out ${productName} on QunimartSSS!\n${productDesc}`, url: productUrl });
             btn.innerHTML = '<i class="fas fa-check"></i> Shared!';
             setTimeout(() => { btn.innerHTML = originalHTML; btn.disabled = false; }, 2000);
         } catch (err) {

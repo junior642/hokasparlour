@@ -927,7 +927,7 @@ def generate_otp():
 def send_otp_email_to_address(email, username, otp):
     """Send OTP email with error handling and logging"""
     try:
-        subject = "Your OTP Verification Code - Hoka's Parlour"
+        subject = "Your OTP Verification Code - Qunimart"
 
         html_message = f"""
         <!DOCTYPE html>
@@ -987,7 +987,7 @@ def send_otp_email_to_address(email, username, otp):
             <div class="container">
                 <div class="header">
                     <div class="logo">HOKA'S<span>PARLOUR</span></div>
-                    <p style="color: #666; margin-top: 10px;">Welcome to Hoka's Parlour!</p>
+                    <p style="color: #666; margin-top: 10px;">Welcome to Qunimart!</p>
                 </div>
 
                 <h2 style="text-align: center; color: #333;">Email Verification</h2>
@@ -1007,7 +1007,7 @@ def send_otp_email_to_address(email, username, otp):
                 </p>
 
                 <div class="footer">
-                    <p>© 2026 Hoka's Parlour. All rights reserved.</p>
+                    <p>© 2026 Qunimart. All rights reserved.</p>
                     <p style="color: #999; font-size: 12px;">Rongai, Kajiado County, Kenya</p>
                 </div>
             </div>
@@ -1149,14 +1149,14 @@ def verify_otp(request):
                         profile.show_promo_popup = True
                         profile.promo_popup_shown = False
                         profile.save(update_fields=['show_promo_popup', 'promo_popup_shown'])
-                        messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
+                        messages.success(request, "🎉 Account verified successfully! Welcome to Qunimart!")
                 else:
                     # No referral code — show promo popup on home page
                     profile, _ = Profile.objects.get_or_create(user=user)
                     profile.show_promo_popup = True
                     profile.promo_popup_shown = False
                     profile.save(update_fields=['show_promo_popup', 'promo_popup_shown'])
-                    messages.success(request, "🎉 Account verified successfully! Welcome to Hoka's Parlour!")
+                    messages.success(request, "🎉 Account verified successfully! Welcome to Qunimart!")
                 # ─────────────────────────────────────────────────────
 
                 return redirect('home')
@@ -1828,7 +1828,7 @@ def contact(request):
             <div class="container">
                 <div class="header">
                     <h1>🔔 New Contact Form Submission</h1>
-                    <div class="badge">Hoka's Parlour Website · Ref #{contact_msg.id}</div>
+                    <div class="badge">Qunimart Website · Ref #{contact_msg.id}</div>
                 </div>
                 <div class="content">
                     <h2 style="color: #333; margin-bottom: 20px;">Contact Details</h2>
@@ -1857,7 +1857,7 @@ def contact(request):
                     </div>
                 </div>
                 <div class="footer">
-                    <p style="margin: 5px 0;">Hoka's Parlour Admin Panel</p>
+                    <p style="margin: 5px 0;">Qunimart Admin Panel</p>
                     <p style="margin: 5px 0; color: #999;">This is an automated notification</p>
                 </div>
             </div>
@@ -1905,7 +1905,7 @@ def contact(request):
                     </div>
                     <p style="color: #666; line-height: 1.6; font-size: 16px;">
                         Dear <strong>{full_name}</strong>,<br><br>
-                        Thank you for reaching out to Hoka's Parlour! We have successfully received your message and our team will review it shortly.
+                        Thank you for reaching out to Qunimart! We have successfully received your message and our team will review it shortly.
                     </p>
                     <div class="info-box">
                         <h3>📋 Your Enquiry Details</h3>
@@ -1942,9 +1942,9 @@ def contact(request):
                     </p>
                 </div>
                 <div class="footer">
-                    <p style="font-weight: 600; color: #333; font-size: 16px;">Hoka's Parlour</p>
+                    <p style="font-weight: 600; color: #333; font-size: 16px;">Qunimart</p>
                     <p>Premium Fashion & Streetwear</p>
-                    <p style="color: #999; font-size: 12px; margin-top: 15px;">© 2026 Hoka's Parlour. All rights reserved.</p>
+                    <p style="color: #999; font-size: 12px; margin-top: 15px;">© 2026 Qunimart. All rights reserved.</p>
                 </div>
             </div>
         </body>
@@ -1964,7 +1964,7 @@ def contact(request):
 
             # Send auto-reply to customer
             customer_email = EmailMessage(
-                subject="Thank you for contacting Hoka's Parlour ✓",
+                subject="Thank you for contacting Qunimart ✓",
                 body=customer_html_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[email],
@@ -1986,7 +1986,7 @@ def contact(request):
 
 def about(request):
     """About Us page"""
-    return render(request, 'details/about.html')
+    return render(request, 'about.html')
 
 def terms(request):
     """Terms and Conditions page"""
@@ -3057,7 +3057,7 @@ def whatsapp_connect(request):
     from whatsapphoka.service import send_whatsapp_message
     message = (
         f"Hi {request.user.first_name or request.user.username}! "
-        f"Your Hoka's Parlour verification code is: *{otp}*\n\n"
+        f"Your Qunimart verification code is: *{otp}*\n\n"
         f"This code expires in 10 minutes. Do not share it with anyone."
     )
     result = send_whatsapp_message(phone, message)

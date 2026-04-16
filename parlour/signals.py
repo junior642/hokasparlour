@@ -67,7 +67,7 @@ def send_order_confirmation_whatsapp(sender, instance, created, **kwargs):
         total = instance.get_total()
 
         message = (
-            f"✅ *Order Confirmed — Hoka's Parlour*\n\n"
+            f"✅ *Order Confirmed — Qunimart*\n\n"
             f"Hi {instance.customer_name}! 🎉 Your order has been received.\n\n"
             f"━━━━━━━━━━━━━━━━━━\n"
             f"🧾 *Order #{instance.id}*\n"
@@ -123,22 +123,22 @@ def update_product_stats(sender, instance, created, **kwargs):
 
 STATUS_WHATSAPP_MESSAGES = {
     'processing': (
-        "⚙️ *Order Update — Hoka's Parlour*\n\n"
+        "⚙️ *Order Update — Qunimart*\n\n"
         "Hi {name}! Your order *#{id}* is now being *processed*. 🏪\n\n"
         "We're preparing your items and will notify you once dispatched."
     ),
     'dispatched': (
-        "🚚 *Order Dispatched — Hoka's Parlour*\n\n"
+        "🚚 *Order Dispatched — Qunimart*\n\n"
         "Hi {name}! Great news — your order *#{id}* is on its way! 🎉\n\n"
         "📬 Delivering to: {address}\n\n"
         "You'll receive it soon. Thank you for your patience! 💛"
     ),
     'delivered': (
-        "✅ *Order Delivered — Hoka's Parlour*\n\n"
+        "✅ *Order Delivered — Qunimart*\n\n"
         "Hi {name}! Your order *#{id}* has been *delivered*. 📦\n\n"
         "We hope you love your items! 😊\n"
         "If you have any issues, feel free to reach us at {store_phone}.\n\n"
-        "Thank you for shopping with Hoka's Parlour! 🛍️💕"
+        "Thank you for shopping with Qunimart! 🛍️💕"
     ),
 }
 

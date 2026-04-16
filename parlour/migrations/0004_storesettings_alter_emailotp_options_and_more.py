@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='StoreSettings',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('pickup_location', models.CharField(default="Hoka's Parlour Main Store, 123 Fashion Street", max_length=300)),
+                ('pickup_location', models.CharField(default="Qunimart Main Store, 123 Fashion Street", max_length=300)),
                 ('pickup_date', models.DateField(default=django.utils.timezone.now, help_text='Pickup date for all orders')),
                 ('pickup_time', models.TimeField(default='22:00:00', help_text='Pickup time (e.g., 10:00 PM)')),
                 ('pickup_days_info', models.TextField(default='Monday - Saturday', help_text='Pickup days information')),

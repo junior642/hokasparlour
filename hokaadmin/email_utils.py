@@ -32,7 +32,7 @@ def send_order_email(recipient_email, subject, message):
 
 
 def send_order_status_change_email(order):
-    subject = f"Order #{order.id} Status Update - Hoka's Parlour"
+    subject = f"Order #{order.id} Status Update -Qunimart"
     message = f"""
 Dear {order.customer_name},
 
@@ -52,17 +52,17 @@ Order Details:
         message += f"- Current Location: {order.delivery_location}\n"
     
     message += """
-Thank you for shopping with Hoka's Parlour!
+Thank you for shopping with Qunimart!
 
 Best regards,
-Hoka's Parlour Team
+Qunimart Team
 """
     
     return send_order_email(order.email, subject, message)
 
 
 def send_order_dispatched_email(order):
-    subject = f"Order #{order.id} Dispatched - Hoka's Parlour"
+    subject = f"Order #{order.id} Dispatched - Qunimart"
     message = f"""
 Dear {order.customer_name},
 
@@ -83,10 +83,10 @@ Order Details:
     message += """
 You can track your order status at any time using your Order ID.
 
-Thank you for shopping with Hoka's Parlour!
+Thank you for shopping with Qunimart!
 
 Best regards,
-Hoka's Parlour Team
+Qunimart Team
 """
     
     return send_order_email(order.email, subject, message)

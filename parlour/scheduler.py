@@ -78,7 +78,7 @@ def send_daily_orders_email():
         <div style="max-width:900px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
             
             <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:40px 30px;text-align:center;">
-                <div style="font-size:32px;font-weight:800;margin-bottom:10px;">HOKA'S <span style="color:#ffd700;">PARLOUR</span></div>
+                <div style="font-size:32px;font-weight:800;margin-bottom:10px;">Qunimart<span style="color:#ffd700;">PARLOUR</span></div>
                 <h1 style="margin:0;font-size:22px;">📦 Daily Orders Report</h1>
                 <p style="margin:10px 0 0 0;opacity:0.9;">{today.strftime('%A, %B %d, %Y')}</p>
             </div>
@@ -106,8 +106,8 @@ def send_daily_orders_email():
             </div>
 
             <div style="background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #eee;">
-                <p style="color:#666;margin:5px 0;font-size:14px;">Hoka's Parlour — Automated Daily Report</p>
-                <p style="color:#999;margin:5px 0;font-size:12px;">© 2026 Hoka's Parlour. All rights reserved.</p>
+                <p style="color:#666;margin:5px 0;font-size:14px;">Qunimart — Automated Daily Report</p>
+                <p style="color:#999;margin:5px 0;font-size:12px;">© 2026 Qunimart. All rights reserved.</p>
             </div>
         </div>
     </body>
