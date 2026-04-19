@@ -13,6 +13,29 @@
     <form method="post" enctype="multipart/form-data" class="product-form">
       {% csrf_token %}
 
+      <!-- IMAGE FIRST — full width with live preview -->
+      <div class="image-upload-section">
+        <h3 class="form-section-title">Product Image</h3>
+        <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('image').click()">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" alt="Product image" id="imagePreview" class="image-preview visible">
+            <div class="upload-placeholder" id="uploadPlaceholder" style="display:none">
+          {% else %}
+            <img src="" alt="" id="imagePreview" class="image-preview">
+            <div class="upload-placeholder" id="uploadPlaceholder">
+          {% endif %}
+            <div class="upload-icon">📷</div>
+            <p class="upload-text">Click to upload image</p>
+            <p class="upload-hint">JPG, PNG, WEBP — recommended 800×800px</p>
+          </div>
+          <div class="image-overlay" id="imageOverlay">
+            <span>🔄 Click to change</span>
+          </div>
+        </div>
+        <input type="file" id="image" name="image" accept="image/*"
+               style="display:none" {% if not product %}required{% endif %}>
+      </div>
+
       <div class="form-cols">
         <!-- Left: core info -->
         <div class="form-col">
@@ -27,19 +50,63 @@
 
           <div class="field-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" rows="5"
+            <textarea id="description" name="description" rows="4"
                       placeholder="Describe the product…">{{ product.description|default:'' }}</textarea>
           </div>
 
           <div class="field-group">
-            <label for="image">Product Image</label>
-            {% if product.image %}
-              <div class="current-image">
-                <img src="{{ product.image.url }}" alt="Current image">
-                <span class="img-label">Current image — upload a new one to replace</span>
-              </div>
-            {% endif %}
-            <input type="file" id="image" name="image" accept="image/*">
+  <div class="field-label-row">
+    <label for="category">Category</label>
+    <a href="{% url 'seller:seller_category_add' %}" class="add-cat-btn" target="_blank">+ New</a>
+  </div>
+  <div class="cat-select-wrap">
+    <select id="category" name="category">
+      <option value="">— Select category —</option>
+      {% for cat in categories %}
+        <option value="{{ cat.pk }}"
+          data-gender="{{ cat.gender }}"
+          {% if product.category_id == cat.pk %}selected{% endif %}>
+          {{ cat.name }}{% if not cat.store %} ✦{% endif %}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="button" class="more-btn" id="moreBtn" onclick="toggleMore()">⋯ More</button>
+  </div>
+  <span id="noCategoryMsg" style="display:none;font-size:.75rem;color:var(--text-muted);margin-top:.25rem;">
+    No categories for this gender yet.
+  </span>
+
+  <!-- More dropdown -->
+  <div class="more-dropdown" id="moreDropdown">
+    <a href="{% url 'seller:seller_categories' %}" target="_blank">
+      <span>🗂️</span> View all categories
+    </a>
+    <a href="{% url 'seller:seller_category_add' %}" target="_blank">
+      <span>➕</span> Add new category
+    </a>
+    <div class="more-divider"></div>
+    <p class="more-hint">✦ = Platform category (read-only)</p>
+  </div>
+</div>
+
+          <div class="form-row">
+            <div class="field-group">
+              <label for="gender">Gender</label>
+              <select id="gender" name="gender">
+                <option value="U" {% if product.gender == 'U' or not product %}selected{% endif %}>Unisex</option>
+                <option value="M" {% if product.gender == 'M' %}selected{% endif %}>Male</option>
+                <option value="F" {% if product.gender == 'F' %}selected{% endif %}>Female</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="available_sizes">Sizes
+                <span class="field-hint">Comma-separated e.g. S,M,L,XL</span>
+              </label>
+              <input type="text" id="available_sizes" name="available_sizes"
+                     value="{{ product.available_sizes|default:'' }}"
+                     placeholder="S,M,L,XL or 38,39,40,41">
+            </div>
           </div>
 
           <div class="toggle-field">
@@ -67,7 +134,7 @@
 
           <div class="field-group">
             <label for="anchor_price">Anchor / Original Price (KES)
-              <span class="field-hint">Shown crossed out — creates a "was/now" look</span>
+              <span class="field-hint">Shown crossed out — auto-set to price × 1.20 if blank</span>
             </label>
             <div class="input-prefix">
               <span>KES</span>
@@ -94,14 +161,14 @@
             <div class="input-prefix">
               <span>KES</span>
               <input type="number" id="cost" name="cost" step="0.01" min="0"
-                     value="{{ product.cost|default:'' }}" placeholder="Optional">
+                     value="{{ product.purchase_cost|default:'' }}" placeholder="Optional">
             </div>
           </div>
 
           <div class="field-group">
-            <label for="stock">Stock Quantity *</label>
-            <input type="number" id="stock" name="stock" min="0"
-                   value="{{ product.stock|default:'0' }}" required>
+            <label for="stock_quantity">Stock Quantity *</label>
+            <input type="number" id="stock_quantity" name="stock_quantity" min="0"
+                   value="{{ product.stock_quantity|default:'0' }}" required>
           </div>
 
           <!-- Live margin preview -->
@@ -123,28 +190,61 @@
 </div>
 
 <style>
+/* Category field extras */
+.field-label-row{display:flex;align-items:center;justify-content:space-between}
+.field-label-row label{margin:0}
+.add-cat-btn{font-size:.72rem;font-weight:600;color:var(--accent);text-decoration:none;padding:2px 8px;border:1px solid var(--accent);border-radius:20px;transition:background .2s}
+.add-cat-btn:hover{background:var(--accent);color:#fff}
+.cat-select-wrap{display:flex;gap:.5rem;align-items:stretch}
+.cat-select-wrap select{flex:1}
+.more-btn{padding:.7rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:border-color .2s}
+.more-btn:hover,.more-btn.active{border-color:var(--accent);color:var(--accent)}
+.more-dropdown{display:none;flex-direction:column;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.5rem;margin-top:.4rem;box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:10}
+.more-dropdown.open{display:flex}
+.more-dropdown a{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;border-radius:7px;font-size:.85rem;color:var(--text-primary);text-decoration:none;transition:background .15s}
+.more-dropdown a:hover{background:var(--bg)}
+.more-dropdown a span{font-size:1rem}
+.more-divider{height:1px;background:var(--border);margin:.35rem 0}
+.more-hint{font-size:.72rem;color:var(--text-muted);padding:.25rem .85rem;margin:0}  
 .form-page{max-width:900px;margin:0 auto}
-.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;display:flex;flex-direction:column;gap:2rem}
+.form-section-title{font-size:.95rem;font-weight:700;color:var(--text-primary);margin:0 0 1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+
+/* Image upload */
+.image-upload-section{width:100%}
+.image-upload-area{position:relative;width:100%;height:260px;border:2px dashed var(--border);border-radius:12px;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:border-color .2s}
+.image-upload-area:hover{border-color:var(--accent)}
+.upload-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;pointer-events:none}
+.upload-icon{font-size:2.5rem}
+.upload-text{font-size:.95rem;font-weight:600;color:var(--text-primary);margin:0}
+.upload-hint{font-size:.78rem;color:var(--text-muted);margin:0}
+.image-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s}
+.image-preview.visible{opacity:1}
+.image-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.image-overlay span{color:#fff;font-size:.9rem;font-weight:600;background:rgba(0,0,0,.4);padding:.5rem 1.25rem;border-radius:20px}
+.image-upload-area:hover .image-overlay{opacity:1}
+
+/* Two column layout */
 .form-cols{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
 @media(max-width:640px){.form-cols{grid-template-columns:1fr}}
 .form-col{display:flex;flex-direction:column;gap:1.25rem}
-.form-section-title{font-size:.95rem;font-weight:700;color:var(--text-primary);margin:0 0 .25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* Fields */
 .field-group{display:flex;flex-direction:column;gap:.35rem}
 .field-group label{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
 .field-hint{font-size:.72rem;color:var(--text-muted);text-transform:none;letter-spacing:0;font-weight:400;display:block;margin-top:.15rem}
 .field-group input:not([type=checkbox]):not([type=file]),
 .field-group textarea,
 .field-group select{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text-primary);font-size:.92rem;width:100%;box-sizing:border-box;transition:border .2s}
-.field-group input:focus,.field-group textarea:focus{outline:none;border-color:var(--accent)}
+.field-group input:focus,.field-group textarea:focus,.field-group select:focus{outline:none;border-color:var(--accent)}
 .input-prefix{display:flex;align-items:stretch;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border .2s}
 .input-prefix:focus-within{border-color:var(--accent)}
 .input-prefix span{padding:.7rem 1rem;background:var(--surface);color:var(--text-muted);font-size:.82rem;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center}
 .input-prefix input{border:none;border-radius:0;background:transparent;flex:1}
 .input-prefix input:focus{border:none;outline:none}
-.current-image{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem}
-.current-image img{width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border)}
-.img-label{font-size:.75rem;color:var(--text-muted)}
-/* Toggle switch */
+
+/* Toggle */
 .toggle-field{padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px}
 .toggle-label{display:flex;align-items:center;gap:.75rem;cursor:pointer;font-size:.9rem;color:var(--text-primary)}
 .toggle-label input[type=checkbox]{display:none}
@@ -152,15 +252,18 @@
 .toggle-switch::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s}
 .toggle-label input:checked~.toggle-switch{background:var(--accent)}
 .toggle-label input:checked~.toggle-switch::after{transform:translateX(18px)}
+
 /* Margin preview */
 .margin-preview{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-top:auto}
 .margin-label{font-size:.78rem;color:var(--text-muted);font-weight:600}
 .margin-value{font-size:1rem;font-weight:700;color:var(--text-primary)}
+
 /* Footer */
-.form-footer{display:flex;justify-content:flex-end;gap:1rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.form-footer{display:flex;justify-content:flex-end;gap:1rem;padding-top:1.5rem;border-top:1px solid var(--border)}
 </style>
 
 <script>
+// Margin calculator
 const priceEl = document.getElementById('price');
 const costEl  = document.getElementById('cost');
 const display = document.getElementById('marginVal');
@@ -179,7 +282,45 @@ function updateMargin(){
   }
 }
 priceEl.addEventListener('input', updateMargin);
-costEl.addEventListener('input',  updateMargin);
+costEl.addEventListener('input', updateMargin);
 updateMargin();
+
+// Image preview
+const imageInput = document.getElementById('image');
+const imagePreview = document.getElementById('imagePreview');
+const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+const imageOverlay = document.getElementById('imageOverlay');
+
+imageInput.addEventListener('change', function(){
+  const file = this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imagePreview.src = e.target.result;
+    imagePreview.classList.add('visible');
+    uploadPlaceholder.style.display = 'none';
+    imageOverlay.style.opacity = '0';
+  };
+  reader.readAsDataURL(file);
+});
+
+// More dropdown toggle
+function toggleMore(){
+  const dropdown = document.getElementById('moreDropdown');
+  const btn = document.getElementById('moreBtn');
+  const isOpen = dropdown.classList.toggle('open');
+  btn.classList.toggle('active', isOpen);
+}
+
+// Close more dropdown when clicking outside
+document.addEventListener('click', function(e){
+  const wrap = document.querySelector('.cat-select-wrap');
+  const dropdown = document.getElementById('moreDropdown');
+  const btn = document.getElementById('moreBtn');
+  if(!wrap.contains(e.target) && !dropdown.contains(e.target)){
+    dropdown.classList.remove('open');
+    btn.classList.remove('active');
+  }
+});
 </script>
 {% endblock %}

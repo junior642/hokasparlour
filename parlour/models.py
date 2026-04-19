@@ -95,8 +95,16 @@ class Category(models.Model):
         ('U', 'Unisex'),
     ]
 
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    store = models.ForeignKey(
+        'Store',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='categories',
+        help_text="Leave blank for global/platform categories. Set for store-specific categories."
+    )
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='U')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -104,18 +112,37 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             from django.utils.text import slugify
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            # ensure slug unique per store
+            while Category.objects.filter(
+                slug=slug, store=self.store
+            ).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        if self.store:
+            return f"{self.name} ({self.store.store_name})"
+        return f"{self.name} (Global)"
 
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
         ordering = ['name']
+        # same name allowed across different stores, but unique globally
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'store'],
+                name='unique_category_per_store'
+            )
+        ]
 
 
+        
 class Color(models.Model):
     name = models.CharField(max_length=50, unique=True)
     hex_code = models.CharField(max_length=7, blank=True, help_text="e.g. #FF0000")
@@ -1123,35 +1150,41 @@ class SellerApplication(models.Model):
         return f"{self.business_name} — {self.user.username} ({self.get_status_display()})"
 
     def approve(self):
-        """
-        Approves the application, creates the Store, and sends approval email.
-        Call this from the admin action.
-        """
         from django.utils import timezone
+        import logging
+        logger = logging.getLogger(__name__)
 
-        # Create the store
-        store, created = Store.objects.get_or_create(
-            owner=self.user,
-            defaults={
-                'store_name': self.business_name,
-                'phone':      self.phone,
-                'email':      self.email or self.user.email,
-                'status':     'approved',
-                'approved_at': timezone.now(),
-            }
-        )
-        if not created:
-            store.status = 'approved'
-            store.approved_at = timezone.now()
-            store.save(update_fields=['status', 'approved_at'])
+        # 1. Create the store first
+        try:
+            store, created = Store.objects.get_or_create(
+                owner=self.user,
+                defaults={
+                    'store_name': self.business_name,
+                    'phone':      self.phone,
+                    'email':      self.email or self.user.email,
+                    'status':     'approved',
+                    'approved_at': timezone.now(),
+                }
+            )
+            if not created:
+                store.status = 'approved'
+                store.approved_at = timezone.now()
+                store.save(update_fields=['status', 'approved_at'])
+            logger.info(f"Store {'created' if created else 'updated'} for {self.user.username}")
+        except Exception as e:
+            logger.error(f"Store creation failed for {self.user.username}: {e}")
+            raise  # stop here — don't approve if store wasn't created
 
-        # Update application
-        self.status      = 'approved'
+        # 2. Mark application as approved
+        self.status = 'approved'
         self.reviewed_at = timezone.now()
         self.save(update_fields=['status', 'reviewed_at'])
 
-        # Send email
-        self._send_approval_email(store)
+        # 3. Send email last — failure here won't roll back the store
+        try:
+            self._send_approval_email(store)
+        except Exception as e:
+            logger.error(f"Approval email failed for {self.user.username}: {e}")
 
     def reject(self):
         """Rejects the application and sends rejection email."""
@@ -1164,128 +1197,20 @@ class SellerApplication(models.Model):
     def _send_approval_email(self, store):
         from django.core.mail import EmailMessage
         from django.conf import settings
+        from django.template.loader import render_to_string
 
-        applicant_name = self.user.get_full_name() or self.user.username
-        subject = f"🎉 Congratulations! Your Qunimart Store is Live — {store.store_name}"
-
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body {{font-family: 'Inter', Arial, sans-serif; background:#f5f5f5; margin:0; padding:20px;}}
-                .container {{max-width:600px; margin:0 auto; background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1);}}
-                .header {{background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color:white; padding:40px 30px; text-align:center;}}
-                .logo {{font-size:36px; font-weight:900; letter-spacing:-1px;}}
-                .logo span {{color:#e94560;}}
-                .badge {{display:inline-block; background:rgba(233,69,96,0.2); border:1px solid #e94560; color:#e94560; padding:6px 18px; border-radius:20px; font-size:13px; margin-top:12px;}}
-                .content {{padding:40px 30px;}}
-                .success-box {{background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left:4px solid #28a745; padding:25px; border-radius:10px; text-align:center; margin-bottom:25px;}}
-                .success-box h2 {{color:#155724; margin:0 0 8px 0; font-size:24px;}}
-                .store-card {{background:#f8f9fa; border:2px solid #e94560; border-radius:12px; padding:25px; margin:25px 0;}}
-                .store-card h3 {{color:#1a1a2e; margin:0 0 15px 0; font-size:18px;}}
-                .detail-row {{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;}}
-                .detail-row:last-child {{border-bottom:none;}}
-                .detail-row strong {{color:#666; font-size:13px;}}
-                .detail-row span {{color:#333; font-weight:600;}}
-                .steps {{background:#fff; border:1px solid #eee; border-radius:10px; padding:25px; margin:25px 0;}}
-                .step {{display:flex; align-items:flex-start; gap:15px; margin-bottom:18px;}}
-                .step-num {{background:#e94560; color:white; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; font-size:14px;}}
-                .step-text strong {{display:block; color:#333; margin-bottom:3px;}}
-                .step-text p {{color:#666; margin:0; font-size:14px;}}
-                .cta-btn {{display:block; background:linear-gradient(135deg,#e94560,#c0392b); color:white; text-decoration:none; text-align:center; padding:16px 30px; border-radius:10px; font-size:16px; font-weight:700; margin:25px 0;}}
-                .footer {{background:#1a1a2e; padding:25px; text-align:center; color:#aaa; font-size:13px;}}
-                .footer strong {{color:white;}}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <div class="logo">QUNI<span>MART</span></div>
-                    <div class="badge">✦ Seller Approved</div>
-                </div>
-                <div class="content">
-                    <div class="success-box">
-                        <h2>🎉 You're In!</h2>
-                        <p style="color:#155724; margin:0; font-size:16px;">Welcome to the Qunimart seller community, <strong>{applicant_name}</strong>!</p>
-                    </div>
-
-                    <p style="color:#555; line-height:1.7; font-size:15px;">
-                        Great news — your application has been reviewed and <strong>approved</strong>. Your store is now live on Qunimart and you can start listing products immediately.
-                    </p>
-
-                    <div class="store-card">
-                        <h3>🏪 Your Store Details</h3>
-                        <div class="detail-row">
-                            <strong>Store Name</strong>
-                            <span>{store.store_name}</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong>Store Slug</strong>
-                            <span>/store/{store.slug}/</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong>Status</strong>
-                            <span style="color:#28a745;">✔ Active</span>
-                        </div>
-                        <div class="detail-row">
-                            <strong>Approved On</strong>
-                            <span>{store.approved_at.strftime('%d %b %Y') if store.approved_at else 'Today'}</span>
-                        </div>
-                    </div>
-
-                    <div class="steps">
-                        <h3 style="color:#1a1a2e; margin:0 0 20px 0;">🚀 Getting Started</h3>
-                        <div class="step">
-                            <div class="step-num">1</div>
-                            <div class="step-text">
-                                <strong>Log into your Seller Dashboard</strong>
-                                <p>Access your dashboard to manage your store, products, and orders.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-num">2</div>
-                            <div class="step-text">
-                                <strong>Complete your store profile</strong>
-                                <p>Add your logo, description, and contact details so customers can find you.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-num">3</div>
-                            <div class="step-text">
-                                <strong>List your first product</strong>
-                                <p>Add products with photos, pricing, sizes, and stock information.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-num">4</div>
-                            <div class="step-text">
-                                <strong>Start selling!</strong>
-                                <p>Your products go live instantly and are visible to all Qunimart shoppers.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <a href="https://qunimart.com/seller/dashboard/" class="cta-btn">
-                        Go to My Seller Dashboard →
-                    </a>
-
-                    <p style="color:#999; font-size:13px; text-align:center;">
-                        Questions? Reply to this email or reach us at <a href="mailto:support@qunimart.com" style="color:#e94560;">support@qunimart.com</a>
-                    </p>
-                </div>
-                <div class="footer">
-                    <strong>Qunimart</strong>
-                    <p style="margin:8px 0 0 0;">© 2026 Qunimart. All rights reserved.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
+        context = {
+            'applicant_name': self.user.get_full_name() or self.user.username,
+            'store_name':     store.store_name,
+            'store_slug':     store.slug,
+            'approved_on':    store.approved_at.strftime('%d %b %Y') if store.approved_at else 'Today',
+            'dashboard_url':  'https://qunimart.com/seller/dashboard/',
+        }
+        html = render_to_string('parlour/emails/seller_approved.html', context)
 
         try:
             email_msg = EmailMessage(
-                subject=subject,
+                subject=f"🎉 Congratulations! Your Qunimart Store is Live — {store.store_name}",
                 body=html,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[self.email or self.user.email],
@@ -1299,61 +1224,17 @@ class SellerApplication(models.Model):
     def _send_rejection_email(self):
         from django.core.mail import EmailMessage
         from django.conf import settings
+        from django.template.loader import render_to_string
 
-        applicant_name = self.user.get_full_name() or self.user.username
-        subject = "Your Qunimart Seller Application — Update"
-
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body {{font-family:'Inter',Arial,sans-serif; background:#f5f5f5; margin:0; padding:20px;}}
-                .container {{max-width:600px; margin:0 auto; background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1);}}
-                .header {{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); color:white; padding:40px 30px; text-align:center;}}
-                .logo {{font-size:36px; font-weight:900; letter-spacing:-1px;}}
-                .logo span {{color:#e94560;}}
-                .content {{padding:40px 30px;}}
-                .info-box {{background:#fff3cd; border:1px solid #ffc107; border-left:4px solid #ffc107; padding:20px; border-radius:10px; margin:20px 0;}}
-                .footer {{background:#1a1a2e; padding:25px; text-align:center; color:#aaa; font-size:13px;}}
-                .footer strong {{color:white;}}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <div class="logo">QUNI<span>MART</span></div>
-                </div>
-                <div class="content">
-                    <h2 style="color:#333;">Hi {applicant_name},</h2>
-                    <p style="color:#555; line-height:1.7; font-size:15px;">
-                        Thank you for applying to become a seller on Qunimart. After careful review, we are unable to approve your application at this time.
-                    </p>
-                    <div class="info-box">
-                        <p style="color:#856404; margin:0; line-height:1.6;">
-                            <strong>What this means:</strong> Your account remains active and you can re-apply in the future once you meet our seller requirements.
-                        </p>
-                    </div>
-                    {f'<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;"><strong style="color:#333;">Note from our team:</strong><p style="color:#555;margin:8px 0 0 0;line-height:1.6;">{self.admin_notes}</p></div>' if self.admin_notes else ''}
-                    <p style="color:#555; line-height:1.7; font-size:15px;">
-                        If you believe this decision was made in error or have questions, please don't hesitate to reach out to us.
-                    </p>
-                    <p style="color:#999; font-size:13px;">
-                        Contact us at <a href="mailto:support@qunimart.com" style="color:#e94560;">support@qunimart.com</a>
-                    </p>
-                </div>
-                <div class="footer">
-                    <strong>Qunimart</strong>
-                    <p style="margin:8px 0 0 0;">© 2026 Qunimart. All rights reserved.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
+        context = {
+            'applicant_name': self.user.get_full_name() or self.user.username,
+            'admin_notes':    self.admin_notes,
+        }
+        html = render_to_string('parlour/emails/seller_rejected.html', context)
 
         try:
             email_msg = EmailMessage(
-                subject=subject,
+                subject="Your Qunimart Seller Application — Update",
                 body=html,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[self.email or self.user.email],
@@ -1362,4 +1243,4 @@ class SellerApplication(models.Model):
             email_msg.send(fail_silently=False)
         except Exception as e:
             import logging
-            logging.getLogger(__name__).error(f"Seller rejection email error for {self.user.username}: {e}")        
+            logging.getLogger(__name__).error(f"Seller rejection email error for {self.user.username}: {e}")

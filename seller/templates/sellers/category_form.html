@@ -1,0 +1,60 @@
+{% extends 'sellers/seller_base.html' %}
+{% block page_content %}
+
+<div class="form-page">
+  <div class="form-card">
+
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <h2 class="form-title">{{ page_title }}</h2>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="field-group">
+        <label for="name">Category Name *</label>
+        <input type="text" id="name" name="name"
+               value="{{ category.name|default:'' }}" required
+               placeholder="e.g. Sneakers, Dresses, Electronics">
+      </div>
+
+      <div class="field-group">
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender">
+          <option value="U" {% if category.gender == 'U' or not category %}selected{% endif %}>Unisex</option>
+          <option value="M" {% if category.gender == 'M' %}selected{% endif %}>Male</option>
+          <option value="F" {% if category.gender == 'F' %}selected{% endif %}>Female</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="description">Description <span style="font-weight:400;text-transform:none">(optional)</span></label>
+        <textarea id="description" name="description" rows="3"
+                  placeholder="Brief description of this category…">{{ category.description|default:'' }}</textarea>
+      </div>
+
+      <div class="form-footer">
+        <a href="{% url 'seller:seller_categories' %}" class="btn-secondary">Cancel</a>
+        <button type="submit" class="btn-primary">
+          {% if category %}Save Changes{% else %}Create Category{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.form-page{max-width:540px;margin:0 auto}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;display:flex;flex-direction:column;gap:1.25rem}
+.form-title{font-size:1.2rem;font-weight:700;color:var(--text-primary);margin:0}
+.field-group{display:flex;flex-direction:column;gap:.35rem}
+.field-group label{font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+.field-group input,.field-group select,.field-group textarea{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text-primary);font-size:.92rem;width:100%;box-sizing:border-box;transition:border .2s}
+.field-group input:focus,.field-group select:focus,.field-group textarea:focus{outline:none;border-color:var(--accent)}
+.form-footer{display:flex;justify-content:flex-end;gap:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+</style>
+{% endblock %}

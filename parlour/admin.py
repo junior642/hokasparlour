@@ -677,10 +677,12 @@ class ContactMessageAdmin(admin.ModelAdmin):
     readonly_fields = ['full_name', 'email', 'phone', 'subject', 'order_number',
                        'message', 'user', 'ip_address', 'created_at']    
 
+from django.contrib import admin
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from .models import Store, SellerApplication
- 
- 
+
+
 @admin.register(Store)
 class StoreAdmin(admin.ModelAdmin):
     list_display = (
@@ -691,7 +693,7 @@ class StoreAdmin(admin.ModelAdmin):
     search_fields = ('store_name', 'owner__username', 'owner__email', 'phone', 'email')
     readonly_fields = ('created_at', 'approved_at', 'slug', 'product_count')
     ordering = ('-created_at',)
- 
+
     fieldsets = (
         ('Store Identity', {
             'fields': ('store_name', 'slug', 'logo', 'description')
@@ -710,14 +712,14 @@ class StoreAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
- 
+
     actions = ['approve_stores', 'suspend_stores']
- 
+
     def product_count(self, obj):
         count = obj.get_product_count()
         return format_html('<strong>{}</strong> product{}', count, 's' if count != 1 else '')
     product_count.short_description = 'Products'
- 
+
     def status_badge(self, obj):
         colors = {
             'pending':   ('#ffc107', 'black'),
@@ -731,7 +733,7 @@ class StoreAdmin(admin.ModelAdmin):
             bg, text, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
- 
+
     def approve_stores(self, request, queryset):
         count = 0
         for store in queryset.exclude(status='approved'):
@@ -741,12 +743,13 @@ class StoreAdmin(admin.ModelAdmin):
             count += 1
         self.message_user(request, f'✅ {count} store(s) approved.')
     approve_stores.short_description = '✅ Approve selected stores'
- 
+
     def suspend_stores(self, request, queryset):
         count = queryset.exclude(is_default=True).update(status='suspended')
         self.message_user(request, f'⛔ {count} store(s) suspended.')
     suspend_stores.short_description = '⛔ Suspend selected stores'
- 
+
+
 @admin.register(SellerApplication)
 class SellerApplicationAdmin(admin.ModelAdmin):
     list_display = (
@@ -757,7 +760,7 @@ class SellerApplicationAdmin(admin.ModelAdmin):
     search_fields = ('business_name', 'user__username', 'user__email', 'phone')
     readonly_fields = ('user', 'business_name', 'phone', 'email', 'reason', 'created_at', 'reviewed_at')
     ordering = ('-created_at',)
- 
+
     fieldsets = (
         ('Applicant Info', {
             'fields': ('user', 'business_name', 'phone', 'email')
@@ -767,7 +770,7 @@ class SellerApplicationAdmin(admin.ModelAdmin):
         }),
         ('Review', {
             'fields': ('status', 'admin_notes', 'reviewed_at'),
-            'description': (
+            'description': mark_safe(                          # ← fix applied here
                 'Use the <strong>Approve</strong> or <strong>Reject</strong> actions below '
                 'to process applications — this will automatically create the store and '
                 'send the applicant an email notification.'
@@ -778,12 +781,12 @@ class SellerApplicationAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
- 
+
     actions = ['approve_applications', 'reject_applications']
- 
+
     def has_add_permission(self, request):
         return False
- 
+
     def status_badge(self, obj):
         colors = {
             'pending':  ('#ffc107', 'black'),
@@ -797,30 +800,53 @@ class SellerApplicationAdmin(admin.ModelAdmin):
             bg, text, obj.get_status_display()
         )
     status_badge.short_description = 'Status'
- 
+
     def has_store(self, obj):
         try:
             store = obj.user.store
-            return format_html(
-                '<span style="color:green;">✔ {}</span>', store.store_name
-            )
+            return format_html('<span style="color:green;">✔ {}</span>', store.store_name)
         except Exception:
-            return format_html('<span style="color:#ccc;">—</span>')
-    has_store.short_description = 'Store Created'
- 
+            return mark_safe('<span style="color:#ccc;">—</span>')  # ← no dynamic values, use mark_safe
+        has_store.short_description = 'Store Created'
+
+
     def approve_applications(self, request, queryset):
         count = 0
+        errors = 0
         for app in queryset.filter(status='pending'):
-            app.approve()  # creates store + sends email
-            count += 1
-        self.message_user(request, f'✅ {count} application(s) approved. Stores created and emails sent.')
+            try:
+                app.approve()
+                count += 1
+            except Exception as e:
+                errors += 1
+                self.message_user(request, f'❌ Failed to approve {app.business_name}: {e}', level='error')
+        if count:
+            self.message_user(request, f'✅ {count} application(s) approved. Stores created and emails sent.')
+        if errors:
+            self.message_user(request, f'⚠️ {errors} application(s) failed — check server logs.', level='warning')
     approve_applications.short_description = '✅ Approve — create store & notify seller'
- 
+
     def reject_applications(self, request, queryset):
         count = 0
         for app in queryset.filter(status='pending'):
-            app.reject()  # sends rejection email
+            app.reject()
             count += 1
         self.message_user(request, f'⛔ {count} application(s) rejected. Sellers notified by email.')
     reject_applications.short_description = '⛔ Reject & notify seller'
- 
+
+
+    def save_model(self, request, obj, form, change):
+        if change:  # only on edits, not new objects
+            old = SellerApplication.objects.get(pk=obj.pk)
+
+            if old.status != 'approved' and obj.status == 'approved':
+                super().save_model(request, obj, form, change)  # save first
+                obj.approve()  # then trigger store creation + email
+                return
+
+            if old.status != 'rejected' and obj.status == 'rejected':
+                super().save_model(request, obj, form, change)
+                obj.reject()  # trigger rejection email
+                return
+
+        super().save_model(request, obj, form, change)

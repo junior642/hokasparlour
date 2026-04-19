@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {font-family: 'Inter', Arial, sans-serif; background:#f5f5f5; margin:0; padding:20px;}
+        .container {max-width:600px; margin:0 auto; background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+        .header {background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color:white; padding:40px 30px; text-align:center;}
+        .logo {font-size:36px; font-weight:900; letter-spacing:-1px;}
+        .logo span {color:#e94560;}
+        .badge {display:inline-block; background:rgba(233,69,96,0.2); border:1px solid #e94560; color:#e94560; padding:6px 18px; border-radius:20px; font-size:13px; margin-top:12px;}
+        .content {padding:40px 30px;}
+        .success-box {background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left:4px solid #28a745; padding:25px; border-radius:10px; text-align:center; margin-bottom:25px;}
+        .success-box h2 {color:#155724; margin:0 0 8px 0; font-size:24px;}
+        .store-card {background:#f8f9fa; border:2px solid #e94560; border-radius:12px; padding:25px; margin:25px 0;}
+        .store-card h3 {color:#1a1a2e; margin:0 0 15px 0; font-size:18px;}
+        .detail-row {display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;}
+        .detail-row:last-child {border-bottom:none;}
+        .detail-row strong {color:#666; font-size:13px;}
+        .detail-row span {color:#333; font-weight:600;}
+        .steps {background:#fff; border:1px solid #eee; border-radius:10px; padding:25px; margin:25px 0;}
+        .step {display:flex; align-items:flex-start; gap:15px; margin-bottom:18px;}
+        .step-num {background:#e94560; color:white; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; font-size:14px;}
+        .step-text strong {display:block; color:#333; margin-bottom:3px;}
+        .step-text p {color:#666; margin:0; font-size:14px;}
+        .cta-btn {display:block; background:linear-gradient(135deg,#e94560,#c0392b); color:white; text-decoration:none; text-align:center; padding:16px 30px; border-radius:10px; font-size:16px; font-weight:700; margin:25px 0;}
+        .footer {background:#1a1a2e; padding:25px; text-align:center; color:#aaa; font-size:13px;}
+        .footer strong {color:white;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">QUNI<span>MART</span></div>
+            <div class="badge">✦ Seller Approved</div>
+        </div>
+        <div class="content">
+            <div class="success-box">
+                <h2>🎉 You're In!</h2>
+                <p style="color:#155724; margin:0; font-size:16px;">Welcome to the Qunimart seller community, <strong>{{ applicant_name }}</strong>!</p>
+            </div>
+            <p style="color:#555; line-height:1.7; font-size:15px;">
+                Great news — your application has been reviewed and <strong>approved</strong>. Your store is now live on Qunimart and you can start listing products immediately.
+            </p>
+            <div class="store-card">
+                <h3>🏪 Your Store Details</h3>
+                <div class="detail-row">
+                    <strong>Store Name</strong>
+                    <span>{{ store_name }}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Store Slug</strong>
+                    <span>/store/{{ store_slug }}/</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Status</strong>
+                    <span style="color:#28a745;">✔ Active</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Approved On</strong>
+                    <span>{{ approved_on }}</span>
+                </div>
+            </div>
+            <div class="steps">
+                <h3 style="color:#1a1a2e; margin:0 0 20px 0;">🚀 Getting Started</h3>
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <div class="step-text">
+                        <strong>Log into your Seller Dashboard</strong>
+                        <p>Access your dashboard to manage your store, products, and orders.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <div class="step-text">
+                        <strong>Complete your store profile</strong>
+                        <p>Add your logo, description, and contact details so customers can find you.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <div class="step-text">
+                        <strong>List your first product</strong>
+                        <p>Add products with photos, pricing, sizes, and stock information.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <div class="step-text">
+                        <strong>Start selling!</strong>
+                        <p>Your products go live instantly and are visible to all Qunimart shoppers.</p>
+                    </div>
+                </div>
+            </div>
+            <a href="{{ dashboard_url }}" class="cta-btn">Go to My Seller Dashboard →</a>
+            <p style="color:#999; font-size:13px; text-align:center;">
+                Questions? Reply to this email or reach us at <a href="mailto:support@qunimart.com" style="color:#e94560;">support@qunimart.com</a>
+            </p>
+        </div>
+        <div class="footer">
+            <strong>Qunimart</strong>
+            <p style="margin:8px 0 0 0;">© 2026 Qunimart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

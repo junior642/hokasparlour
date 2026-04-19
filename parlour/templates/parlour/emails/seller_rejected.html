@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {font-family:'Inter',Arial,sans-serif; background:#f5f5f5; margin:0; padding:20px;}
+        .container {max-width:600px; margin:0 auto; background:white; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1);}
+        .header {background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%); color:white; padding:40px 30px; text-align:center;}
+        .logo {font-size:36px; font-weight:900; letter-spacing:-1px;}
+        .logo span {color:#e94560;}
+        .content {padding:40px 30px;}
+        .info-box {background:#fff3cd; border:1px solid #ffc107; border-left:4px solid #ffc107; padding:20px; border-radius:10px; margin:20px 0;}
+        .footer {background:#1a1a2e; padding:25px; text-align:center; color:#aaa; font-size:13px;}
+        .footer strong {color:white;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">QUNI<span>MART</span></div>
+        </div>
+        <div class="content">
+            <h2 style="color:#333;">Hi {{ applicant_name }},</h2>
+            <p style="color:#555; line-height:1.7; font-size:15px;">
+                Thank you for applying to become a seller on Qunimart. After careful review, we are unable to approve your application at this time.
+            </p>
+            <div class="info-box">
+                <p style="color:#856404; margin:0; line-height:1.6;">
+                    <strong>What this means:</strong> Your account remains active and you can re-apply in the future once you meet our seller requirements.
+                </p>
+            </div>
+            {% if admin_notes %}
+            <div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+                <strong style="color:#333;">Note from our team:</strong>
+                <p style="color:#555;margin:8px 0 0 0;line-height:1.6;">{{ admin_notes }}</p>
+            </div>
+            {% endif %}
+            <p style="color:#555; line-height:1.7; font-size:15px;">
+                If you believe this decision was made in error or have questions, please don't hesitate to reach out to us.
+            </p>
+            <p style="color:#999; font-size:13px;">
+                Contact us at <a href="mailto:support@qunimart.com" style="color:#e94560;">support@qunimart.com</a>
+            </p>
+        </div>
+        <div class="footer">
+            <strong>Qunimart</strong>
+            <p style="margin:8px 0 0 0;">© 2026 Qunimart. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

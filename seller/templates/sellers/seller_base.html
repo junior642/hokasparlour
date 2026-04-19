@@ -607,6 +607,20 @@
             </div>
             {% endif %}
 
+                            {% if user.agent.status == 'approved' %}
+                    <a href="{% url 'agent_dashboard' %}"
+                       class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                        <i class="fas fa-users"></i>
+                        Agent Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'become_agent' %}"
+                       class="text-[var(--text-soft)] p-2 rounded-lg hover:bg-[var(--accent-soft)] hover:text-[var(--accent)] transition-all flex items-center gap-2">
+                        <i class="fas fa-handshake"></i>
+                        Become an Agent
+                    </a>
+                {% endif %}
+
         </nav>
 
         <div class="sidebar-footer">
